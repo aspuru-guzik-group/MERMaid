@@ -1,3 +1,7 @@
+<b> To-do and progress log </b> 
+https://docs.google.com/document/d/1yM1FouFpXCQ3gdKxlpcvkXmApNxV_wq-ibLNyMGouww/edit?usp=sharing
+
+
 <b> Prepare training set for Florence-2 model finetuning using <code>prepare-florence-training-set.py</code>: </b>
 1) Convert COCO dataset to Florence dataset
 2) Augment Florence dataset with non-annotated images
