@@ -1,7 +1,7 @@
 <b> Description </b>
 
 
-PDF-TF-chem : detect and saves figures and tables from pdfs
+PDF-TF-chem : detect and saves figures and tables from pdfs (Missing caption retrieval module)
 
 TF_to_json: processes the figures and table images
 
