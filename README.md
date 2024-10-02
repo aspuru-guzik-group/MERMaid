@@ -1,7 +1,7 @@
 <b> Overview </b>
 
-![image](https://github.com/user-attachments/assets/d080fe59-ca1b-4078-a7e0-f2bdf3bdb3a5)
 
+<img src="https://github.com/user-attachments/assets/d080fe59-ca1b-4078-a7e0-f2bdf3bdb3a5" alt="Overview" width="300">
 
 
 <b> Description </b>
