@@ -160,7 +160,24 @@ class RxnOptDataProcessor:
                 self.crop_image(image_name, input_directory, cropped_image_directory, min_segment_height)
         print(f'All images cropped and saved in {cropped_image_directory}')
 
-    def encode_image(self, image_path): 
+ 
+        """
+        updates the reaction dictionary with footnote information 
+
+        Additional parameters: 
+        update_dict_prompt: prompt_name: file name of user message prompt to update reaction conditions
+        json_file: saved response file for image_name using adaptive_get_data
+
+        """
+        response_path = os.path.join(json_directory, f"{json_file}_updated.json")
+        token_path = os.path.join(f"{json_directory}/token_count/", f"{json_file}_updated_tokencount.json")
+
+        # Read user message prompt
+        user_prompt_path = os.path.join(prompt_directory, f"{update_dict_prompt}.txt")
+        with open(user_prompt_path, "r") as file:
+            user_message = file.read().strip()
+
+        # Read json file    def encode_image(self, image_path): 
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('utf-8')
     
@@ -269,27 +286,21 @@ class RxnOptDataProcessor:
         except requests.exceptions.RequestException as e:
             print(f"Error during API request: {e}")
 
-    def update_dict(self, prompt_directory, update_dict_prompt, json_file, json_directory): 
-        """
-        updates the reaction dictionary with footnote information 
-
-        Additional parameters: 
-        update_dict_prompt: prompt_name: file name of user message prompt to update reaction conditions
-        json_file: saved response file for image_name using adaptive_get_data
-
-        """
-        response_path = os.path.join(json_directory, f"{json_file}_updated.json")
-        token_path = os.path.join(f"{json_directory}/token_count/", f"{json_file}_updated_tokencount.json")
-
-        # Read user message prompt
+    def update_dict(self, prompt_directory, update_dict_prompt, json_file, json_directory):
+        
+        # Get user prompt file
         user_prompt_path = os.path.join(prompt_directory, f"{update_dict_prompt}.txt")
         with open(user_prompt_path, "r") as file:
             user_message = file.read().strip()
-
-        # Read json file
+        
+        # Get Json file
         json_path = os.path.join(json_directory, f"{json_file}.json")
         with open(json_path, "r") as file2:
             json_dict = file2.read().strip()
+
+        # Get response paths
+        response_path = os.path.join(json_directory, f"{json_file}_updated.json")
+        token_path = os.path.join(f"{json_directory}/token_count/", f"{json_file}_updated_tokencount.json")
 
         # Construct message
         messages = [
