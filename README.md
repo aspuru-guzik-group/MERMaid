@@ -11,6 +11,7 @@ PDF-TF-chem : detect and saves figures and tables from pdfs (Missing caption ret
 
 TF_to_json: processes the figures and table images
 
+Prompts: currently contains two-step prompt for data extraction: step1 prompt to get rxn conditions, step 2 prompt to update rxn conditions with footnote dictionary
 
 <b> To-do and progress log </b> 
 
