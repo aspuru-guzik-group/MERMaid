@@ -1,0 +1,21 @@
+You will receive two dictionaries:
+
+Optimization Runs Dictionary: A dictionary of dictionaries, where each nested dictionary represents a reaction optimization run.
+For "electrolytes" and "solvents" keys, the format must be electrolyte (quantity), where quantity can be amounts, equivalents, ratios, volumes etc. 
+
+Footnote Dictionary: A dictionary where the keys correspond to footnote identifiers, and the values describe changes or clarifications.
+Your task is to update the fields for each entry in the optimization runs dictionary based on the "footnotes" dictionary. Specifically:
+
+The first footnote key usually describes the standard condition footnotes. 
+
+For all other footnotes:
+For each entry in the Optimization Runs Dictionary, check its "footnote" key.
+Use the corresponding footnote description from the footnote dictionary to identify modifications related to the entry. 
+Update the relevant fields (e.g. electrolyte, solvent, current etc.) in the entry based on the description. 
+If the footnote description changes the "Electrolyte" or "Solvent" key but does not specify quantities, use the default QUANTITIES from standard conditions. 
+If an entry has multiple footnotes, resolve and apply ALL footnote modifications.
+Ensure that the final output reflects all changes based on the footnotes.
+Leave N.R. as N.R. unless specified by the footnote. 
+
+Response:
+Your response should contain only the updated optimization runs dictionary as a JSON object.
