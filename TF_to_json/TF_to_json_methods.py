@@ -13,7 +13,8 @@ from os import listdir
 import json
 import glob
 
-#NOTE: Prompts stored locally for now but will store prompts used in the same repo folder in latest ver
+#NOTE1: Prompts stored locally for now but will store prompts used in the same repo folder in latest ver
+#NOTE2: Handle errors 
 
 class RxnOptDataProcessor:
     """
