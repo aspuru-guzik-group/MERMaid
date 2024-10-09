@@ -16,6 +16,7 @@ Please provide a complete list of all entries, even if the list is long.
 Internal standard MUST NOT be included. 
 Assume changes SUBSTITUTE the standard condition unless otherwise specified that it is an addition. 
 MAKE SURE ALL CHEMICALS are included. 
+If any COLUMN INFORMATION is not included in previous fields, you MUST add to 'OTHERS'. 
 
 
 
