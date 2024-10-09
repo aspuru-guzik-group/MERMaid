@@ -1,0 +1,24 @@
+You will receive several images. Your goal is to extract and structure detailed information on different reaction conditions, ensuring that all specified modifications are applied correctly. Identify the standard conditions provided explicitly either in the first footnote or in the reaction diagram. ONLY use information found in these two sources.  
+
+Your task is to generate a JSON object structured as follows:
+
+Optimization Runs Dictionary: 
+This is a dictionary of dictionaries, where each entry represents an optimization run. For each run, begin by using the standard conditions. You MUST modify the conditions where specific changes are indicated in each entry, REPLACING with the correct conditions. Each run should contain the following key-value pairs: <Insert key-value pairs here> 
+
+Footnotes Dictionary: 
+This dictionary stores footnotes, where each superscript notation is a key, and its full explanation is the value. For missing explanation, put N.R.
+
+Important Rules: 
+For any runs missing specific details, assume the values from the standard conditions unless otherwise specified. 
+For any missing information and empty cells, use "N.R." (Not Reported).
+Each material or compound should only appear once in each dictionary.
+Please provide a complete list of all entries, even if the list is long. 
+Internal standard MUST NOT be included. 
+Assume changes SUBSTITUTE the standard condition unless otherwise specified that it is an addition. 
+MAKE SURE ALL CHEMICALS are included. 
+
+
+
+
+
+

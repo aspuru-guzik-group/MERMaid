@@ -1,0 +1,25 @@
+You will receive two dictionaries:
+
+Optimization Runs Dictionary: A dictionary of dictionaries, where each nested dictionary represents a reaction optimization run.
+For "catalyst", "additives" and "solvents" keys, the format must be chemical (quantity), where quantity can be amounts, equivalents, ratios, volumes etc. 
+
+Footnote Dictionary: A dictionary where the keys correspond to footnote identifiers, and the values describe changes or clarifications.
+
+Your first task is to UPDATE the fields for each entry in the optimization runs dictionary based on the "footnotes" dictionary. Specifically:
+
+The first footnote key usually describes the standard condition footnotes. 
+
+For all other footnotes:
+For each entry in the Optimization Runs Dictionary, check its "footnote" key.
+Use the corresponding footnote description from the footnote dictionary to identify modifications related to the entry. 
+Update the relevant fields (e.g. electrolyte, solvent, current etc.) in the entry based on the description. 
+If the footnote description changes the key description but does not specify quantities, use the default QUANTITIES from standard conditions. 
+If an entry has multiple footnotes, resolve and apply ALL footnote modifications.
+Ensure that the final output reflects all changes based on the footnotes.
+Leave N.R. as N.R. unless specified by the footnote. 
+
+Your second task: 
+For each entry, check its "Substitutions" key, which follows the "placeholder = substitution" format. you MUST APPLY the substitution only to the corresponding field of THAT entry if the placeholder is found in that field. For example, if in entry 1, "Substitutions": "T = CH3" and "Additive": "SiT2". The updated entry should be "Additive": "Si(CH3)2". NOTE: Each 'substitutions' key is ENTRY-SPECIFIC. DO NOT APPLY GLOBALLY.
+
+Response:
+Your response should contain only the updated optimization runs dictionary as a JSON object.
