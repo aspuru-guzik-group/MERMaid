@@ -1,0 +1,72 @@
+{
+    "SMILES": {
+        "reactants": [
+            "C[C@H](O)CCc1ccccc1"
+        ],
+        "products": [
+            "CC(O)CCc1ccccc1"
+        ]
+    },
+    "Optimization Runs": {
+        "1": {
+            "Entry": 1,
+            "irradiation conditions": "Blue LEDs",
+            "Photocatalyst": "Cu(dtbbpy)(DPEPhos)BF4 (3 mol%)",
+            "Additives": "(Ph3SiS)2 (20 mol%), DABCO (15 mol%)",
+            "Solvents": "MeCN [0.2 M]",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "Yields following column chromatography.",
+            "Yield": "85",
+            "Yield type": "isolated",
+            "Other product info": "ee (10%)",
+            "Footnote": "a"
+        },
+        "2": {
+            "Entry": 2,
+            "irradiation conditions": "No light",
+            "Photocatalyst": "Cu(dtbbpy)(DPEPhos)BF4 (3 mol%)",
+            "Additives": "(Ph3SiS)2 (20 mol%), DABCO (15 mol%)",
+            "Solvents": "MeCN [0.2 M]",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "Yields following column chromatography.",
+            "Yield": "79",
+            "Yield type": "isolated",
+            "Other product info": "ee (99%)",
+            "Footnote": "a"
+        },
+        "3": {
+            "Entry": 3,
+            "irradiation conditions": "No light",
+            "Photocatalyst": "Cu(dtbbpy)(DPEPhos)BF4 (3 mol%)",
+            "Additives": "(Ph3SiS)2 (20 mol%), DABCO (15 mol%)",
+            "Solvents": "MeCN [0.2 M]",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "40\u00b0C",
+            "Others": "Yields following column chromatography.",
+            "Yield": "70",
+            "Yield type": "isolated",
+            "Other product info": "ee (99%)",
+            "Footnote": "a"
+        },
+        "4": {
+            "Entry": 4,
+            "irradiation conditions": "Blue LEDs",
+            "Photocatalyst": "N.R.",
+            "Additives": "(Ph3SiS)2 (20 mol%), DABCO (15 mol%)",
+            "Solvents": "MeCN [0.2 M]",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "Yields following column chromatography.",
+            "Yield": "83",
+            "Yield type": "isolated",
+            "Other product info": "ee (99%)",
+            "Footnote": "a"
+        }
+    }
+}

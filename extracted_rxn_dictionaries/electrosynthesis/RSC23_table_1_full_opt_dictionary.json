@@ -1,0 +1,102 @@
+{
+    "SMILES": {
+        "reactants": [
+            "c1ccc(-c2cn3ccccc3n2)cc1"
+        ],
+        "products": [
+            "CCOP(=O)(OCC)c1c(-c2ccccc2)nc2ccccn12"
+        ]
+    },
+    "Optimization Runs": {
+        "1": {
+            "Entry": "1",
+            "Anode": "Carbon rod",
+            "Cathode": "Platinum plate",
+            "Electrolytes": "nBu4NBF4 (0.1 mmol)",
+            "Solvents": "MeCN (10 mL)",
+            "Current": "4 mA",
+            "Duration": "6 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "50 \\u00b0C",
+            "Others": "Undivided cell, 1a (0.3 mmol), 2a (0.6 mmol), 3 F mol\\u207b\\u00b9",
+            "Yield": "70",
+            "Yield type": "31P NMR",
+            "Footnote": "b"
+        },
+        "2": {
+            "Entry": "2",
+            "Anode": "Carbon rod",
+            "Cathode": "Platinum plate",
+            "Electrolytes": "nBu4NClO4",
+            "Solvents": "MeCN (10 mL)",
+            "Current": "4 mA",
+            "Duration": "6 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "50 \\u00b0C",
+            "Others": "Undivided cell, 1a (0.3 mmol), 2a (0.6 mmol), 3 F mol\\u207b\\u00b9",
+            "Yield": "54",
+            "Yield type": "NMR",
+            "Footnote": ""
+        },
+        "3": {
+            "Entry": "3",
+            "Anode": "Carbon rod",
+            "Cathode": "Platinum plate",
+            "Electrolytes": "nBu4NPF6",
+            "Solvents": "MeCN (10 mL)",
+            "Current": "4 mA",
+            "Duration": "6 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "50 \\u00b0C",
+            "Others": "Undivided cell, 1a (0.3 mmol), 2a (0.6 mmol), 3 F mol\\u207b\\u00b9",
+            "Yield": "77, 70",
+            "Yield type": "NMR, Isolated",
+            "Footnote": "c"
+        },
+        "4": {
+            "Entry": "4",
+            "Anode": "Carbon rod",
+            "Cathode": "Nickel plate",
+            "Electrolytes": "nBu4NPF6",
+            "Solvents": "MeCN (10 mL)",
+            "Current": "4 mA",
+            "Duration": "6 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "50 \\u00b0C",
+            "Others": "Undivided cell, 1a (0.3 mmol), 2a (0.6 mmol), 3 F mol\\u207b\\u00b9",
+            "Yield": "61",
+            "Yield type": "NMR",
+            "Footnote": ""
+        },
+        "5": {
+            "Entry": "5",
+            "Anode": "Carbon cloth",
+            "Cathode": "Nickel plate",
+            "Electrolytes": "nBu4NPF6",
+            "Solvents": "MeCN (10 mL)",
+            "Current": "4 mA",
+            "Duration": "6 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "50 \\u00b0C",
+            "Others": "Undivided cell, 1a (0.3 mmol), 2a (0.6 mmol), 3 F mol\\u207b\\u00b9",
+            "Yield": "49",
+            "Yield type": "NMR",
+            "Footnote": ""
+        },
+        "6": {
+            "Entry": "6",
+            "Anode": "Carbon cloth",
+            "Cathode": "Nickel plate",
+            "Electrolytes": "nBu4NPF6",
+            "Solvents": "MeCN (10 mL)",
+            "Current": "0 mA",
+            "Duration": "6 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "50 \\u00b0C",
+            "Others": "Undivided cell, 1a (0.3 mmol), 2a (0.6 mmol), 3 F mol\\u207b\\u00b9",
+            "Yield": "0",
+            "Yield type": "NMR",
+            "Footnote": ""
+        }
+    }
+}

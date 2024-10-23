@@ -13,7 +13,8 @@ from os import listdir
 import json
 import glob
 
-#NOTE: Prompts stored locally for now but will store prompts used in the same repo folder in latest ver
+#NOTE1: Prompts stored locally for now but will store prompts used in the same repo folder in latest ver
+#NOTE2: Handle errors 
 
 class RxnOptDataProcessor:
     """
@@ -359,22 +360,30 @@ class RxnOptDataProcessor:
         except requests.exceptions.RequestException as e:
             print(f"Error during API request: {e}")
 
+    # EDIT: Handle escape strings in smiles otherwise will have errors
     def extract_smiles(self, image_name, image_directory, json_directory):
         """
         Use RxnScribe to get reactants and product SMILES
         """
+        ckpt_path = hf_hub_download("yujieq/RxnScribe", "pix2seq_reaction_full.ckpt")
+        model = RxnScribe(ckpt_path, device=torch.device('cpu'))
         image_file = os.path.join(image_directory, f"{image_name}.png")
+        reactions = []
 
-        # Predict reaction
+        # Extract reactant and product SMILES
         if self.is_reaction_diagram(image_file):   
-            predictions = self.model.predict_image_file(image_file, molscribe=True, ocr=False)
-
-            # Extract reactant and product SMILES
-            reactions = []
-            for prediction in predictions: 
-                reactant_smiles = [reactant['smiles'] for reactant in prediction.get('reactants', [])]
-                product_smiles = [product['smiles'] for product in prediction.get('products', [])]
-                reactions.append({'reactants': reactant_smiles, 'products': product_smiles})
+            try: 
+                predictions = model.predict_image_file(image_file, molscribe=True, ocr=False)
+            
+                for prediction in predictions: 
+                    #reactant_smiles = [reactant['smiles'] for reactant in prediction.get('reactants', [])]
+                    #product_smiles = [product['smiles'] for product in prediction.get('products', [])]
+                    reactant_smiles = [reactant.get('smiles') for reactant in prediction.get('reactants', []) if 'smiles' in reactant]
+                    product_smiles = [product.get('smiles') for product in prediction.get('products', []) if 'smiles' in product]
+                    reactions.append({'reactants': reactant_smiles, 'products': product_smiles})
+            
+            except Exception as e: 
+                reactions.append({'reactants': ["N.R"], 'products': ["N.R"]})
             
             # Save SMILES list  
             smiles_path = os.path.join(json_directory, f"{image_name}_rxnsmiles.json")
@@ -383,6 +392,7 @@ class RxnOptDataProcessor:
         else:
             print(f"{image_name} is not a reaction diagram.")
     
+    # EDIT: Handle NR SMILES dictionaries
     def update_dict_with_smiles(self, image_name, json_directory): 
         """
         Combine reaction dictionary with reaction SMILES
@@ -397,12 +407,19 @@ class RxnOptDataProcessor:
         smiles_path = os.path.join(json_directory, f"{image_name}_rxnsmiles.json")
         with open(smiles_path, "r") as file2: 
             smiles_list = json.load(file2)
+        
+        if not smiles_list or 'NR' in smiles_list[0].get('reactants', '') or 'NR' in smiles_list[0].get('products', ''):
+            reactants = 'NR' if not smiles_list or 'NR' in smiles_list[0].get('reactants', '') else smiles_list[0]['reactants']
+            products = 'NR' if not smiles_list or 'NR' in smiles_list[0].get('products', '') else smiles_list[0]['products']
+        else:
+            reactants = smiles_list[0].get('reactants', 'NR')
+            products = smiles_list[0].get('products', 'NR')
 
         # combine and save 
         updated_dict = {
             "SMILES": {
-                "reactants": smiles_list[0]['reactants'], 
-                "products": smiles_list[0]['products']
+                "reactants": reactants, 
+                "products": products
             }, 
             "Optimization Runs": opt_data
         }

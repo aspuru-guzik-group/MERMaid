@@ -1,0 +1,102 @@
+{
+    "SMILES": {
+        "reactants": [
+            "C=CC*C/C=C/C(=C)C"
+        ],
+        "products": [
+            "[H][C@@]12C*C[C@]1([H])[C@@H](C(=C)C)C2"
+        ]
+    },
+    "Optimization Runs": {
+        "1": {
+            "Entry": "1",
+            "irradiation conditions": "UVC, 30 min",
+            "Photocatalyst": "N.R.",
+            "Additives": "N.R.",
+            "Solvents": "MeCN",
+            "Duration": "30 min",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "0",
+            "Yield type": "NMR",
+            "Other product info": "Conversion: 100%",
+            "Footnote": "b"
+        },
+        "2": {
+            "Entry": "2",
+            "irradiation conditions": "UVC, 10 min",
+            "Photocatalyst": "N.R.",
+            "Additives": "N.R.",
+            "Solvents": "MeCN",
+            "Duration": "10 min",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "0",
+            "Yield type": "NMR",
+            "Other product info": "Conversion: 63%",
+            "Footnote": "b"
+        },
+        "3": {
+            "Entry": "3",
+            "irradiation conditions": "visible, 15 h",
+            "Photocatalyst": "1 (1 mol%)",
+            "Additives": "PF6",
+            "Solvents": "DMSO",
+            "Duration": "15 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "89",
+            "Yield type": "NMR",
+            "Other product info": "Conversion: 100%",
+            "Footnote": ""
+        },
+        "4": {
+            "Entry": "4",
+            "irradiation conditions": "visible, 15 h",
+            "Photocatalyst": "1 (1 mol%)",
+            "Additives": "N.R.",
+            "Solvents": "DMSO",
+            "Duration": "15 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "0",
+            "Yield type": "NMR",
+            "Other product info": "Conversion: 12%",
+            "Footnote": ""
+        },
+        "5": {
+            "Entry": "5",
+            "irradiation conditions": "visible, 15 h",
+            "Photocatalyst": "N.R.",
+            "Additives": "N.R.",
+            "Solvents": "DMSO",
+            "Duration": "15 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "0",
+            "Yield type": "NMR",
+            "Other product info": "Conversion: 6%",
+            "Footnote": ""
+        },
+        "6": {
+            "Entry": "6",
+            "irradiation conditions": "no light, 15 h",
+            "Photocatalyst": "2 (1 mol%)",
+            "Additives": "PF6",
+            "Solvents": "DMSO",
+            "Duration": "15 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "0",
+            "Yield type": "NMR",
+            "Other product info": "Conversion: 0%",
+            "Footnote": ""
+        }
+    }
+}

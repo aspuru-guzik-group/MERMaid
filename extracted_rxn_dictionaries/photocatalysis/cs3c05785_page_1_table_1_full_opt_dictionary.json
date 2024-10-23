@@ -1,0 +1,148 @@
+{
+    "SMILES": {
+        "reactants": [
+            "C1CCSCC1",
+            "C*(C)C.CC1=C(C)=CC2=NC3C(=O)NC(=O)N=C3N(C)C2=C1.C[In]"
+        ],
+        "products": [
+            "N#CC1CCCCS1"
+        ]
+    },
+    "Optimization Runs": {
+        "1": {
+            "Entry": 1,
+            "irradiation conditions": "blue LEDs (\\u03bbmax 456 nm)",
+            "Photocatalyst": "riboflavin (10 mol%)",
+            "Additives": "TsCN (1.5 equiv.)",
+            "Solvents": "DMF/H2O (1:19)",
+            "Duration": "48 h",
+            "Air/Inert": "ambient",
+            "Temperature": "ambient temperature",
+            "Others": "concentration 5 mM",
+            "Yield": "<5",
+            "Yield type": "NMR",
+            "Other product info": "using MeNO2 as the internal standard",
+            "Footnote": ""
+        },
+        "2": {
+            "Entry": 2,
+            "irradiation conditions": "blue LEDs (\\u03bbmax 456 nm)",
+            "Photocatalyst": "riboflavin (10 mol%)",
+            "Additives": "TsCN (1.5 equiv.)",
+            "Solvents": "MeCN",
+            "Duration": "18 h",
+            "Air/Inert": "ambient",
+            "Temperature": "ambient temperature",
+            "Others": "concentration 100 mM",
+            "Yield": "7",
+            "Yield type": "NMR",
+            "Other product info": "using MeNO2 as the internal standard",
+            "Footnote": ""
+        },
+        "3": {
+            "Entry": 3,
+            "irradiation conditions": "blue LEDs (\\u03bbmax 456 nm)",
+            "Photocatalyst": "riboflavin tetraacetate (10 mol%)",
+            "Additives": "TsCN (1.5 equiv.)",
+            "Solvents": "MeCN",
+            "Duration": "18 h",
+            "Air/Inert": "ambient",
+            "Temperature": "ambient temperature",
+            "Others": "concentration 100 mM",
+            "Yield": "21",
+            "Yield type": "NMR",
+            "Other product info": "using MeNO2 as the internal standard",
+            "Footnote": ""
+        },
+        "4": {
+            "Entry": 4,
+            "irradiation conditions": "blue LEDs (\\u03bbmax 456 nm)",
+            "Photocatalyst": "lumiflavin (10 mol%)",
+            "Additives": "TsCN (1.5 equiv.)",
+            "Solvents": "MeCN",
+            "Duration": "18 h",
+            "Air/Inert": "ambient",
+            "Temperature": "ambient temperature",
+            "Others": "concentration 100 mM",
+            "Yield": "14",
+            "Yield type": "NMR",
+            "Other product info": "using MeNO2 as the internal standard",
+            "Footnote": ""
+        },
+        "5": {
+            "Entry": 5,
+            "irradiation conditions": "blue LEDs (\\u03bbmax 456 nm)",
+            "Photocatalyst": "riboflavin tetraacetate (10 mol%)",
+            "Additives": "TsCN (10 equiv.)",
+            "Solvents": "MeCN",
+            "Duration": "18 h",
+            "Air/Inert": "ambient",
+            "Temperature": "ambient temperature",
+            "Others": "concentration 50 mM",
+            "Yield": "40",
+            "Yield type": "NMR",
+            "Other product info": "using MeNO2 as the internal standard",
+            "Footnote": ""
+        },
+        "6": {
+            "Entry": 6,
+            "irradiation conditions": "blue LEDs (\\u03bbmax 456 nm)",
+            "Photocatalyst": "riboflavin tetraacetate (10 mol%)",
+            "Additives": "TsCN (10 equiv.)",
+            "Solvents": "dioxane",
+            "Duration": "18 h",
+            "Air/Inert": "ambient",
+            "Temperature": "ambient temperature",
+            "Others": "concentration 50 mM",
+            "Yield": "54",
+            "Yield type": "NMR",
+            "Other product info": "using MeNO2 as the internal standard",
+            "Footnote": ""
+        },
+        "7": {
+            "Entry": 7,
+            "irradiation conditions": "blue LEDs (\\u03bbmax 456 nm)",
+            "Photocatalyst": "riboflavin tetraacetate (10 mol%)",
+            "Additives": "TsCN (10 equiv.)",
+            "Solvents": "acetone",
+            "Duration": "18 h",
+            "Air/Inert": "ambient",
+            "Temperature": "ambient temperature",
+            "Others": "concentration 50 mM",
+            "Yield": "66",
+            "Yield type": "NMR",
+            "Other product info": "using MeNO2 as the internal standard",
+            "Footnote": ""
+        },
+        "8": {
+            "Entry": 8,
+            "irradiation conditions": "performed in the dark",
+            "Photocatalyst": "riboflavin tetraacetate (10 mol%)",
+            "Additives": "TsCN (10 equiv.)",
+            "Solvents": "acetone",
+            "Duration": "18 h",
+            "Air/Inert": "ambient",
+            "Temperature": "ambient temperature",
+            "Others": "concentration 50 mM",
+            "Yield": "0",
+            "Yield type": "NMR",
+            "Other product info": "using MeNO2 as the internal standard",
+            "Footnote": "b"
+        },
+        "9": {
+            "Entry": 9,
+            "irradiation conditions": "blue LEDs (\\u03bbmax 456 nm)",
+            "Photocatalyst": "riboflavin tetraacetate (10 mol%)",
+            "Additives": "TsCN (10 equiv.)",
+            "Solvents": "acetone",
+            "Duration": "18 h",
+            "Air/Inert": "ambient",
+            "Temperature": "ambient temperature",
+            "Others": "concentration 50 mM",
+            "Yield": "0",
+            "Yield type": "NMR",
+            "Other product info": "using MeNO2 as the internal standard",
+            "Footnote": ""
+        }
+    }
+}
