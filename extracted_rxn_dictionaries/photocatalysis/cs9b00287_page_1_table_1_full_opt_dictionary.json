@@ -1,0 +1,103 @@
+{
+    "SMILES": {
+        "reactants": [
+            "C1CCCCC1",
+            "N#CC(C#N)=Cc1ccccc1"
+        ],
+        "products": [
+            "N#CC(C#N)[C@H](c1ccccc1)C1CCCCC1"
+        ]
+    },
+    "Optimization Runs": {
+        "1": {
+            "Entry": 1,
+            "irradiation conditions": "Kessil lamp (456 nm)",
+            "Photocatalyst": "[UO2](NO3)2\\u20226H2O (8 mol%)",
+            "Additives": "N.R.",
+            "Solvents": "Me2CO (N.R.)",
+            "Duration": "24 h",
+            "Air/Inert": "air",
+            "Temperature": "rt",
+            "Others": "N.R.",
+            "Yield": "3 (95%, 96%)",
+            "Yield type": "absolute, isolated",
+            "Other product info": "N.R.",
+            "Footnote": "a,b"
+        },
+        "2": {
+            "Entry": 2,
+            "irradiation conditions": "no light",
+            "Photocatalyst": "[UO2](NO3)2\\u20226H2O (8 mol%)",
+            "Additives": "N.R.",
+            "Solvents": "Me2CO (N.R.)",
+            "Duration": "24 h",
+            "Air/Inert": "air",
+            "Temperature": "rt",
+            "Others": "N.R.",
+            "Yield": "3 (n.d.)",
+            "Yield type": "N.R.",
+            "Other product info": "N.R.",
+            "Footnote": ""
+        },
+        "3": {
+            "Entry": 3,
+            "irradiation conditions": "dark",
+            "Photocatalyst": "[UO2](NO3)2\\u20226H2O (8 mol%)",
+            "Additives": "N.R.",
+            "Solvents": "Me2CO (N.R.)",
+            "Duration": "N.R.",
+            "Air/Inert": "air",
+            "Temperature": "Refluxing",
+            "Others": "N.R.",
+            "Yield": "3 (n.d.)",
+            "Yield type": "N.R.",
+            "Other product info": "N.R.",
+            "Footnote": "c"
+        },
+        "4": {
+            "Entry": 4,
+            "irradiation conditions": "Kessil lamp (456 nm)",
+            "Photocatalyst": "none",
+            "Additives": "N.R.",
+            "Solvents": "Me2CO (N.R.)",
+            "Duration": "24 h",
+            "Air/Inert": "air",
+            "Temperature": "rt",
+            "Others": "N.R.",
+            "Yield": "3 (n.d.)",
+            "Yield type": "N.R.",
+            "Other product info": "N.R.",
+            "Footnote": ""
+        },
+        "5": {
+            "Entry": 5,
+            "irradiation conditions": "Kessil lamp (456 nm)",
+            "Photocatalyst": "[UO2](NO3)2\\u20226H2O (8 mol%)",
+            "Additives": "N.R.",
+            "Solvents": "Me2CO (N.R.)",
+            "Duration": "24 h",
+            "Air/Inert": "N2 sparged solution",
+            "Temperature": "rt",
+            "Others": "N.R.",
+            "Yield": "3 (95%)",
+            "Yield type": "isolated",
+            "Other product info": "N.R.",
+            "Footnote": ""
+        },
+        "6": {
+            "Entry": 6,
+            "irradiation conditions": "Kessil lamp (456 nm)",
+            "Photocatalyst": "[UO2](NO3)2\\u20226H2O (8 mol%)",
+            "Additives": "TEMPO (1 equiv)",
+            "Solvents": "Me2CO (N.R.)",
+            "Duration": "24 h",
+            "Air/Inert": "air",
+            "Temperature": "rt",
+            "Others": "N.R.",
+            "Yield": "3 (n.d.)",
+            "Yield type": "N.R.",
+            "Other product info": "N.R.",
+            "Footnote": ""
+        }
+    }
+}

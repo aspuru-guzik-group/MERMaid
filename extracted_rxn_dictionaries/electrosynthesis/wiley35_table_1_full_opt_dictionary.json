@@ -1,0 +1,162 @@
+{
+    "SMILES": {
+        "reactants": [
+            "CC(=N)c1ccccn1"
+        ],
+        "products": [
+            "Cc1nnn2ccccc12"
+        ]
+    },
+    "Optimization Runs": {
+        "1": {
+            "Entry": "1",
+            "Anode": "RVC",
+            "Cathode": "Pt",
+            "Electrolytes": "Et4NPF6 (0.5 equiv), K2CO3 (1.0 equiv)",
+            "Solvents": "MeOH/H2O (4:1)",
+            "Current": "5 mA",
+            "Duration": "3.4 h",
+            "Air/Inert": "argon",
+            "Temperature": "RT",
+            "Others": "",
+            "Yield": "2a (78%)",
+            "Yield type": "isolated",
+            "Footnote": "c"
+        },
+        "2": {
+            "Entry": "2",
+            "Anode": "RVC",
+            "Cathode": "Pt",
+            "Electrolytes": "Et4NPF6 (0.5 equiv), K2CO3 (1.0 equiv)",
+            "Solvents": "MeOH",
+            "Current": "5 mA",
+            "Duration": "3.4 h",
+            "Air/Inert": "argon",
+            "Temperature": "RT",
+            "Others": "",
+            "Yield": "2a (67%)",
+            "Yield type": "NMR",
+            "Footnote": ""
+        },
+        "3": {
+            "Entry": "3",
+            "Anode": "RVC",
+            "Cathode": "Pt",
+            "Electrolytes": "Et4NPF6 (0.5 equiv)",
+            "Solvents": "MeOH/H2O (4:1)",
+            "Current": "5 mA",
+            "Duration": "3.4 h",
+            "Air/Inert": "argon",
+            "Temperature": "RT",
+            "Others": "",
+            "Yield": "2a (42%)",
+            "Yield type": "NMR",
+            "Footnote": ""
+        },
+        "4": {
+            "Entry": "4",
+            "Anode": "RVC",
+            "Cathode": "Pt",
+            "Electrolytes": "K2CO3 (1.0 equiv)",
+            "Solvents": "MeOH/H2O (4:1)",
+            "Current": "5 mA",
+            "Duration": "3.4 h",
+            "Air/Inert": "argon",
+            "Temperature": "RT",
+            "Others": "",
+            "Yield": "2a (58%)",
+            "Yield type": "NMR",
+            "Footnote": ""
+        },
+        "5": {
+            "Entry": "5",
+            "Anode": "RVC",
+            "Cathode": "Pt",
+            "Electrolytes": "Et4NPF6 (0.5 equiv), Na2CO3 (1.0 equiv)",
+            "Solvents": "MeOH/H2O (4:1)",
+            "Current": "5 mA",
+            "Duration": "3.4 h",
+            "Air/Inert": "argon",
+            "Temperature": "RT",
+            "Others": "",
+            "Yield": "2a (48%)",
+            "Yield type": "NMR",
+            "Footnote": ""
+        },
+        "6": {
+            "Entry": "6",
+            "Anode": "RVC",
+            "Cathode": "Pt",
+            "Electrolytes": "Et4NPF6 (0.5 equiv), K3PO4 (1.0 equiv)",
+            "Solvents": "MeOH/H2O (4:1)",
+            "Current": "5 mA",
+            "Duration": "3.4 h",
+            "Air/Inert": "argon",
+            "Temperature": "RT",
+            "Others": "",
+            "Yield": "2a (58%)",
+            "Yield type": "NMR",
+            "Footnote": ""
+        },
+        "7": {
+            "Entry": "7",
+            "Anode": "RVC",
+            "Cathode": "Pt",
+            "Electrolytes": "Et4NPF6 (0.5 equiv), KHCO3 (1.0 equiv)",
+            "Solvents": "MeOH/H2O (4:1)",
+            "Current": "5 mA",
+            "Duration": "3.4 h",
+            "Air/Inert": "argon",
+            "Temperature": "RT",
+            "Others": "",
+            "Yield": "2a (47%)",
+            "Yield type": "NMR",
+            "Footnote": ""
+        },
+        "8": {
+            "Entry": "8",
+            "Anode": "RVC",
+            "Cathode": "Pt",
+            "Electrolytes": "Et4NPF6 (0.5 equiv), K2CO3 (1.0 equiv)",
+            "Solvents": "MeCN/H2O (4:1)",
+            "Current": "5 mA",
+            "Duration": "3.4 h",
+            "Air/Inert": "argon",
+            "Temperature": "RT",
+            "Others": "",
+            "Yield": "2a (51%)",
+            "Yield type": "NMR",
+            "Footnote": ""
+        },
+        "9": {
+            "Entry": "9",
+            "Anode": "graphite",
+            "Cathode": "Pt",
+            "Electrolytes": "Et4NPF6 (0.5 equiv), K2CO3 (1.0 equiv)",
+            "Solvents": "MeOH/H2O (4:1)",
+            "Current": "5 mA",
+            "Duration": "3.4 h",
+            "Air/Inert": "argon",
+            "Temperature": "RT",
+            "Others": "",
+            "Yield": "2a (53%)",
+            "Yield type": "NMR",
+            "Footnote": ""
+        },
+        "10": {
+            "Entry": "10",
+            "Anode": "Pt",
+            "Cathode": "Pt",
+            "Electrolytes": "Et4NPF6 (0.5 equiv), K2CO3 (1.0 equiv)",
+            "Solvents": "MeOH/H2O (4:1)",
+            "Current": "5 mA",
+            "Duration": "3.4 h",
+            "Air/Inert": "argon",
+            "Temperature": "RT",
+            "Others": "",
+            "Yield": "2a (47%)",
+            "Yield type": "NMR",
+            "Footnote": ""
+        }
+    }
+}

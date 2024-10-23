@@ -1,0 +1,135 @@
+{
+    "SMILES": {
+        "reactants": [
+            "CC(C)(CCc1ccccc1)OC(=O)C(=O)O[Cs]",
+            "O=C1O[IH]C2([IH]C#Cc3ccccc3)=CC=CC=C12"
+        ],
+        "products": [
+            "CC(C)(C#Cc1ccccc1)CCc1ccccc1",
+            "O=C(COC(=O)c1ccccc1I)c1ccccc1",
+            "CC(C)(CCc1ccccc1)OC(=O)C(=O)OCC(=O)c1ccccc1"
+        ]
+    },
+    "Optimization Runs": {
+        "1": {
+            "Entry": "1",
+            "irradiation conditions": "2 Kessil lamps, 440 nm",
+            "Photocatalyst": "N.R.",
+            "Additives": "N.R.",
+            "Solvents": "DCM (0.1 M)",
+            "Duration": "18 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "30\u201335\u00b0C",
+            "Others": "residual 3a (0.25 equiv), residual 1a (0.12 equiv)",
+            "Yield": "4a (50), 5a (17), 5b (12)",
+            "Yield type": "1H NMR",
+            "Other product info": "",
+            "Footnote": "a, b"
+        },
+        "2": {
+            "Entry": "2",
+            "irradiation conditions": "LED strips, 460 nm",
+            "Photocatalyst": "N.R.",
+            "Additives": "N.R.",
+            "Solvents": "DCM (0.1 M)",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "30\u201335\u00b0C",
+            "Others": "residual 3a (0.70 equiv), residual 1a (0.66 equiv)",
+            "Yield": "5a (36), 5b (23)",
+            "Yield type": "1H NMR",
+            "Other product info": "",
+            "Footnote": "a, b"
+        },
+        "3": {
+            "Entry": "3",
+            "irradiation conditions": "dark",
+            "Photocatalyst": "N.R.",
+            "Additives": "N.R.",
+            "Solvents": "DCM (0.1 M)",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "50\u00b0C",
+            "Others": "residual 3a (0.75 equiv), residual 1a (0.60 equiv)",
+            "Yield": "5a (45), 5b (23)",
+            "Yield type": "1H NMR",
+            "Other product info": "",
+            "Footnote": "c, b"
+        },
+        "4": {
+            "Entry": "4",
+            "irradiation conditions": "2 Kessil lamps, 440 nm",
+            "Photocatalyst": "N.R.",
+            "Additives": "N.R.",
+            "Solvents": "DCM (0.1 M)",
+            "Duration": "18 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "30\u201335\u00b0C",
+            "Others": "residual 3a (0.05 equiv), residual 1a (0.40 equiv)",
+            "Yield": "4a (57), 5a (50), 5b (23)",
+            "Yield type": "1H NMR",
+            "Other product info": "",
+            "Footnote": "a, b"
+        },
+        "5": {
+            "Entry": "5",
+            "irradiation conditions": "1 Kessil lamp, 440 nm",
+            "Photocatalyst": "N.R.",
+            "Additives": "N.R.",
+            "Solvents": "DCM (0.1 M)",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "30\u201335\u00b0C",
+            "Others": "residual 3a (0.25 equiv), residual 1a (0.40 equiv)",
+            "Yield": "4a (40), 5a (41), 5b (19)",
+            "Yield type": "1H NMR",
+            "Other product info": "",
+            "Footnote": "a, b"
+        },
+        "6": {
+            "Entry": "6",
+            "irradiation conditions": "1 Kessil lamp, 427 nm",
+            "Photocatalyst": "N.R.",
+            "Additives": "N.R.",
+            "Solvents": "DCM (0.1 M)",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "30\u201335\u00b0C",
+            "Others": "residual 3a (0.15 equiv), residual 1a (0.40 equiv)",
+            "Yield": "4a (43), 5a (25), 5b (16)",
+            "Yield type": "1H NMR",
+            "Other product info": "",
+            "Footnote": "a, b"
+        },
+        "7": {
+            "Entry": "7",
+            "irradiation conditions": "1 Kessil lamp, 390 nm",
+            "Photocatalyst": "N.R.",
+            "Additives": "N.R.",
+            "Solvents": "DCM (0.1 M)",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "30\u201335\u00b0C",
+            "Others": "residual 3a (0.30\u20130.40 equiv), residual 1a (0.60 equiv)",
+            "Yield": "4a (34), 5a (23), 5b (17)",
+            "Yield type": "1H NMR",
+            "Other product info": "",
+            "Footnote": "a, b"
+        },
+        "8": {
+            "Entry": "8",
+            "irradiation conditions": "2 Kessil lamps, 440 nm",
+            "Photocatalyst": "N.R.",
+            "Additives": "N.R.",
+            "Solvents": "DCM (0.1 M)",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "30\u201335\u00b0C",
+            "Others": "residual 3a (0.08 equiv), residual 1a (0.40 equiv)",
+            "Yield": "4a (63), 5a (33), 5b (18)",
+            "Yield type": "1H NMR",
+            "Other product info": "",
+            "Footnote": "a, b"
+        }
+    }
+}

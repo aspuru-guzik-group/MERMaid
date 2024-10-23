@@ -1,0 +1,118 @@
+{
+    "SMILES": {
+        "reactants": [
+            "C#Cc1ccccc1"
+        ],
+        "products": [
+            "c1ccc(-c2ccc(-c3ccccc3)c(-c3ccccc3)c2)cc1",
+            "c1ccc(-c2cc(-c3ccccc3)cc(-c3ccccc3)c2)cc1"
+        ]
+    },
+    "Optimization Runs": {
+        "1": {
+            "Entry": 1,
+            "irradiation conditions": "395-410 nm",
+            "Photocatalyst": "FeCl2 (1.0 mol%)",
+            "Additives": "DPA (0.4 mol%), DIPEA (2.0 mol%)",
+            "Solvents": "MeCN (0.5 M)",
+            "Duration": "0.5 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "22 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "100 (100)",
+            "Yield type": "GC",
+            "Other product info": "Isolated yield (95%), minor 1,3,5-isomer <5%",
+            "Footnote": "a, b"
+        },
+        "2": {
+            "Entry": 2,
+            "irradiation conditions": "395-410 nm",
+            "Photocatalyst": "FeCl2 (2.5 mol%)",
+            "Additives": "diisopropylamine (5.0 mol%)",
+            "Solvents": "MeCN (0.5 M)",
+            "Duration": "0.5 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "22 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "39 (39)",
+            "Yield type": "GC",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        },
+        "3": {
+            "Entry": 3,
+            "irradiation conditions": "395-410 nm",
+            "Photocatalyst": "FeCl3 (2.5 mol%)",
+            "Additives": "DIPEA (7.5 mol%)",
+            "Solvents": "MeCN (0.5 M)",
+            "Duration": "0.5 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "22 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "0 (0)",
+            "Yield type": "GC",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        },
+        "4": {
+            "Entry": 4,
+            "irradiation conditions": "365 nm",
+            "Photocatalyst": "[FeCl2(thf)1.5/2PCy3] (5 mol%)",
+            "Additives": "DPA (5 mol%), DIPEA (50 mol%), PhCCH (0.2 mmol)",
+            "Solvents": "MeCN (0.5 M)",
+            "Duration": "3 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "22 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "43 (82)",
+            "Yield type": "GC",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        },
+        "5": {
+            "Entry": 5,
+            "irradiation conditions": "365 nm",
+            "Photocatalyst": "FeCl2 (2.5 mol%)",
+            "Additives": "DIPEA (5.0 mol%), anthracene (0.04 mol%)",
+            "Solvents": "MeCN (0.5 M)",
+            "Duration": "0.5 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "22 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "13 (17)",
+            "Yield type": "GC",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        },
+        "6": {
+            "Entry": 6,
+            "irradiation conditions": "LED",
+            "Photocatalyst": "FeCl2 (5 mol%), Eosin Y (5 mol%), Rhodamine 6G (5 mol%), Fluorescein (5 mol%), 9,10-dicyano-anthracene (5 mol%), [Ru(bpy)3]Cl2 (5 mol%), [Ir(ppy)3] (5 mol%)",
+            "Additives": "DIPEA (10 mol%)",
+            "Solvents": "MeCN (0.5 M)",
+            "Duration": "15 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "22 \\u00b0C",
+            "Others": "Phenylacetylene (0.2 mmol)",
+            "Yield": "< 5 (< 5) each",
+            "Yield type": "GC",
+            "Other product info": "N.R.",
+            "Footnote": "a, c"
+        },
+        "7": {
+            "Entry": 7,
+            "irradiation conditions": "dark reaction",
+            "Photocatalyst": "none",
+            "Additives": "none",
+            "Solvents": "MeCN (0.5 M)",
+            "Duration": "18 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "22 \\u00b0C",
+            "Others": "No FeCl2, no DPA, or no DIPEA",
+            "Yield": "< 2 (< 9) each",
+            "Yield type": "GC",
+            "Other product info": "N.R.",
+            "Footnote": "a, d"
+        }
+    }
+}

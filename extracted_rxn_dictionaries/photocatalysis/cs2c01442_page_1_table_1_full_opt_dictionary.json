@@ -1,0 +1,148 @@
+{
+    "SMILES": {
+        "reactants": [
+            "*/C([H])=N/S(=O)(=O)c1ccc(C)cc1",
+            "CC(=O)C=CCCC1=O=C1C"
+        ],
+        "products": [
+            "CC(=O)CCS(=O)(=O)c1ccc(C)cc1"
+        ]
+    },
+    "Optimization Runs": {
+        "1": {
+            "Entry": "1",
+            "irradiation conditions": "N.R.",
+            "Photocatalyst": "none",
+            "Additives": "TMS3Si-H (1.5 equiv.)",
+            "Solvents": "PhMe (0.05 M)",
+            "Duration": "4 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "15 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "2a (0%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        },
+        "2": {
+            "Entry": "2",
+            "irradiation conditions": "no light",
+            "Photocatalyst": "5CzBN (0.5 mol%)",
+            "Additives": "TMS3Si-H (1.5 equiv.)",
+            "Solvents": "PhMe (0.05 M)",
+            "Duration": "4 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "15 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "2a (<3%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        },
+        "3": {
+            "Entry": "3",
+            "irradiation conditions": "no light",
+            "Photocatalyst": "5CzBN (0.5 mol%)",
+            "Additives": "TMS3Si-H (1.5 equiv.)",
+            "Solvents": "PhMe (0.05 M)",
+            "Duration": "4 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "80 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "2a (<3%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        },
+        "4": {
+            "Entry": "4",
+            "irradiation conditions": "blue LEDs",
+            "Photocatalyst": "5CzBN (0.5 mol%)",
+            "Additives": "none",
+            "Solvents": "PhMe (0.05 M)",
+            "Duration": "4 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "15 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "2a (15%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        },
+        "5": {
+            "Entry": "5",
+            "irradiation conditions": "blue LEDs",
+            "Photocatalyst": "5CzBN (0.5 mol%)",
+            "Additives": "TMS3Si-H (1.5 equiv.)",
+            "Solvents": "MeCN (0.05 M)",
+            "Duration": "4 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "15 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "2a (69%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        },
+        "6": {
+            "Entry": "6",
+            "irradiation conditions": "blue LEDs",
+            "Photocatalyst": "5CzBN (0.5 mol%)",
+            "Additives": "TMS3Si-H (1.5 equiv.)",
+            "Solvents": "CH2Cl2 (0.05 M)",
+            "Duration": "4 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "15 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "2a (62%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        },
+        "7": {
+            "Entry": "7",
+            "irradiation conditions": "blue LEDs",
+            "Photocatalyst": "5CzBN (0.5 mol%)",
+            "Additives": "TMS3Si-H (1.5 equiv.)",
+            "Solvents": "EtOAc (0.05 M)",
+            "Duration": "4 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "15 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "2a (64%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        },
+        "8": {
+            "Entry": "8",
+            "irradiation conditions": "blue LEDs",
+            "Photocatalyst": "5CzBN (0.5 mol%)",
+            "Additives": "TMS3Si-H (1.5 equiv.)",
+            "Solvents": "THF (0.05 M)",
+            "Duration": "4 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "15 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "2a (54%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        },
+        "9": {
+            "Entry": "9",
+            "irradiation conditions": "blue LEDs",
+            "Photocatalyst": "5CzBN (0.5 mol%)",
+            "Additives": "TMS3Si-H (1.5 equiv.)",
+            "Solvents": "MeOH (0.05 M)",
+            "Duration": "4 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "15 \\u00b0C",
+            "Others": "N.R.",
+            "Yield": "2a (44%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a"
+        }
+    }
+}

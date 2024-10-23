@@ -1,0 +1,124 @@
+{
+    "SMILES": {
+        "reactants": [
+            "C[C@H](O)CCc1ccccc1"
+        ],
+        "products": [
+            "CC(O)CCc1ccccc1"
+        ]
+    },
+    "Optimization Runs": {
+        "1": {
+            "Entry": "1",
+            "irradiation conditions": "Blue LEDs, 24 h",
+            "Photocatalyst": "Cu(dtbbpy)(DPEPhos)BF4 (3 mol %), (Ph3Si)2 (20 mol %)",
+            "Additives": "Quinuclidine (15 mol %)",
+            "Solvents": "MeCN [0.2 M]",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "87",
+            "Yield type": "isolated",
+            "Other product info": "ee (38%)"
+        },
+        "2": {
+            "Entry": "2",
+            "irradiation conditions": "Blue LEDs, 24 h",
+            "Photocatalyst": "Cu(dtbbpy)(DPEPhos)BF4 (3 mol %), (Ph3Si)2 (20 mol %)",
+            "Additives": "TMP (15 mol %)",
+            "Solvents": "MeCN [0.2 M]",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "79",
+            "Yield type": "isolated",
+            "Other product info": "ee (40%)"
+        },
+        "3": {
+            "Entry": "3",
+            "irradiation conditions": "Blue LEDs, 24 h",
+            "Photocatalyst": "Cu(dtbbpy)(DPEPhos)BF4 (3 mol %), (Ph3Si)2 (20 mol %)",
+            "Additives": "Piperidine (15 mol %)",
+            "Solvents": "MeCN [0.2 M]",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "82",
+            "Yield type": "isolated",
+            "Other product info": "ee (64%)"
+        },
+        "4": {
+            "Entry": "4",
+            "irradiation conditions": "Blue LEDs, 24 h",
+            "Photocatalyst": "Cu(dtbbpy)(DPEPhos)BF4 (3 mol %), (Ph3Si)2 (20 mol %)",
+            "Additives": "Et3N (15 mol %)",
+            "Solvents": "MeCN [0.2 M]",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "70",
+            "Yield type": "isolated",
+            "Other product info": "ee (64%)"
+        },
+        "5": {
+            "Entry": "5",
+            "irradiation conditions": "Blue LEDs, 24 h",
+            "Photocatalyst": "Cu(dtbbpy)(DPEPhos)BF4 (3 mol %), (Ph3Si)2 (20 mol %)",
+            "Additives": "DIPEA (15 mol %)",
+            "Solvents": "MeCN [0.2 M]",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "76",
+            "Yield type": "isolated",
+            "Other product info": "ee (76%)"
+        },
+        "6": {
+            "Entry": "6",
+            "irradiation conditions": "Blue LEDs, 24 h",
+            "Photocatalyst": "Cu(dtbbpy)(DPEPhos)BF4 (3 mol %), (Ph3Si)2 (20 mol %)",
+            "Additives": "Ph3N (15 mol %)",
+            "Solvents": "MeCN [0.2 M]",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "80",
+            "Yield type": "isolated",
+            "Other product info": "ee (51%)"
+        },
+        "7": {
+            "Entry": "7",
+            "irradiation conditions": "Blue LEDs, 24 h",
+            "Photocatalyst": "Cu(dtbbpy)(DPEPhos)BF4 (3 mol %), (Ph3Si)2 (20 mol %)",
+            "Additives": "K2CO3 (15 mol %)",
+            "Solvents": "MeCN [0.2 M]",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "78",
+            "Yield type": "isolated",
+            "Other product info": "ee (99%)"
+        },
+        "8": {
+            "Entry": "8",
+            "irradiation conditions": "Blue LEDs, 24 h",
+            "Photocatalyst": "Cu(dtbbpy)(DPEPhos)BF4 (3 mol %), (Ph3Si)2 (20 mol %)",
+            "Additives": "Cs2CO3 (15 mol %)",
+            "Solvents": "MeCN [0.2 M]",
+            "Duration": "24 h",
+            "Air/Inert": "N.R.",
+            "Temperature": "N.R.",
+            "Others": "N.R.",
+            "Yield": "81",
+            "Yield type": "isolated",
+            "Other product info": "ee (99%)"
+        }
+    }
+}

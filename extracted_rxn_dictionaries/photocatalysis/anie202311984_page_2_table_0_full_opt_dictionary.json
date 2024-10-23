@@ -1,0 +1,148 @@
+{
+    "SMILES": {
+        "reactants": [
+            "[H]c1cccn1-c1ccc(F)cc1"
+        ],
+        "products": [
+            "Fc1ccc(-n2cccc2C(F)(F)F)cc1",
+            "Fc1ccc(-n2c(C(F)(F)F)ccc2C(F)(F)F)cc1"
+        ]
+    },
+    "Optimization Runs": {
+        "1": {
+            "Entry": 1,
+            "irradiation conditions": "light, 25 \\u00b0C",
+            "Photocatalyst": "Fe(OTf)2 (10 mol%), L1 (10 mol%)",
+            "Additives": "NaO2C-CF3 (6 equiv), K2S2O8 (3 equiv)",
+            "Solvents": "MeCN",
+            "Duration": "N.R.",
+            "Air/Inert": "N2",
+            "Temperature": "25 \\u00b0C",
+            "Others": "-CO2",
+            "Yield": "4a (62%), 4b (16%)",
+            "Yield type": "isolated",
+            "Other product info": "X = I, OAc, OTf. bpy, 2,2'-bipyridine; ppy, 2-phenylbypyridyl; dtbbpy, 4,4'-di-tert-butyl-2,2'-dipyridyl.",
+            "Footnote": "a, b, c"
+        },
+        "2": {
+            "Entry": 2,
+            "irradiation conditions": "light, 25 \\u00b0C",
+            "Photocatalyst": "Fe(OTf)2 (10 mol%)",
+            "Additives": "NaO2C-CF3 (6 equiv), K2S2O8 (3 equiv)",
+            "Solvents": "MeCN",
+            "Duration": "N.R.",
+            "Air/Inert": "N2",
+            "Temperature": "25 \\u00b0C",
+            "Others": "-CO2, without L1",
+            "Yield": "4a (22%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a, b"
+        },
+        "3": {
+            "Entry": 3,
+            "irradiation conditions": "light, 25 \\u00b0C",
+            "Photocatalyst": "L1 (10 mol%)",
+            "Additives": "NaO2C-CF3 (6 equiv), K2S2O8 (3 equiv)",
+            "Solvents": "MeCN",
+            "Duration": "N.R.",
+            "Air/Inert": "N2",
+            "Temperature": "25 \\u00b0C",
+            "Others": "-CO2, without Fe(OTf)2",
+            "Yield": "4a (<1%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a, b"
+        },
+        "4": {
+            "Entry": 4,
+            "irradiation conditions": "dark, 25 \\u00b0C",
+            "Photocatalyst": "Fe(OTf)2 (10 mol%), L1 (10 mol%)",
+            "Additives": "NaO2C-CF3 (6 equiv), K2S2O8 (3 equiv)",
+            "Solvents": "MeCN",
+            "Duration": "N.R.",
+            "Air/Inert": "N2",
+            "Temperature": "25 \\u00b0C",
+            "Others": "-CO2",
+            "Yield": "4a (<1%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a, b"
+        },
+        "5": {
+            "Entry": 5,
+            "irradiation conditions": "light, 25 \\u00b0C",
+            "Photocatalyst": "Fe(OTf)2 (10 mol%), L1 (10 mol%)",
+            "Additives": "NaO2C-CF3 (6 equiv), K2S2O8 (3 equiv)",
+            "Solvents": "MeCN",
+            "Duration": "N.R.",
+            "Air/Inert": "air",
+            "Temperature": "25 \\u00b0C",
+            "Others": "-CO2",
+            "Yield": "4a (8%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a, b"
+        },
+        "6": {
+            "Entry": 6,
+            "irradiation conditions": "light, 25 \\u00b0C",
+            "Photocatalyst": "CuX/CuX2 or CoX2",
+            "Additives": "NaO2C-CF3 (6 equiv), K2S2O8 (3 equiv)",
+            "Solvents": "MeCN",
+            "Duration": "N.R.",
+            "Air/Inert": "N2",
+            "Temperature": "25 \\u00b0C",
+            "Others": "-CO2, instead of Fe(OTf)2",
+            "Yield": "4a (<1%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a, b"
+        },
+        "7": {
+            "Entry": 7,
+            "irradiation conditions": "light, 25 \\u00b0C",
+            "Photocatalyst": "[Ru(bpy)3](PF6)2",
+            "Additives": "NaO2C-CF3 (6 equiv), K2S2O8 (3 equiv)",
+            "Solvents": "MeCN",
+            "Duration": "N.R.",
+            "Air/Inert": "N2",
+            "Temperature": "25 \\u00b0C",
+            "Others": "-CO2, as PC",
+            "Yield": "4a (<1%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a, b"
+        },
+        "8": {
+            "Entry": 8,
+            "irradiation conditions": "light, 25 \\u00b0C",
+            "Photocatalyst": "[Ir(dFCF3ppy)2(dtbbpy)]PF6",
+            "Additives": "NaO2C-CF3 (6 equiv), K2S2O8 (3 equiv)",
+            "Solvents": "MeCN",
+            "Duration": "N.R.",
+            "Air/Inert": "N2",
+            "Temperature": "25 \\u00b0C",
+            "Others": "-CO2, as PC",
+            "Yield": "4a (<1%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a, b"
+        },
+        "9": {
+            "Entry": 9,
+            "irradiation conditions": "light, 25 \\u00b0C",
+            "Photocatalyst": "(Mes-Acr-Ph)BF4",
+            "Additives": "NaO2C-CF3 (6 equiv), K2S2O8 (3 equiv)",
+            "Solvents": "MeCN",
+            "Duration": "N.R.",
+            "Air/Inert": "N2",
+            "Temperature": "25 \\u00b0C",
+            "Others": "-CO2, as PC",
+            "Yield": "4a (<1%)",
+            "Yield type": "NMR",
+            "Other product info": "N.R.",
+            "Footnote": "a, b"
+        }
+    }
+}
