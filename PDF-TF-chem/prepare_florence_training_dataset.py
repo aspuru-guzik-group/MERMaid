@@ -4,7 +4,7 @@ import random
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-def convert_to_florence_format(coco_json_path, output_dir):
+def convert_to_florence_format(coco_json_path, florence_output_path):
 	"""
 	converts coco dataset to florence dataset
 	"""
@@ -72,7 +72,7 @@ def convert_to_florence_format(coco_json_path, output_dir):
 
 	print("total number of images:", len(florence_data))
 
-	# save train and test data into jsonl files
+	# save converted json
 	with open(florence_output_path, 'w') as file:
 		for entry in florence_data:
 			json.dump(entry, file)
@@ -80,22 +80,53 @@ def convert_to_florence_format(coco_json_path, output_dir):
 	
 	print("florence data saved to ", florence_output_path)
 
-def add_img_w_empty_annotations_florence(florence_output_path, empty_annotation_dir):
-    # Load the existing JSON content
-    with open(florence_output_path, 'r') as f:
-        json_data = [json.loads(line) for line in f.readlines()]
+def clean_json(florence_output_path, cleaned_output_path):
+    json_data = []
     
-    for image_name in os.listdir(empty_annotation_dir):
-        if image_name.endswith(".png"):
-            
-            new_entry = {"image": image_name, "prefix": "<OD>", "suffix": ""}
-            json_data.append(new_entry)
-			
-    with open(florence_output_path, 'w') as f:
+    # Load the existing JSON content, skipping invalid or empty lines
+    with open(florence_output_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                try:
+                    json_data.append(json.loads(line))
+                except json.JSONDecodeError:
+                    print(f"Skipping invalid JSON line: {line}")
+                    
+    # Write the updated JSON data back to the file
+    with open(cleaned_output_path, 'w') as f:
         for entry in json_data:
             f.write(json.dumps(entry) + '\n')
+    
+    print(f"Images have been appended to {cleaned_output_path}.")
 
-    print(f"Images from {empty_annotation_dir} have been appended to {florence_output_path}.")
+def add_img_w_empty_annotations_florence(florence_output_path, image_dir, augmented_output_path):
+    json_data = []
+    
+    # Load the existing JSON content, skipping invalid or empty lines
+    with open(florence_output_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                try:
+                    json_data.append(json.loads(line))
+                except json.JSONDecodeError:
+                    print(f"Skipping invalid JSON line: {line}")
+    
+    existing_images = {entry['image'] for entry in json_data}
+    
+    # Iterate through the images in the directory and add only new ones
+    for image_name in os.listdir(image_dir):
+        if image_name.endswith(".png") and image_name not in existing_images:
+            new_entry = {"image": image_name, "prefix": "<OD>", "suffix": ""}
+            json_data.append(new_entry)
+    
+    # Write the updated JSON data back to the file
+    with open(augmented_output_path, 'w') as f:
+        for entry in json_data:
+            f.write(json.dumps(entry) + '\n')
+    
+    print(f"Images have been appended to {augmented_output_path}.")
 
 def train_test_split_florence(florence_output_path, train_jsonl_path, test_jsonl_path):
     # Load the JSONL file into a list of dictionaries
@@ -130,7 +161,7 @@ def train_test_split_florence(florence_output_path, train_jsonl_path, test_jsonl
     print(f"Train data saved to {train_jsonl_path}")
     print(f"Test data saved to {test_jsonl_path}")
 
-
+'''
 # Generating the dataset for Florence2 model finetuning 
 coco_json_path = "<path_to_downloaded_coco_dataset_json>" 
 output_dir = "<output_directory>"
@@ -142,3 +173,4 @@ test_jsonl_path = "<path_to_save_test_jsonl_file"
 convert_to_florence_format(coco_json_path,output_dir)
 add_img_w_empty_annotations_florence(florence_output_path, empty_annotation_dir)
 train_test_split_florence(florence_output_path, train_jsonl_path, test_jsonl_path)
+'''
