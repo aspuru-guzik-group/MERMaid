@@ -209,25 +209,23 @@ def download_captions_headers_footnots_elsevier_cellpress(input_file_path):
     return final_captions
 
 
-# Run 
-input_file_dir = "../downloaded_html/electrosynthesis/"
-caption_file_dir = "../downloaded_captions/electrosynthesis/"
-for file in os.listdir(input_file_dir):
-    if file.endswith('.json'): 
-        article_name = file.removesuffix('.json') + '_with_footnotes'
-        input_file_path = os.path.join(input_file_dir, file)
-        if "10.1021" in file:
-            all_captions = download_captions_headers_footnotes_acs(input_file_path)
-            save_captions(caption_file_dir, article_name, all_captions)
-        
-        if "10.1002" in file:
-            all_captions = download_captions_headers_footnotes_wiley(input_file_path) 
-            save_captions(caption_file_dir, article_name, all_captions)
+def download_captions(input_file_dir, caption_file_dir):
+    for file in os.listdir(input_file_dir):
+        if file.endswith('.json'): 
+            article_name = file.removesuffix('.json') + '_with_footnotes'
+            input_file_path = os.path.join(input_file_dir, file)
+            if "10.1021" in file:
+                all_captions = download_captions_headers_footnotes_acs(input_file_path)
+                save_captions(caption_file_dir, article_name, all_captions)
+            
+            if "10.1002" in file:
+                all_captions = download_captions_headers_footnotes_wiley(input_file_path) 
+                save_captions(caption_file_dir, article_name, all_captions)
 
-        if "10.1039" in file:
-            all_captions = download_captions_headers_footnotes_rsc(input_file_path)
-            save_captions(caption_file_dir, article_name, all_captions)
+            if "10.1039" in file:
+                all_captions = download_captions_headers_footnotes_rsc(input_file_path)
+                save_captions(caption_file_dir, article_name, all_captions)
 
-        if "10.1016" in file: 
-            all_captions = download_captions_headers_footnots_elsevier_cellpress(input_file_path)
-            save_captions(caption_file_dir, article_name, all_captions)
+            if "10.1016" in file: 
+                all_captions = download_captions_headers_footnots_elsevier_cellpress(input_file_path)
+                save_captions(caption_file_dir, article_name, all_captions)
