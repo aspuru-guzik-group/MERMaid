@@ -14,103 +14,6 @@ def save_captions(caption_file_dir, base_name, all_captions):
         json.dump(all_captions, json_file, ensure_ascii=False, indent=4)
         print(f"captions saved to {caption_file_path}")
 
-
-#OLD
-def download_captions_headers_wiley(input_file_path):
-    with open(input_file_path, "r", encoding="utf-8") as file:
-        html_content = file.read()
-
-    soup = BeautifulSoup(html_content, "html.parser")
-
-    remove_phrase = "Open in figure viewerPowerPoint"
-
-    table_captions = soup.find_all("header", class_="article-table-caption")
-    table_captions = [caption.get_text(strip=True).replace(remove_phrase, "") for 
-                      caption in table_captions]
-
-    figure_captions = soup.find_all("figcaption", class_="figure__caption")
-    figure_captions = [caption.get_text(strip=True).replace(remove_phrase, "") for 
-                       caption in figure_captions]
-    
-    all_captions = table_captions + figure_captions
-
-    return all_captions
-
-#OLD
-def download_captions_headers_rsc(input_file_path):
-    with open(input_file_path, "r", encoding="utf-8") as file:
-        html_content = file.read()
-
-    soup = BeautifulSoup(html_content, "html.parser")
-
-    remove_phrase = ""
-
-    figure_captions = soup.find_all("td", class_="image_title")
-    figure_captions = [
-        f"{caption.find('b').get_text(strip=True)} {caption.find('span', class_='graphic_title').get_text(strip=True)}" 
-        for caption in figure_captions
-    ]
-
-    table_captions = soup.find_all("div", class_="table_caption")
-    table_captions = [
-        f"{caption.find('b').get_text(strip=True)} {caption.find('span').get_text(strip=True)}" 
-        for caption in table_captions
-    ]
-    
-    all_captions = figure_captions + table_captions
-    
-    return all_captions
-
-#OLD
-def download_captions_headers_acs(input_file_path):
-    with open(input_file_path, "r", encoding="utf-8") as file:
-        html_content = file.read()
-
-    soup = BeautifulSoup(html_content, "html.parser")
-
-    captions_divs = soup.find_all("div", class_="hlFld-FigureCaption")
-    figure_captions_divs = soup.find_all("div", class_="hlFld-FigureCaption caption")
-    
-    extracted_captions_set = set()
-
-    for caption in captions_divs:
-        title = caption.find("div", class_="title2")
-        if title:
-            extracted_captions_set.add(title.get_text(strip=True))
-    
-    for figure in figure_captions_divs:
-        figure_caption = figure.find("p")
-        if figure_caption:
-            extracted_captions_set.add(figure_caption.get_text(strip=True))
-
-    all_captions = sorted(list(extracted_captions_set))
-    
-    return all_captions
-
-#OLD
-def download_captions_headers_elsevier_cellpress(input_file_path):
-    
-    with open(input_file_path, "r", encoding="utf-8") as file:
-        html_content = file.read()
-
-    soup = BeautifulSoup(html_content, "html.parser")
-
-    remove_phrase = "Download: Download full-size image"
-
-    all_captions = soup.find_all("span", class_="captions text-s")
-
-    cleaned_captions = []
-
-    for caption in all_captions:
-        caption_text = caption.find("p").get_text(strip=True).replace(remove_phrase, "")
-        if "Document" not in caption_text: 
-            if "Table" in caption_text or "Scheme" in caption_text or "Figure" in caption_text or "Chart" in caption_text:
-                cleaned_captions.append(caption_text)
-    
-    all_captions = sorted(cleaned_captions)
-    return all_captions
-
-
 # with footnotes 
 def download_captions_headers_footnotes_wiley(input_file_path):
     with open(input_file_path, "r", encoding="utf-8") as file:
@@ -119,6 +22,7 @@ def download_captions_headers_footnotes_wiley(input_file_path):
     soup = BeautifulSoup(html_content, "html.parser")
     
     remove_phrase = "Open in figure viewerPowerPoint"
+    remove_phrase2 = "Caption"
 
     combined_captions = []
     
@@ -142,7 +46,7 @@ def download_captions_headers_footnotes_wiley(input_file_path):
         elif "article-section__table-footnotes" in element.get("class", []):
             # If it's a table footnote, add it to the current caption
             if current_caption:
-                footnote_text = element.get_text(strip=True)
+                footnote_text = element.get_text(strip=True).replace
                 current_caption += f" {footnote_text}"
     
     # Add the last caption if it exists
@@ -152,7 +56,7 @@ def download_captions_headers_footnotes_wiley(input_file_path):
     # Extract figure captions (handled separately)
     figure_captions = soup.find_all("figcaption", class_="figure__caption")
     figure_captions_cleaned = [
-        caption.get_text(strip=True).replace(remove_phrase, "")
+        caption.get_text(strip=True).replace(remove_phrase2, " ").replace(remove_phrase,"")
         for caption in figure_captions
     ]
 
@@ -303,3 +207,27 @@ def download_captions_headers_footnots_elsevier_cellpress(input_file_path):
 
     final_captions = sorted(list(all_captions))
     return final_captions
+
+
+# Run 
+input_file_dir = "../downloaded_html/electrosynthesis/"
+caption_file_dir = "../downloaded_captions/electrosynthesis/"
+for file in os.listdir(input_file_dir):
+    if file.endswith('.json'): 
+        article_name = file.removesuffix('.json') + '_with_footnotes'
+        input_file_path = os.path.join(input_file_dir, file)
+        if "10.1021" in file:
+            all_captions = download_captions_headers_footnotes_acs(input_file_path)
+            save_captions(caption_file_dir, article_name, all_captions)
+        
+        if "10.1002" in file:
+            all_captions = download_captions_headers_footnotes_wiley(input_file_path) 
+            save_captions(caption_file_dir, article_name, all_captions)
+
+        if "10.1039" in file:
+            all_captions = download_captions_headers_footnotes_rsc(input_file_path)
+            save_captions(caption_file_dir, article_name, all_captions)
+
+        if "10.1016" in file: 
+            all_captions = download_captions_headers_footnots_elsevier_cellpress(input_file_path)
+            save_captions(caption_file_dir, article_name, all_captions)
