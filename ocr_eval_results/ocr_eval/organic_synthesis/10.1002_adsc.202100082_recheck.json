@@ -1,0 +1,20 @@
+{
+    "uncompared_gt_captions": [
+        "Table  1",
+        "Table  2",
+        "Table  3",
+        "Table  4",
+        "Table  5",
+        "Scheme 2Synthesis",
+        "Scheme 4Functionalization"
+    ],
+    "uncompared_ocr_captions": [
+        "Scheme 2",
+        "Scheme 4",
+        "Table 1",
+        "Table 2",
+        "Table 3",
+        "Table 4",
+        "Table 5"
+    ]
+}

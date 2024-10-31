@@ -1,0 +1,30 @@
+{
+    "uncompared_gt_captions": [
+        "Figure 1",
+        "Figure 2",
+        "Figure 3",
+        "Figure 4",
+        "Table 1"
+    ],
+    "uncompared_ocr_captions": [
+        "Figure S1",
+        "Figure S10",
+        "Figure S11",
+        "Figure S12",
+        "Figure S13",
+        "Figure S14",
+        "Figure S1b",
+        "Figure S2",
+        "Figure S3",
+        "Figure S5",
+        "Figure S7",
+        "Figure S7r",
+        "Figure S8",
+        "Figure S9",
+        "Figure Sb",
+        "Table S1",
+        "Table S3",
+        "Table S5",
+        "Table S8"
+    ]
+}
