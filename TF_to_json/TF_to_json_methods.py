@@ -12,6 +12,7 @@ import json
 from os import listdir
 import json
 import glob
+import pubchempy as pcp
 
 #NOTE1: Prompts stored locally for now but will store prompts used in the same repo folder in latest ver
 #NOTE2: Handle errors 
@@ -20,21 +21,31 @@ class RxnOptDataProcessor:
     """
     Handles image processing tasks to extract reaction optimization-related data from images.
     """
-    def __init__(self, ckpt_path, device='cpu'):
-        self.api_key = os.getenv("OPENAI_API_KEY") # to use GPT
+    def __init__(self, 
+                 ckpt_path:str, 
+                 device='cpu'):
+        self.api_key = os.getenv("OPENAI_API_KEY")
         self.model = RxnScribe(ckpt_path, device=torch.device(device)) # initialize RxnScribe to get SMILES
 
-    def is_optimization_table(self, image_name, image_directory): 
+    def is_optimization_table(self, 
+                              image_name:str, 
+                              image_directory:str): 
         # filter logic from MERMES here 
         return True 
     
-    def is_reaction_diagram(self, image_file):
+    def is_reaction_diagram(self, 
+                            image_file:str):
         # logic to determine if the image is a reaction diagram
         return True    
     
-    def crop_image(self, image_name, image_directory, cropped_image_directory, min_segment_height=120): 
+    def crop_image(self, 
+                   image_name:str, 
+                   image_directory:str, 
+                   cropped_image_directory:str, 
+                   min_segment_height=120): 
         """
-        Adaptively crop a given figure into smaller subfigures before passing to VLM based on image length
+        Adaptively crop a given figure into smaller subfigures before 
+        passing to VLM based on image length
 
         parameters: 
         image_name: base image name
@@ -42,7 +53,12 @@ class RxnOptDataProcessor:
         cropped_image_directory: output directory to save cropped images 
         min_segment_height: minimum height of each segmented subfigure
         """
-        def find_split_line(image, threshold, region_start, region_end, percentage_threshold, step_size):
+        def find_split_line(image, 
+                            threshold, 
+                            region_start, 
+                            region_end, 
+                            percentage_threshold, 
+                            step_size):
             """
             Helper function to determine where to segment the figure
             """
@@ -62,7 +78,12 @@ class RxnOptDataProcessor:
 
             return split_line if split_line > region_start else region_start
 
-        def adaptive_split_lines(image, first_split_line, min_segment_height, threshold, percentage_threshold, step_size):
+        def adaptive_split_lines(image, 
+                                 first_split_line, 
+                                 min_segment_height, 
+                                 threshold, 
+                                 percentage_threshold, 
+                                 step_size):
             """
             Helper function to identify all the split lines for an image
             """
@@ -147,7 +168,10 @@ class RxnOptDataProcessor:
             print(str(e))
             cv2.imwrite(os.path.join(cropped_image_directory, f"{image_name}_original.png"), image)
 
-    def batch_crop_image(self, input_directory, cropped_image_directory, min_segment_height=120):
+    def batch_crop_image(self, 
+                         input_directory:str, 
+                         cropped_image_directory:str, 
+                         min_segment_height:float=120):
         """
         crop all images in a given directory 
         """
@@ -182,7 +206,8 @@ class RxnOptDataProcessor:
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('utf-8')
     
-    def reformat_json(self, input_file):
+    def reformat_json(self, 
+                      input_file:str):
         """
         Clean and format JSON data by removing unwanted characters and ensuring proper JSON formatting
         """
@@ -197,7 +222,12 @@ class RxnOptDataProcessor:
         with open(input_file, 'w') as file:
             file.write(formatted_json)
 
-    def adaptive_get_data(self, prompt_directory, get_data_prompt, image_name, image_directory, json_directory):
+    def adaptive_get_data(self, 
+                          prompt_directory:str, 
+                          get_data_prompt:str, 
+                          image_name:str, 
+                          image_directory:str, 
+                          json_directory:str):
         """
         Outputs a reaction dictionary from all subfigures 
 
@@ -287,7 +317,11 @@ class RxnOptDataProcessor:
         except requests.exceptions.RequestException as e:
             print(f"Error during API request: {e}")
 
-    def update_dict(self, prompt_directory, update_dict_prompt, json_file, json_directory):
+    def update_dict(self, 
+                    prompt_directory:str, 
+                    update_dict_prompt:str, 
+                    json_file:str, 
+                    json_directory:str):
         
         # Get user prompt file
         user_prompt_path = os.path.join(prompt_directory, f"{update_dict_prompt}.txt")
@@ -361,7 +395,10 @@ class RxnOptDataProcessor:
             print(f"Error during API request: {e}")
 
     # EDIT: Handle escape strings in smiles otherwise will have errors
-    def extract_smiles(self, image_name, image_directory, json_directory):
+    def extract_smiles(self, 
+                       image_name:str, 
+                       image_directory:str, 
+                       json_directory:str):
         """
         Use RxnScribe to get reactants and product SMILES
         """
@@ -393,7 +430,9 @@ class RxnOptDataProcessor:
             print(f"{image_name} is not a reaction diagram.")
     
     # EDIT: Handle NR SMILES dictionaries
-    def update_dict_with_smiles(self, image_name, json_directory): 
+    def update_dict_with_smiles(self, 
+                                image_name:str, 
+                                json_directory:str): 
         """
         Combine reaction dictionary with reaction SMILES
         """
@@ -430,7 +469,13 @@ class RxnOptDataProcessor:
 
         print (f"Reaction optimization dictionary updated with reaction smiles for {image_name}")
 
-    def batch_process_data(self, prompt_directory, get_data_prompt, update_dict_prompt, cropped_image_directory, json_directory, image_directory): 
+    def batch_process_data(self, 
+                           prompt_directory:str, 
+                           get_data_prompt:str, 
+                           update_dict_prompt:str, 
+                           cropped_image_directory:str, 
+                           json_directory:str, 
+                           image_directory:str): 
         """
         Get the full reaction optimization dictionary for all images - reaction SMILES + reaction conditions        
         Should be able to streamline code further
@@ -461,10 +506,22 @@ class RxnOptDataProcessor:
 
         print("All reaction dictionaries are extracted and saved - hopefully")
 
-           
-        
 
 
+class GraphJson(RxnOptDataProcessor):
+
+    def pubchem_common_name_to_smiles(self, 
+                                      common_name: str): 
+        try: 
+            c = pcp.get_cids(common_name, 'name')
+            if len(c) ==1: 
+                compound = pcp.Compound.from_cid(c[0])
+                c_smiles = compound.isomeric_smiles
+                return c_smiles, common_name
+            else: 
+                return None, common_name
+        except: 
+            return None, common_name
 
 # Testing 
 ckpt_path = hf_hub_download("yujieq/RxnScribe", "pix2seq_reaction_full.ckpt") # Download the checkpoint
