@@ -1,4 +1,4 @@
-You will receive several images. 
+You will receive one or several images. 
 
 Your goal is to extract and structure detailed information on different reaction conditions, ensuring that all specified modifications are applied correctly. Identify the standard conditions provided explicitly either in the first footnote or in the reaction diagram. ONLY use information found in these two sources.  
 
