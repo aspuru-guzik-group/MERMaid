@@ -1,9 +1,3 @@
-"""
-Adapted from TF-ID model https://github.com/ai8hyf/TF-ID
-Runs on GPU
-"""
-
-
 from pdf2image import convert_from_path, convert_from_bytes
 from pdf2image.exceptions import (
     PDFInfoNotInstalledError,
@@ -13,12 +7,28 @@ from pdf2image.exceptions import (
 from PIL import Image
 from transformers import AutoProcessor, AutoModelForCausalLM 
 from safetensors import safe_open
-
 import os
 import json
 import time
 
+"""
+Adapted from TF-ID model https://github.com/ai8hyf/TF-ID
+Runs on GPU
 
+For each PDF file in a directory, extract all tables and figures, with the 
+associated captions/headings/footnotes as images. 
+
+Args: 
+pdf_path: str, path to the PDF file
+model_id: str, model id of the TF-ID model
+safetensors_path: str, path to the safetensors file
+output_dir: str, path to the output directory
+
+Output: 
+each image is saved as a separate file in the output directory in the format 
+{pdf_name}_image_{counter}.png 
+
+"""
 def pdf_to_image(pdf_path):
 	images = convert_from_path(pdf_path)
 	return images
@@ -37,20 +47,15 @@ def tf_id_detection(image, model, processor):
 	annotation = processor.post_process_generation(generated_text, task="<OD>", image_size=(image.width, image.height))
 	return annotation["<OD>"]
 
-# TO-DO: modify save directory
-def save_image_from_bbox(image, annotation, page, output_dir):
-	# the name should be page + label + index
+#TODO: check if the counter will overwrite the images 
+def save_image_from_bbox(image, annotation, page, output_dir, pdf_name):
 	for counter, bbox in enumerate(annotation['bboxes']):
-		#bbox = annotation['bboxes']
-		label = annotation['labels'][counter]
 		x1, y1, x2, y2 = bbox
 		cropped_image = image.crop((x1, y1, x2, y2))
-		cropped_image.save(os.path.join(output_dir, f"page_{page}_{label}_{counter}.png"))
+		cropped_image.save(os.path.join(output_dir, f"{pdf_name}_image_{counter}.png"))
 
 def pdf_to_table_figures(pdf_path, model_id, safetensors_path, output_dir):
 	pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
-	output_dir = os.path.join(output_dir, pdf_name)
-
 	os.makedirs(output_dir, exist_ok=True)
 
 	images = pdf_to_image(pdf_path)
@@ -62,24 +67,25 @@ def pdf_to_table_figures(pdf_path, model_id, safetensors_path, output_dir):
 	model = AutoModelForCausalLM.from_pretrained(model_id, state_dict=state_dict, trust_remote_code=True)
 	processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
 	print("Model loaded with retrained weights from: ", safetensors_path)
-	
 	print("=====================================")
 	print("start saving cropped images")
 	for i, image in enumerate(images):
 		annotation = tf_id_detection(image, model, processor)
-		save_image_from_bbox(image, annotation, i, output_dir)
+		save_image_from_bbox(image, annotation, i, output_dir, pdf_name)
 		print(f"Page {i} saved. Number of objects: {len(annotation['bboxes'])}")
 	
 	print("=====================================")
 	print("All images saved to: ", output_dir)
 
-model_id = "yifeihu/TF-ID-large"
-safetensors_path = "./model_checkpoints/epoch_12/model.safetensors" #currently stored locally on cluster, will upload to huggingface or something?
-input_dir = "./pdfs/"
-output_dir = "./output/"
 
-for file in os.listdir(input_dir): 
-	if not file.endswith("pdf"):
-		continue 
-	pdf_path = os.path.join(input_dir,file)
-	pdf_to_table_figures(pdf_path, model_id, safetensors_path, output_dir)
+if __name__ == "__main__":
+	model_id = "yifeihu/TF-ID-large" #TODO: check the training script to use this or 'microsoft/Florence-2-large'
+	safetensors_path = "./model_checkpoints/epoch_12/model.safetensors" #currently stored locally on cluster, will upload to huggingface
+	pdf_dir = "./pdfs/"
+	output_dir = "./output/"
+
+	for file in os.listdir(pdf_dir): 
+		if not file.endswith("pdf"):
+			continue 
+		pdf_path = os.path.join(pdf_dir,file)
+		pdf_to_table_figures(pdf_path, model_id, safetensors_path, output_dir)
