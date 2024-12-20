@@ -194,7 +194,7 @@ class MaterialFamily(VertexBase):
 
 @dataclass
 class Reaction(VertexBase):
-    id: int
+    uuid: str
 
 
 TEdgeCompound = EdgeBase[Reaction, Compound]
@@ -264,7 +264,7 @@ class HasReaction(EdgeBase[Study, Reaction]):
     pass
 
 @dataclass
-class IsInstance(EdgeBase[Material, MaterialFamily]):
+class IsMemberOfFamily(EdgeBase[Material, MaterialFamily]):
     pass
 
 

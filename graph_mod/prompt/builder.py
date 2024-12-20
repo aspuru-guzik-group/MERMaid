@@ -23,6 +23,34 @@ class Guidelines(NamedTuple):
     def __str__(self):
         return guidelines_to_str(self)
 
+def subs_or_none(
+    s: str
+    , **kwargs
+) -> str | None:
+    try:
+        return s.format(**kwargs)
+    except KeyError: return None
+
+def subs_or_still(
+    s: str
+    , **kwargs
+) -> str:
+    try: return s.format(**kwargs)
+    except KeyError: return s
+
+
+def apply_substitutions(
+    guidelines: Guidelines
+    , remove_not_found_tokens: bool=True
+    , **kwargs: dict[str, str]
+) -> Guidelines:
+    f = subs_or_none if remove_not_found_tokens else subs_or_still
+    return Guidelines(
+        header=None if guidelines.header is None else Header(f(guidelines.header, **kwargs))
+        , instructions=[x for x in (f(i, **kwargs) for i in guidelines.instructions) if x is not None]
+        , tail=None if guidelines.tail is None else Tail(f(guidelines.tail, **kwargs))
+    )
+
 
 def guidelines_to_str(
     g: Guidelines

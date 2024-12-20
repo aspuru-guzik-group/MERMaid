@@ -4,6 +4,7 @@ from openai import OpenAI
 from prompt.builder import (
     build_guidelines
     , guidelines_to_str
+    , apply_substitutions
 )
 
 MODULE_PATH = Path(__file__).resolve().parent
@@ -30,8 +31,10 @@ def build_prompt_from_react(
     react_str: str
     , **kwargs
 ) -> dict[str,str]:
-    return build_prompt(str(build_guidelines()).format(
-            **{ "code": CODE_STR
+    return build_prompt(
+        apply_substitutions(
+            build_guidelines()
+            , **{ "code": CODE_STR
               , "json": react_str
               , **kwargs
               }

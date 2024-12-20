@@ -11,3 +11,6 @@
 - Catalog the materials in the following material family nodes: Carbon-based, metal, alloy and others.
 - Take into account the types of the code, the logic of the graph database is encoded in the types.
 - It is crucial that all the nodes and the vertices you create have the "label" key:value pairs, as it is specified in the classes of the code.
+- Try to select the "Atmosphere" vertex name from the following list: {atmosphere}. If you are not able to match the value with anyone in the list, feel free to create a new entry.
+- Try to select the "Material" vertex name from the following list: {material}. If you are not able to match the value with anyone in the list, feel free to create a new entry.
+- Try to select the "MaterialFamily" vertex name from the following list: {material_family}. If you are not able to match the value with anyone in the list, feel free to create a new entry.

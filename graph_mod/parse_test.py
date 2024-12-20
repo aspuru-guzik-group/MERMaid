@@ -39,9 +39,9 @@ def parse_or_skip(
 def filter_none(xs): return filter(lambda x: x is not None, xs)
     
 
-rfiles = list(filter_none(map(read_and_clean_file, RESULT_FILES)))
-conns = list(chain.from_iterable(filter(lambda x: x is not None,
-               (map(parse_or_skip, rfiles)))))
+# rfiles = list(filter_none(map(read_and_clean_file, RESULT_FILES)))
+# conns = list(chain.from_iterable(filter(lambda x: x is not None,
+#                (map(parse_or_skip, rfiles)))))
 
 connection = connect(
     "ws://localhost"
@@ -49,10 +49,10 @@ connection = connect(
     , 'g')
 graph = get_traversal(connection)
 
-for item in conns:
-    try:
-        add_connection(item, graph)
-    except TypeError:
-        add_connection(item, graph)
-    except:
-        continue
+# for item in conns:
+#     try:
+#         add_connection(item, graph)
+#     except TypeError:
+#         add_connection(item, graph)
+#     except:
+#         continue

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """Janusgraph database interface."""
+from typing import Any, Type
+from itertools import chain
 from gremlin_python.structure.graph import Edge, Graph, Vertex
 from gremlin_python.driver import serializer
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
 from gremlin_python.process.graph_traversal import GraphTraversalSource, __
 
 from schema import VertexBase, EdgeBase, Connection
-
 
 def connect(
     direction: str
@@ -38,6 +39,44 @@ def get_vertex(
             return v
 
     return None
+
+
+def get_vertices(
+    vertex_type: Type[VertexBase]
+    , graph: GraphTraversalSource
+) -> list[dict[str, Any]]:
+    return (
+        graph
+        .V()
+        .hasLabel(vertex_type.__name__)
+        .valueMap()
+        .toList()
+    )
+
+
+def get_vnamelist_from_db(
+    vertex_type: Type[VertexBase]
+    , graph: GraphTraversalSource
+) -> list[str]:
+    return list(chain.from_iterable(
+        map(
+            lambda x: x["name"]
+            , get_vertices(vertex_type, graph)
+        )
+    ))
+
+
+def get_edges(
+    edge_type: Type[EdgeBase]
+    , graph: GraphTraversalSource
+) -> list[dict[str, Any]]:
+    return (
+        graph
+        . E()
+        . hasLabel(edge_type.__name__)
+        . valueMap()
+        . toList()
+    )
 
 
 # def get_edge(
