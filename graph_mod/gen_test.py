@@ -1,4 +1,5 @@
 import json
+from multiprocessing import Pool
 from pathlib import Path
 from oai import build_prompt, build_prompt_from_react, build_prompt_from_react_file, get_response
 
@@ -32,5 +33,11 @@ def get_json_from_react(
     return messages
 
 
-for item in range(0, 40):
-    get_json_from_react(DATA_FILES[item])
+def pool_proxy(n): get_json_from_react(DATA_FILES[n])
+
+
+with Pool(10) as p:
+    p.map(
+        pool_proxy
+        , range(0,30)
+    )

@@ -10,24 +10,36 @@ RESULT_FILES = list(RESULTS_FOLDER.glob("*.json"))
 
 def read_and_clean_file(
     path: Path | str
-) -> str:
-    with open(path, 'r') as f:
-         return json.loads(''.join(f.readlines()[1:-1]))
-
-def parse_or_skip(
-    reaction: list[str]
-) -> Connection | None:
+) -> str | None:
     try:
-        return list(map(Connection.from_dict, reaction))
-    except TypeError:
-        print(f"Reaction {reaction[0]} failed, skipping")
-    except KeyError:
-        print(f"Reaction {reaction[0]} failed, skipping")
-    return None
-    
+        with open(path, 'r') as f:
+            return json.loads(''.join(f.readlines()[1:-1]))
+    except:
+        return None
+
+FAILED_TYPE=[]
+FAILED_KEY=[]
+def parse_or_skip(
+    reaction: list[dict[Any, Any]]
+) -> list[Connection] | None:
+    connections = []
+    for item in reaction:
+        try:
+            connections.append(Connection.from_dict(item))
+        except TypeError:
+            print(f"Reaction {item} failed, skipping")
+            FAILED_TYPE.append(item)
+            continue
+        except KeyError:
+            print(f"Reaction {item} failed, skipping")
+            FAILED_KEY.append(item)
+            continue
+    return connections
+
+def filter_none(xs): return filter(lambda x: x is not None, xs)
     
 
-rfiles = list(map(read_and_clean_file, RESULT_FILES))
+rfiles = list(filter_none(map(read_and_clean_file, RESULT_FILES)))
 conns = list(chain.from_iterable(filter(lambda x: x is not None,
                (map(parse_or_skip, rfiles)))))
 

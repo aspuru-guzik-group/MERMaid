@@ -1,0 +1,13 @@
+- Based on the code of my schema, create a json file for the following "study" including all the nodes and all the edges.
+- Take care with the values and the units.
+- Try to guess temperatures (i.e. room temperature).
+- The different "Optimization Runs" are the same "Study" but with different reaction conditions.
+- Take into account that the edges contain some information, make sure that you think about it.
+- Be concise, only output the json file I will automatically process it with my graph API.
+- Create only a list of edges.
+- Each edge in the list, should contain a dictonary with the following keywords: source (containing the dictionary of the source node), target (containing the dictionary of the target node), label (containing the label of the edge) and properties (containing the properties of the edge).
+- The UUID of the "Reaction" vertex should be {study_name}_[entry_number], where [entry_number] is the key in the json dictionary. Please, be extremely carefully with it as I need to have unique IDs for the reaction nodes.
+- The name of the "Study" node should be: {study_name}
+- Catalog the materials in the following material family nodes: Carbon-based, metal, alloy and others.
+- Take into account the types of the code, the logic of the graph database is encoded in the types.
+- It is crucial that all the nodes and the vertices you create have the "label" key:value pairs, as it is specified in the classes of the code.
