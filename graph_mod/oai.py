@@ -32,13 +32,13 @@ def build_prompt_from_react(
     , **kwargs
 ) -> dict[str,str]:
     return build_prompt(
-        apply_substitutions(
+        str(apply_substitutions(
             build_guidelines()
             , **{ "code": CODE_STR
               , "json": react_str
               , **kwargs
               }
-        )
+        ))
     )
 
 
