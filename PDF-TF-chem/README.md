@@ -1,6 +1,6 @@
 # PDF-TF-chem
 
-PDF-TF-chem is the module in MERMES2.0 that extracts figures and tables from litearture.
+PDF-TF-chem is the module in MERMES2.0 that extracts figures and tables from literature.
 
 ## Instalation
 
@@ -13,11 +13,14 @@ conda activate mermes
 Install required packages
 
 ```
+sudo apt install poppler-utils
 pip install pdf2image
 pip install transformers
+pip install torch
+pip install einops timm
 ```
 
-Import the neccessary function
+Import the necessary function
 ```
 from PDF-TF-chem import pdf_to_figures_and_tables
 
