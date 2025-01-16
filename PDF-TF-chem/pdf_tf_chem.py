@@ -10,15 +10,16 @@ def pdf_to_figures_and_tables(input_dir: str, output_dir: str="./", batch: bool=
             if not file.endswith("pdf"):
                 print("ERROR: " + file + "is not a pdf")
                 continue
-            retrieve_for_single_pdf(file, output_dir)
+            pdf_path = os.path.join(input_dir,file)
+            retrieve_for_single_pdf(pdf_path, output_dir)
         return
     # otherwise input_dir is a single pdf
     file = input_dir
     if not file.endswith("pdf"):
         print("ERROR: " + file + "is not a pdf")
         return
-    retrieve_for_single_pdf(file)
-        
-def retrieve_for_single_pdf(file: str, input_dir: str, output_dir: str):
-    pdf_path = os.path.join(input_dir,file)
+    retrieve_for_single_pdf(file, output_dir)
+
+
+def retrieve_for_single_pdf(pdf_path, output_dir: str):
     pdf_to_table_figures(pdf_path, MODEL_ID, SAFETENSORS_PATH, output_dir)
