@@ -15,10 +15,13 @@ from pdf2image.exceptions import (
 from PIL import Image
 from transformers import AutoProcessor, AutoModelForCausalLM 
 from safetensors import safe_open
+from safetensors.torch import load_file
 
 import os
 import json
 import time
+import requests
+import io
 
 
 def pdf_to_image(pdf_path):
@@ -50,6 +53,14 @@ def save_image_from_bbox(image, annotation, page, output_dir):
 		cropped_image.save(os.path.join(output_dir, f"page_{page}_{label}_{counter}.png"))
 
 def pdf_to_table_figures(pdf_path, model_id, safetensors_path, output_dir):
+
+	model_id = "yifeihu/TF-ID-large"
+	safetensors_path = "https://huggingface.co/yifeihu/TF-ID-base/resolve/main/model.safetensors"
+ 
+	# response = requests.get(safetensors_path)
+	# response.raise_for_status()
+	# safetensors_file = io.BytesIO(response.content)
+ 
 	pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
 	output_dir = os.path.join(output_dir, pdf_name)
 
@@ -57,11 +68,15 @@ def pdf_to_table_figures(pdf_path, model_id, safetensors_path, output_dir):
 
 	images = pdf_to_image(pdf_path)
 	print(f"PDF loaded. Number of pages: {len(images)}")
-	state_dict = {}
-	with safe_open(safetensors_path, framework="torch") as f:
-		for key in f.keys():
-			state_dict[key] = f.get_tensor(key)
-	model = AutoModelForCausalLM.from_pretrained(model_id, state_dict=state_dict, trust_remote_code=True)
+	# NOTE that this assumes we use a hugging face model and are not required to load the state_dict
+	# commented out code is what we would need if we needed to load the state_dict ourselves
+	# state_dict = load_file(safetensors_path)
+	# state_dict = {}
+	# with safe_open(safetensors_file, framework="torch") as f:
+	# 	for key in f.keys():
+	# 		state_dict[key] = f.get_tensor(key)
+ 	# model = AutoModelForCausalLM.from_pretrained(model_id, state_dict=state_dict, trust_remote_code=True)
+	model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True)
 	processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
 	print("Model loaded with retrained weights from: ", safetensors_path)
 	
@@ -75,13 +90,13 @@ def pdf_to_table_figures(pdf_path, model_id, safetensors_path, output_dir):
 	print("=====================================")
 	print("All images saved to: ", output_dir)
 
-model_id = "yifeihu/TF-ID-large"
-safetensors_path = "./model_checkpoints/epoch_12/model.safetensors" #currently stored locally on cluster, will upload to huggingface or something?
-input_dir = "./pdfs/"
-output_dir = "./output/"
+# model_id = "yifeihu/TF-ID-large"
+# safetensors_path = "https://huggingface.co/yifeihu/TF-ID-base" # "./model_checkpoints/epoch_12/model.safetensors" #currently stored locally on cluster, will upload to huggingface or something?
+# input_dir = "./pdfs/"
+# output_dir = "./output/"
 
-for file in os.listdir(input_dir): 
-	if not file.endswith("pdf"):
-		continue 
-	pdf_path = os.path.join(input_dir,file)
-	pdf_to_table_figures(pdf_path, model_id, safetensors_path, output_dir)
+# for file in os.listdir(input_dir): 
+# 	if not file.endswith("pdf"):
+# 		continue 
+# 	pdf_path = os.path.join(input_dir,file)
+# 	pdf_to_table_figures(pdf_path, model_id, safetensors_path, output_dir)
