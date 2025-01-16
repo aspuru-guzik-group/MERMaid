@@ -2,6 +2,8 @@
 
 PDF-TF-chem is the module in MERMES2.0 that extracts figures and tables from literature.
 
+Note that you must have a GPU to run locally
+
 ## Instalation
 
 Create a conda envrionment if not created already
