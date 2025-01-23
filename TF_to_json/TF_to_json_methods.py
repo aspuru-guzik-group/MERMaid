@@ -13,6 +13,7 @@ from os import listdir
 import json
 import glob
 import pubchempy as pcp
+import regex as re
 
 #NOTE1: Prompts stored locally for now but will store prompts used in the same repo folder in latest ver
 #NOTE2: Handle errors 
@@ -505,6 +506,48 @@ class RxnOptDataProcessor:
                 self.update_dict_with_smiles(self, file_name, json_directory)
 
         print("All reaction dictionaries are extracted and saved - hopefully")
+    
+    def construct_intial_prompt(opt_run_keys: set, output_dir: str):
+        """
+        Creates a reaction optimization prompt with opt_run_keys key-value pairs embedded into it
+        Assume that <INSERT_HERE> is the marker for inserting keys
+        """
+        
+        marker = "<INSERT_HERE>"
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        inbuilt_key_pair_file_path = os.path.join(script_dir, "../Prompts/inbuilt_keyvaluepairs.txt")
+        base_prompt_file_path = os.path.join(script_dir, "../Prompts/base_prompt.txt")
+        
+        
+        # get the list of optimization run dictionary key value pairs
+        inbuilt_key_pair_file = open(inbuilt_key_pair_file_path, "r")
+        opt_run_list = []
+        for line in inbuilt_key_pair_file:
+            if len(line) == 0:
+                continue
+            key_pattern = r'"([^"]*)"'
+            possible_keys = re.findall(key_pattern, line)
+            if len(possible_keys) == 0:
+                continue
+            key = possible_keys[0]
+            if key not in opt_run_keys:
+                continue
+            opt_run_list.append(line)
+            # append the empty string so it is easier to create new prompt file later
+            opt_run_list.append("")
+        inbuilt_key_pair_file.close()
+        
+        base_prompt_file = open(base_prompt_file_path, "r")
+        new_prompt_file = open(output_dir + "rxn_opt_prompt.txt", "w")
+        
+        for line in base_prompt_file:
+            if marker not in line:
+                new_prompt_file.write(line)
+            else:
+                new_prompt_file.write("\n".join(opt_run_list))
+            
+        new_prompt_file.close()
+        base_prompt_file.close()
 
 
 
@@ -524,11 +567,15 @@ class GraphJson(RxnOptDataProcessor):
             return None, common_name
 
 # Testing 
-ckpt_path = hf_hub_download("yujieq/RxnScribe", "pix2seq_reaction_full.ckpt") # Download the checkpoint
-reaction_diagram = ReactionDiagram(ckpt_path, device='cpu') # Create an instance of the ReactionDiagram class
-image_file = "/mnt/c/Users/Shi Xuan/OneDrive - University of Toronto/Project_MERLIN/Project_Optical reaction retrosynthesis/Test set/10.1021_acs.orglett.2c01930_figure3.jpeg" # Path to the image file
-predictions = reaction_diagram.predict(image_file) 
-if predictions:
-    reaction_smiles = reaction_diagram.extract_smiles(predictions)
-    print(reaction_smiles)
+# ckpt_path = hf_hub_download("yujieq/RxnScribe", "pix2seq_reaction_full.ckpt") # Download the checkpoint
+# reaction_diagram = ReactionDiagram(ckpt_path, device='cpu') # Create an instance of the ReactionDiagram class
+# image_file = "/mnt/c/Users/Shi Xuan/OneDrive - University of Toronto/Project_MERLIN/Project_Optical reaction retrosynthesis/Test set/10.1021_acs.orglett.2c01930_figure3.jpeg" # Path to the image file
+# predictions = reaction_diagram.predict(image_file) 
+# if predictions:
+#     reaction_smiles = reaction_diagram.extract_smiles(predictions)
+#     print(reaction_smiles)
+
+# if __name__ == "__main__":
+#     test_obj = RxnOptDataProcessor("")
+#     RxnOptDataProcessor.construct_intial_prompt({"Entry", "Reactants"}, "./")
 
