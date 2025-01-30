@@ -6,7 +6,7 @@ TF-to-JSON is a module of MERMES2.0 that extracts reaction information from reac
 
 Create a conda envrionment if not created already
 ```
-conda create -n mermes python=3.12
+conda create -n mermes python=3.10
 conda activate mermes
 ```
 
@@ -15,6 +15,7 @@ Install required packages
 ```
 cd MERMES2.0/TF_to_json
 pip install -r requirements.txt
+sudo apt install libjpeg-dev zlib1g-dev # for RxnScribe
 ```
 
 Note that installation of RxnScribe is also needed, follow installation instructions at https://github.com/thomas0809/RxnScribe
