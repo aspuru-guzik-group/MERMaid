@@ -1,0 +1,8 @@
+huggingface_hub==0.28.1
+numpy==2.2.2
+openai==1.60.2
+Pillow==11.1.0
+pubchempy==1.0.4
+regex==2024.11.6
+Requests==2.32.3
+torch==2.6.0
