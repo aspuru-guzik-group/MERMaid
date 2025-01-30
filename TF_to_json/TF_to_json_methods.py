@@ -507,7 +507,7 @@ class RxnOptDataProcessor:
 
         print("All reaction dictionaries are extracted and saved - hopefully")
     
-    def construct_intial_prompt(opt_run_keys: set, output_dir: str):
+    def construct_intial_prompt(opt_run_keys: list, output_dir: str):
         """
         Creates a reaction optimization prompt with opt_run_keys key-value pairs embedded into it
         Assume that <INSERT_HERE> is the marker for inserting keys
@@ -537,8 +537,9 @@ class RxnOptDataProcessor:
             opt_run_list.append("")
         inbuilt_key_pair_file.close()
         
+        new_prompt_file_name = "rxn_opt_prompt"
         base_prompt_file = open(base_prompt_file_path, "r")
-        new_prompt_file = open(output_dir + "rxn_opt_prompt.txt", "w")
+        new_prompt_file = open(output_dir + new_prompt_file_name + ".txt", "w")
         
         for line in base_prompt_file:
             if marker not in line:
@@ -548,6 +549,7 @@ class RxnOptDataProcessor:
             
         new_prompt_file.close()
         base_prompt_file.close()
+        return new_prompt_file_name
 
 
 
