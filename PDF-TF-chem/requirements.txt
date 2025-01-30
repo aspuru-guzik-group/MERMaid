@@ -1,0 +1,8 @@
+beautifulsoup4==4.12.3
+pandas==2.2.3
+pdf2image==1.17.0
+Pillow==11.1.0
+Requests==2.32.3
+safetensors==0.5.2
+scikit_learn==1.6.1
+transformers==4.48.1

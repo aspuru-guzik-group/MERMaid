@@ -8,7 +8,7 @@ Note that you must have a GPU to run locally
 
 Create a conda envrionment if not created already
 ```
-conda create -n mermes python=3.10
+conda create -n mermes python=3.12
 conda activate mermes
 ```
 
@@ -16,10 +16,7 @@ Install required packages
 
 ```
 sudo apt install poppler-utils
-pip install pdf2image
-pip install transformers
-pip install torch
-pip install einops timm
+pip install -r requirements.txt
 ```
 
 Import the necessary function
