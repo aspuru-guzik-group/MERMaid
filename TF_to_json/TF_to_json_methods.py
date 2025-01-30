@@ -9,14 +9,11 @@ from openai import OpenAI
 import base64
 import requests
 import json
-from os import listdir
 import json
 import glob
 import pubchempy as pcp
 import regex as re
 
-#NOTE1: Prompts stored locally for now but will store prompts used in the same repo folder in latest ver
-#NOTE2: Handle errors 
 
 class RxnOptDataProcessor:
     """
@@ -27,18 +24,7 @@ class RxnOptDataProcessor:
                  api_key:str,
                  device='cpu'):
         self.api_key = api_key
-        # self.model = RxnScribe(ckpt_path, device=torch.device(device)) # initialize RxnScribe to get SMILES
-
-    def is_optimization_table(self, 
-                              image_name:str, 
-                              image_directory:str): 
-        # filter logic from MERMES here 
-        return True 
-    
-    def is_reaction_diagram(self, 
-                            image_file:str):
-        # logic to determine if the image is a reaction diagram
-        return True    
+        # self.model = RxnScribe(ckpt_path, device=torch.device(device)) # initialize RxnScribe to get SMILES 
     
     def crop_image(self, 
                    image_name:str, 
@@ -99,7 +85,7 @@ class RxnOptDataProcessor:
             split_lines = [first_split_line]  # Start with the first fixed split line
             region_start_list = [first_region_end] 
 
-            for i in range(1, num_segments):
+            for __ in range(1, num_segments):
                 # Calculate dynamic region start and end for each segment
                 region_start = region_start_list[-1]
                 region_end = region_start + segment_height
@@ -186,9 +172,6 @@ class RxnOptDataProcessor:
                 print(f"processing {image_name}")
                 self.crop_image(image_name, input_directory, cropped_image_directory, min_segment_height)
         print(f'All images cropped and saved in {cropped_image_directory}')
-
- 
-
     
     def reformat_json(self, 
                       input_file:str):
@@ -258,9 +241,8 @@ class RxnOptDataProcessor:
             with open(image_caption_path, "r") as file:
                 image_caption = file.read().strip()
             messages[0]["content"].append({"type": "text","text": image_caption})
-            print('Caption appended!')
         else: 
-            print('No caption found!')
+            print('No caption found for ' + image_caption_path)
 
         # API request headers and payload
         headers = {
@@ -386,7 +368,6 @@ class RxnOptDataProcessor:
     #     """
     #     Use RxnScribe to get reactants and product SMILES
     #     """
-    #     ckpt_path = hf_hub_download("yujieq/RxnScribe", "pix2seq_reaction_full.ckpt")
     #     image_file = os.path.join(image_directory, f"{image_name}.png")
     #     reactions = []
 
@@ -500,7 +481,6 @@ class RxnOptDataProcessor:
         inbuilt_key_pair_file_path = os.path.join(script_dir, "../Prompts/inbuilt_keyvaluepairs.txt")
         base_prompt_file_path = os.path.join(script_dir, "../Prompts/base_prompt.txt")
         
-        
         # get the list of optimization run dictionary key value pairs
         inbuilt_key_pair_file = open(inbuilt_key_pair_file_path, "r")
         opt_run_list = []
@@ -549,17 +529,4 @@ class GraphJson(RxnOptDataProcessor):
                 return None, common_name
         except: 
             return None, common_name
-
-# Testing 
-# ckpt_path = hf_hub_download("yujieq/RxnScribe", "pix2seq_reaction_full.ckpt") # Download the checkpoint
-# reaction_diagram = ReactionDiagram(ckpt_path, device='cpu') # Create an instance of the ReactionDiagram class
-# image_file = "/mnt/c/Users/Shi Xuan/OneDrive - University of Toronto/Project_MERLIN/Project_Optical reaction retrosynthesis/Test set/10.1021_acs.orglett.2c01930_figure3.jpeg" # Path to the image file
-# predictions = reaction_diagram.predict(image_file) 
-# if predictions:
-#     reaction_smiles = reaction_diagram.extract_smiles(predictions)
-#     print(reaction_smiles)
-
-# if __name__ == "__main__":
-#     test_obj = RxnOptDataProcessor("")
-#     RxnOptDataProcessor.construct_intial_prompt({"Entry", "Reactants"}, "./")
 
