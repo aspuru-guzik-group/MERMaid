@@ -1,5 +1,5 @@
 import torch
-from rxnscribe import RxnScribe #need separate installation from https://github.com/thomas0809/RxnScribe 
+# from rxnscribe import RxnScribe #need separate installation from https://github.com/thomas0809/RxnScribe 
 from huggingface_hub import hf_hub_download
 import cv2
 import math
@@ -24,9 +24,10 @@ class RxnOptDataProcessor:
     """
     def __init__(self, 
                  ckpt_path:str, 
+                 api_key:str,
                  device='cpu'):
-        self.api_key = os.getenv("OPENAI_API_KEY")
-        self.model = RxnScribe(ckpt_path, device=torch.device(device)) # initialize RxnScribe to get SMILES
+        self.api_key = api_key
+        # self.model = RxnScribe(ckpt_path, device=torch.device(device)) # initialize RxnScribe to get SMILES
 
     def is_optimization_table(self, 
                               image_name:str, 
@@ -187,25 +188,7 @@ class RxnOptDataProcessor:
         print(f'All images cropped and saved in {cropped_image_directory}')
 
  
-        """
-        updates the reaction dictionary with footnote information 
 
-        Additional parameters: 
-        update_dict_prompt: prompt_name: file name of user message prompt to update reaction conditions
-        json_file: saved response file for image_name using adaptive_get_data
-
-        """
-        response_path = os.path.join(json_directory, f"{json_file}_updated.json")
-        token_path = os.path.join(f"{json_directory}/token_count/", f"{json_file}_updated_tokencount.json")
-
-        # Read user message prompt
-        user_prompt_path = os.path.join(prompt_directory, f"{update_dict_prompt}.txt")
-        with open(user_prompt_path, "r") as file:
-            user_message = file.read().strip()
-
-        # Read json file    def encode_image(self, image_path): 
-        with open(image_path, "rb") as image_file:
-            return base64.b64encode(image_file.read()).decode('utf-8')
     
     def reformat_json(self, 
                       input_file:str):
@@ -396,39 +379,38 @@ class RxnOptDataProcessor:
             print(f"Error during API request: {e}")
 
     # EDIT: Handle escape strings in smiles otherwise will have errors
-    def extract_smiles(self, 
-                       image_name:str, 
-                       image_directory:str, 
-                       json_directory:str):
-        """
-        Use RxnScribe to get reactants and product SMILES
-        """
-        ckpt_path = hf_hub_download("yujieq/RxnScribe", "pix2seq_reaction_full.ckpt")
-        model = RxnScribe(ckpt_path, device=torch.device('cpu'))
-        image_file = os.path.join(image_directory, f"{image_name}.png")
-        reactions = []
+    # def extract_smiles(self, 
+    #                    image_name:str, 
+    #                    image_directory:str, 
+    #                    json_directory:str):
+    #     """
+    #     Use RxnScribe to get reactants and product SMILES
+    #     """
+    #     ckpt_path = hf_hub_download("yujieq/RxnScribe", "pix2seq_reaction_full.ckpt")
+    #     image_file = os.path.join(image_directory, f"{image_name}.png")
+    #     reactions = []
 
-        # Extract reactant and product SMILES
-        if self.is_reaction_diagram(image_file):   
-            try: 
-                predictions = model.predict_image_file(image_file, molscribe=True, ocr=False)
+    #     # Extract reactant and product SMILES
+    #     if self.is_reaction_diagram(image_file):   
+    #         try: 
+    #             predictions = self.model.predict_image_file(image_file, molscribe=True, ocr=False)
             
-                for prediction in predictions: 
-                    #reactant_smiles = [reactant['smiles'] for reactant in prediction.get('reactants', [])]
-                    #product_smiles = [product['smiles'] for product in prediction.get('products', [])]
-                    reactant_smiles = [reactant.get('smiles') for reactant in prediction.get('reactants', []) if 'smiles' in reactant]
-                    product_smiles = [product.get('smiles') for product in prediction.get('products', []) if 'smiles' in product]
-                    reactions.append({'reactants': reactant_smiles, 'products': product_smiles})
+    #             for prediction in predictions: 
+    #                 #reactant_smiles = [reactant['smiles'] for reactant in prediction.get('reactants', [])]
+    #                 #product_smiles = [product['smiles'] for product in prediction.get('products', [])]
+    #                 reactant_smiles = [reactant.get('smiles') for reactant in prediction.get('reactants', []) if 'smiles' in reactant]
+    #                 product_smiles = [product.get('smiles') for product in prediction.get('products', []) if 'smiles' in product]
+    #                 reactions.append({'reactants': reactant_smiles, 'products': product_smiles})
             
-            except Exception as e: 
-                reactions.append({'reactants': ["N.R"], 'products': ["N.R"]})
+    #         except Exception as e: 
+    #             reactions.append({'reactants': ["N.R"], 'products': ["N.R"]})
             
-            # Save SMILES list  
-            smiles_path = os.path.join(json_directory, f"{image_name}_rxnsmiles.json")
-            with open(smiles_path, 'w') as smiles_file: 
-                json.dump(reactions, smiles_file)
-        else:
-            print(f"{image_name} is not a reaction diagram.")
+    #         # Save SMILES list  
+    #         smiles_path = os.path.join(json_directory, f"{image_name}_rxnsmiles.json")
+    #         with open(smiles_path, 'w') as smiles_file: 
+    #             json.dump(reactions, smiles_file)
+    #     else:
+    #         print(f"{image_name} is not a reaction diagram.")
     
     # EDIT: Handle NR SMILES dictionaries
     def update_dict_with_smiles(self, 
@@ -487,7 +469,7 @@ class RxnOptDataProcessor:
             if (file.endswith(".png")):
                 image_name = file.removesuffix('.png')
                 print(f"processing {image_name}")
-                self.extract_smiles(image_name, json_directory)
+                # self.extract_smiles(image_name, json_directory)
                 self.adaptive_get_data(prompt_directory, get_data_prompt, image_name, cropped_image_directory, json_directory)
         
         # Update reaction dictionary with footnote information 
@@ -507,7 +489,7 @@ class RxnOptDataProcessor:
 
         print("All reaction dictionaries are extracted and saved - hopefully")
     
-    def construct_intial_prompt(opt_run_keys: list, output_dir: str):
+    def construct_intial_prompt(self, opt_run_keys: list, output_dir: str):
         """
         Creates a reaction optimization prompt with opt_run_keys key-value pairs embedded into it
         Assume that <INSERT_HERE> is the marker for inserting keys
