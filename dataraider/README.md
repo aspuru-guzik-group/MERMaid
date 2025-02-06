@@ -28,9 +28,11 @@ Once installed, import and use:
 ```
 from mermaid.dataraider import tables_figures_to_json
 keys = [INSERT KEYS HERE]
+new_keys = {NEW_KEY1 : NEW_TEXT1, NEW_KEY2 : NEW_TEXT2, ...}
 input_dir = INSERT HERE
-outpur_dir = INSERT HERE
-tables_figures_to_json(keys=keys, input_dir=input_dir, output_dir=output_dir)
+output_dir = INSERT HERE
+api_key = INSERT HERE
+tables_figures_to_json(keys=keys, new_keys=new_keys, input_dir=input_dir, output_dir=output_dir, api_key=api_key)
 ```
 
 Output will be in a JSON file of the following form:
