@@ -3,12 +3,9 @@ You will receive several images. Your goal is to extract and structure detailed 
 Your task is to generate a JSON object structured as follows:
 
 Optimization Runs Dictionary: 
-This is a dictionary of dictionaries, where each entry represents an optimization run. For each run, begin by using the standard conditions. You MUST modify the conditions where specific changes are indicated in each entry, REPLACING with the correct conditions. Each run should contain the following key-value pairs: <Insert key-value pairs here> 
-
-Each run should contain the following key-value pairs:
+This is a dictionary of dictionaries, where each entry represents an optimization run. For each run, begin by using the standard conditions. You MUST modify the conditions where specific changes are indicated in each entry, REPLACING with the correct conditions. Each run should contain the following key-value pairs:
 
 <INSERT_HERE>
-
 
 Footnotes Dictionary: 
 This dictionary stores footnotes, where each superscript notation is a key, and its full explanation is the value. For missing explanation, put N.R.

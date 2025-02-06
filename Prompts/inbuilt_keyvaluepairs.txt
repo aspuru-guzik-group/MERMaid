@@ -6,7 +6,7 @@
 
 "Catalyst": Specify ALL catalysts. You MUST use chemical (quantity with UNITS) format, where quantity can refer to amounts, equivalents (eq., equiv.), and concentrations, whichever are present. You MUST assume quantitative values and UNITS from standard conditions when the catalyst changes but explicit quantitative values are not provided.
 
-"Ligand:" Specify ALL Ligands. You MUST use chemical (quantity with UNITS) format, where quantity can refer to amounts, equivalents (eq., equiv.), and concentrations, whichever are present. 
+"Ligand": Specify ALL Ligands. You MUST use chemical (quantity with UNITS) format, where quantity can refer to amounts, equivalents (eq., equiv.), and concentrations, whichever are present. 
 
 "Anode": Anode material (positive end). Use abbreviations if available. NOTE: the anode and cathode may be separated by delimiters such as |, /, //, or ||, with or without space. the anode usually appears before the delimiter. Pay particular attention to SEPARATE before including as anode or cathode. There MUST be NO delimiters in the final output. If no polarity indications or delimiters are used, assume the material is used for both the anode and cathode.
 
