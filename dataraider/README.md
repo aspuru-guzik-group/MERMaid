@@ -1,19 +1,19 @@
-# TF-to-JSON
+# DataRaider
 
-TF-to-JSON is a module of MERMES2.0 that extracts reaction information from reaction diagrams
+DataRaider is a module of MERMES2.0 that extracts reaction information from tables and figures
 
 ## Instalation
 
 Create a conda envrionment if not created already
 ```
-conda create -n mermes python=3.10
-conda activate mermes
+conda create -n mermaid python=3.10
+conda activate mermaid
 ```
 
 Install required packages
 
 ```
-cd MERMES2.0/TF_to_json
+cd mermaid/dataraider
 pip install -r requirements.txt
 sudo apt install libjpeg-dev zlib1g-dev # for RxnScribe
 ```
@@ -26,11 +26,11 @@ Note that installation of RxnScribe is also needed, follow installation instruct
 Once installed, import and use:
 
 ```
-from mermaid.dataraider import tf_to_json
-keys = INSERT KEYS HERE
+from mermaid.dataraider import tables_figures_to_json
+keys = [INSERT KEYS HERE]
 input_dir = INSERT HERE
 outpur_dir = INSERT HERE
-table_figures_to_json(keys=keys, input_dir=input_dir, output_dir=output_dir)
+tables_figures_to_json(keys=keys, input_dir=input_dir, output_dir=output_dir)
 ```
 
 Output will be in a JSON file of the following form:
