@@ -4,7 +4,7 @@ from huggingface_hub import hf_hub_download
 
 ckpt_path = hf_hub_download("yujieq/RxnScribe", "pix2seq_reaction_full.ckpt")
 
-def tf_to_json(keys: list, input_dir: str, output_dir: str, api_key: str):
+def tables_figures_to_json(keys: list, input_dir: str, output_dir: str, api_key: str):
     """
     Performs reaction optimization to retrieve the reaction optimization dictionary, SMILES and reaction conditions
     Args:
@@ -32,7 +32,11 @@ def tf_to_json(keys: list, input_dir: str, output_dir: str, api_key: str):
                                          output_dir, output_dir)
 
 if __name__ == "__main__":
-    tf_to_json(["Entry", "Reactants"], "../test/", "./")
+    keys = ["Entry", "Reactants"]
+    input_dir = "directory/to/input/"
+    output_dir = "directory/to/output/"
+    tables_figures_to_json(["Entry", "Reactants"], "../test/", "./")
+    # tf_to_json(["Entry", "Reactants"], "../test/", "./")
 
 
 # def main():

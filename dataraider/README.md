@@ -26,11 +26,11 @@ Note that installation of RxnScribe is also needed, follow installation instruct
 Once installed, import and use:
 
 ```
-From TF_to_json import tf_to_json
+from mermaid.dataraider import tf_to_json
 keys = INSERT KEYS HERE
 input_dir = INSERT HERE
 outpur_dir = INSERT HERE
-tf_to_json(keys=keys, input_dir=input_dir, output_dir=output_dir)
+table_figures_to_json(keys=keys, input_dir=input_dir, output_dir=output_dir)
 ```
 
 Output will be in a JSON file of the following form:
