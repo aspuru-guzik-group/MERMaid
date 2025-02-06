@@ -11,6 +11,7 @@ import requests
 import json
 import json
 import glob
+import pkgutil
 import pubchempy as pcp
 import regex as re
 
@@ -470,48 +471,48 @@ class RxnOptDataProcessor:
 
         print("All reaction dictionaries are extracted and saved - hopefully")
     
-    def construct_intial_prompt(self, opt_run_keys: list, output_dir: str):
+    def construct_intial_prompt(self, opt_run_keys: list, new_run_keys: dict, output_dir: str):
         """
         Creates a reaction optimization prompt with opt_run_keys key-value pairs embedded into it
         Assume that <INSERT_HERE> is the marker for inserting keys
         """
         
         marker = "<INSERT_HERE>"
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        inbuilt_key_pair_file_path = os.path.join(script_dir, "../Prompts/inbuilt_keyvaluepairs.txt")
-        base_prompt_file_path = os.path.join(script_dir, "../Prompts/base_prompt.txt")
+        # inbuilt_key_pair_file = pkgutil.get_data("mermaid", "Prompts/inbuilt_keyvaluepairs.txt")  # Adjust the path
+        # inbuilt_key_pair_file_contents = inbuilt_key_pair_file.decode("utf-8")  # Convert bytes to string
+        
+        
+        package_dir = os.path.dirname(__file__)
+        inbuilt_key_pair_file_path = os.path.join(package_dir, "../Prompts/inbuilt_keyvaluepairs.txt")
+        inbuilt_key_pair_file_contents = open(inbuilt_key_pair_file_path, "r")
         
         # get the list of optimization run dictionary key value pairs
-        inbuilt_key_pair_file = open(inbuilt_key_pair_file_path, "r")
-        opt_run_list = []
-        for line in inbuilt_key_pair_file:
+        # add the newly defined keys first
+        opt_run_list = ["\"" + key + "\": " + new_run_keys[key] + "\n" for key in new_run_keys]
+        for line in inbuilt_key_pair_file_contents:
             if len(line) == 0:
                 continue
             key_pattern = r'"([^"]*)"'
             possible_keys = re.findall(key_pattern, line)
             if len(possible_keys) == 0:
                 continue
-            key = possible_keys[0]
-            if key not in opt_run_keys:
+            if all(key not in opt_run_keys for key in possible_keys):
                 continue
             opt_run_list.append(line)
-            # append the empty string so it is easier to create new prompt file later
-            opt_run_list.append("")
-        inbuilt_key_pair_file.close()
         
-        new_prompt_file_name = "rxn_opt_prompt"
-        base_prompt_file = open(base_prompt_file_path, "r")
-        new_prompt_file = open(output_dir + new_prompt_file_name + ".txt", "w")
         
-        for line in base_prompt_file:
+        # base_prompt_file = pkgutil.get_data("mermaid", "Prompts/base_prompt.txt")  # Adjust the path
+        # base_prompt_file_contents = base_prompt_file.decode("utf-8")  # Convert bytes to string
+        
+        base_prompt_file_path = os.path.join(package_dir, "../Prompts/base_prompt.txt")
+        base_prompt_file_contents = open(base_prompt_file_path, "r")
+        new_prompt_file_contents = []
+        for line in base_prompt_file_contents:
             if marker not in line:
-                new_prompt_file.write(line)
+                new_prompt_file_contents.append(line)
             else:
-                new_prompt_file.write("\n".join(opt_run_list))
-            
-        new_prompt_file.close()
-        base_prompt_file.close()
-        return new_prompt_file_name
+                new_prompt_file_contents.append("\n".join(opt_run_list))
+        return new_prompt_file_contents, "rxn_opt_prompt"
 
 
 
