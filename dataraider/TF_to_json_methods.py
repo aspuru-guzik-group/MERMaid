@@ -1,5 +1,5 @@
 import torch
-# from rxnscribe import RxnScribe #need separate installation from https://github.com/thomas0809/RxnScribe 
+from rxnscribe import RxnScribe #need separate installation from https://github.com/thomas0809/RxnScribe 
 from huggingface_hub import hf_hub_download
 import cv2
 import math
@@ -12,9 +12,9 @@ import json
 import json
 import glob
 import pkgutil
-import pubchempy as pcp
 import regex as re
-
+import postprocess as pp
+import shutil
 
 class RxnOptDataProcessor:
     """
@@ -23,14 +23,26 @@ class RxnOptDataProcessor:
     def __init__(self, 
                  ckpt_path:str, 
                  api_key:str,
+                 vlm_model = "gpt-4o-2024-08-06",
                  device='cpu'):
         self.api_key = api_key
-        # self.model = RxnScribe(ckpt_path, device=torch.device(device)) # initialize RxnScribe to get SMILES 
+        self.vlm_model = vlm_model
+        self.model = RxnScribe(ckpt_path, device=torch.device(device)) # initialize RxnScribe to get SMILES 
+    
+    
+    #TODO
+    def is_reaction_diagram(self, 
+                            image_name:str, 
+                            image_directory:str):
+        """
+        filters to see if image contains reaction information 
+        """
+        pass
+    
     
     def crop_image(self, 
                    image_name:str, 
                    image_directory:str, 
-                   cropped_image_directory:str, 
                    min_segment_height=120): 
         """
         Adaptively crop a given figure into smaller subfigures before 
@@ -39,9 +51,11 @@ class RxnOptDataProcessor:
         parameters: 
         image_name: base image name
         image_directory: root directory where original images are saved 
-        cropped_image_directory: output directory to save cropped images 
         min_segment_height: minimum height of each segmented subfigure
         """
+        cropped_image_directory = os.path.join(image_directory, "cropped_images") #create temporary directory to save cropped images
+        os.makedirs(cropped_image_directory, exist_ok=True)
+        
         def find_split_line(image, 
                             threshold, 
                             region_start, 
@@ -157,6 +171,7 @@ class RxnOptDataProcessor:
             print(str(e))
             cv2.imwrite(os.path.join(cropped_image_directory, f"{image_name}_original.png"), image)
 
+    
     def batch_crop_image(self, 
                          input_directory:str, 
                          cropped_image_directory:str, 
@@ -170,9 +185,8 @@ class RxnOptDataProcessor:
         for file in os.listdir(input_directory):
             if (file.endswith('.png')):
                 image_name = file.removesuffix('.png')
-                print(f"processing {image_name}")
                 self.crop_image(image_name, input_directory, cropped_image_directory, min_segment_height)
-        print(f'All images cropped and saved in {cropped_image_directory}')
+    
     
     def reformat_json(self, 
                       input_file:str):
@@ -190,6 +204,7 @@ class RxnOptDataProcessor:
         with open(input_file, 'w') as file:
             file.write(formatted_json)
 
+    
     def adaptive_get_data(self, 
                           prompt_directory:str, 
                           get_data_prompt:str, 
@@ -208,7 +223,7 @@ class RxnOptDataProcessor:
 
         """
         # Get all subfigures files 
-        image_paths = glob.glob(os.path.join(image_directory, f"{image_name}_*.png"))
+        image_paths = glob.glob(os.path.join(image_directory, f"cropped_images/{image_name}_*.png"))
         if not image_paths:
             print(f"No subimages found for {image_name}")
             return
@@ -220,10 +235,9 @@ class RxnOptDataProcessor:
         with open(user_prompt_path, "r") as file:
             user_message = file.read().strip()
 
-        # Get image captions and response file paths
+        # Get response file paths
         image_caption_path = os.path.join(image_directory, f"{image_name}.txt")
-        response_path = os.path.join(json_directory, f"{image_name}_response.json")
-        token_path = os.path.join(f"{json_directory}/token_count/", f"{image_name}_tokencount.json") # token count is saved in a subfolder in json_directory
+        response_path = os.path.join(json_directory, f"{image_name}.json")
 
         # Create base message
         messages = [{
@@ -242,8 +256,6 @@ class RxnOptDataProcessor:
             with open(image_caption_path, "r") as file:
                 image_caption = file.read().strip()
             messages[0]["content"].append({"type": "text","text": image_caption})
-        else: 
-            print('No caption found for ' + image_caption_path)
 
         # API request headers and payload
         headers = {
@@ -252,7 +264,7 @@ class RxnOptDataProcessor:
         }
 
         payload = {
-            "model": "gpt-4o-2024-08-06",
+            "model": self.vlm_model,
             "messages": messages,
             "max_tokens": 4000
         }
@@ -262,21 +274,16 @@ class RxnOptDataProcessor:
             response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
             response.raise_for_status()  # Raise error if the request failed
             reaction_data = response.json()['choices'][0]['message']['content']
-            token_count = response.json()['usage']
 
             # Save responses
             with open(response_path, 'w') as json_file:
                 json.dump(reaction_data, json_file)
-            print(f"Reaction data saved to {response_path}!")
-
-            with open(token_path, 'w') as token_file: 
-                json.dump(token_count, token_file)
-            print(f"Token count saved to {response_path}!")
+            print(f"Reaction dictionary extracted!")
 
             # Clean response: 
             try: 
                 self.reformat_json(response_path)
-                print(f"{response_path}: Reaction data cleaned.")
+                print(f"{response_path}: Reaction data cleaned!")
 
             except Exception as e: 
                 print(f"{response_path}: Reaction data not cleaned. Error: {e}")
@@ -284,25 +291,27 @@ class RxnOptDataProcessor:
         except requests.exceptions.RequestException as e:
             print(f"Error during API request: {e}")
 
-    def update_dict(self, 
+    
+    def update_dict_with_footnotes(self, 
                     prompt_directory:str, 
                     update_dict_prompt:str, 
-                    json_file:str, 
+                    image_name:str, 
                     json_directory:str):
-        
+        """
+        updates the reaction dictionary with information from the footnote dictionary
+        """
         # Get user prompt file
         user_prompt_path = os.path.join(prompt_directory, f"{update_dict_prompt}.txt")
         with open(user_prompt_path, "r") as file:
             user_message = file.read().strip()
         
         # Get Json file
-        json_path = os.path.join(json_directory, f"{json_file}.json")
+        json_path = os.path.join(json_directory, f"{image_name}.json")
         with open(json_path, "r") as file2:
             json_dict = file2.read().strip()
 
-        # Get response paths
-        response_path = os.path.join(json_directory, f"{json_file}_updated.json")
-        token_path = os.path.join(f"{json_directory}/token_count/", f"{json_file}_updated_tokencount.json")
+        # Replace existing json file with updated json file
+        response_path = json_path
 
         # Construct message
         messages = [
@@ -328,7 +337,7 @@ class RxnOptDataProcessor:
         }
 
         payload = {
-            "model": "gpt-4o-2024-08-06",
+            "model": self.vlm_model,
             "messages": messages,
             "max_tokens": 4000
         }
@@ -338,88 +347,58 @@ class RxnOptDataProcessor:
             response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
             response.raise_for_status()  # Raise error if the request failed
             reaction_data = response.json()['choices'][0]['message']['content']
-            token_count = response.json()['usage']
 
             # Save response
             with open(response_path, 'w') as json_file:
                 json.dump(reaction_data, json_file)
+            print(f"Reaction dictionary has been updated with footnote description!")
 
-            print(f"Reaction data saved to {response_path}!")
-
-            with open(token_path,'w') as token_file:
-               json.dump(token_count, token_file)
-
-            print(f"Token count saved to {token_path}!")
-            
             # Clean response
             try:
                 self.reformat_json(response_path)
-                print(f"{response_path}: Reaction data cleaned.")
+                print(f"{response_path}: Updated reaction dictionary has been cleaned.")
             except Exception as e:
-                print(f"{response_path}: Reaction data not cleaned.Error: {e}")
+                print(f"{response_path}: Updated reaction dictionary not cleaned.Error: {e}")
         
         except requests.exceptions.RequestException as e:
             print(f"Error during API request: {e}")
 
-    # EDIT: Handle escape strings in smiles otherwise will have errors
-    # def extract_smiles(self, 
-    #                    image_name:str, 
-    #                    image_directory:str, 
-    #                    json_directory:str):
-    #     """
-    #     Use RxnScribe to get reactants and product SMILES
-    #     """
-    #     image_file = os.path.join(image_directory, f"{image_name}.png")
-    #     reactions = []
-
-    #     # Extract reactant and product SMILES
-    #     if self.is_reaction_diagram(image_file):   
-    #         try: 
-    #             predictions = self.model.predict_image_file(image_file, molscribe=True, ocr=False)
-            
-    #             for prediction in predictions: 
-    #                 #reactant_smiles = [reactant['smiles'] for reactant in prediction.get('reactants', [])]
-    #                 #product_smiles = [product['smiles'] for product in prediction.get('products', [])]
-    #                 reactant_smiles = [reactant.get('smiles') for reactant in prediction.get('reactants', []) if 'smiles' in reactant]
-    #                 product_smiles = [product.get('smiles') for product in prediction.get('products', []) if 'smiles' in product]
-    #                 reactions.append({'reactants': reactant_smiles, 'products': product_smiles})
-            
-    #         except Exception as e: 
-    #             reactions.append({'reactants': ["N.R"], 'products': ["N.R"]})
-            
-    #         # Save SMILES list  
-    #         smiles_path = os.path.join(json_directory, f"{image_name}_rxnsmiles.json")
-    #         with open(smiles_path, 'w') as smiles_file: 
-    #             json.dump(reactions, smiles_file)
-    #     else:
-    #         print(f"{image_name} is not a reaction diagram.")
     
-    # EDIT: Handle NR SMILES dictionaries
     def update_dict_with_smiles(self, 
-                                image_name:str, 
-                                json_directory:str): 
+                       image_name:str, 
+                       image_directory:str, 
+                       json_directory:str):
         """
-        Combine reaction dictionary with reaction SMILES
+        Use RxnScribe to get reactants and product SMILES and combine reaction dictionary with reaction SMILES
         """
-        # load optimization runs dictionary 
-        dict_path = os.path.join(json_directory, f"{image_name}_response_updated.json")
-        with open(dict_path, "r") as file:
+        image_file = os.path.join(image_directory, f"{image_name}.png")
+        reactions = []
+
+        # Extract reactant and product SMILES
+        try: 
+            predictions = self.model.predict_image_file(image_file, molscribe=True, ocr=False)
+            for prediction in predictions: 
+                reactant_smiles = [reactant.get('smiles') for reactant in prediction.get('reactants', []) if 'smiles' in reactant]
+                product_smiles = [product.get('smiles') for product in prediction.get('products', []) if 'smiles' in product]
+                reactions.append({'reactants': reactant_smiles, 'products': product_smiles})
+        
+        except Exception as e: 
+            reactions.append({'reactants': ["N.R"], 'products': ["N.R"]})
+        
+        #Clean extracted cleaned reaction SMILES 
+        if not reactions or 'NR' in reactions[0].get('reactants', '') or 'NR' in reactions[0].get('products', ''):
+            reactants = 'NR' if not reactions or 'NR' in reactions[0].get('reactants', '') else reactions[0]['reactants']
+            products = 'NR' if not reactions or 'NR' in reactions[0].get('products', '') else reactions[0]['products']
+        else:
+            reactants = reactions[0].get('reactants', 'NR')
+            products = reactions[0].get('products', 'NR')
+
+        # Update reaction dictionary with reaction SMILES 
+        json_path = os.path.join(json_directory, f"{image_name}.json")
+        with open(json_path, 'r') as file: 
             opt_dict = json.load(file)
         opt_data = opt_dict["Optimization Runs"]
 
-        # load reaction smiles list
-        smiles_path = os.path.join(json_directory, f"{image_name}_rxnsmiles.json")
-        with open(smiles_path, "r") as file2: 
-            smiles_list = json.load(file2)
-        
-        if not smiles_list or 'NR' in smiles_list[0].get('reactants', '') or 'NR' in smiles_list[0].get('products', ''):
-            reactants = 'NR' if not smiles_list or 'NR' in smiles_list[0].get('reactants', '') else smiles_list[0]['reactants']
-            products = 'NR' if not smiles_list or 'NR' in smiles_list[0].get('products', '') else smiles_list[0]['products']
-        else:
-            reactants = smiles_list[0].get('reactants', 'NR')
-            products = smiles_list[0].get('products', 'NR')
-
-        # combine and save 
         updated_dict = {
             "SMILES": {
                 "reactants": reactants, 
@@ -428,106 +407,138 @@ class RxnOptDataProcessor:
             "Optimization Runs": opt_data
         }
 
-        output_path = os.path.join(json_directory, f"{image_name}_full_opt_dictionary.json")
+        output_path = os.path.join(json_directory, f"{image_name}.json")
         with open(output_path, 'w') as output_file: 
             json.dump(updated_dict, output_file, indent = 4)
+        print(f'{image_name} reaction dictionary updated with reaction SMILES')
+    
 
-        print (f"Reaction optimization dictionary updated with reaction smiles for {image_name}")
-
-    def batch_process_data(self, 
-                           prompt_directory:str, 
-                           get_data_prompt:str, 
-                           update_dict_prompt:str, 
-                           cropped_image_directory:str, 
-                           json_directory:str, 
-                           image_directory:str): 
+    #TODO (integrate postprocess.py code here)
+    def postprocess_dict(self, 
+                         image_name:str,
+                         json_directory:str):
+        """ 
+        1. converts common chemical names to smiles using pubchem and user-defined dictionary
+        2. unifies format for mixed solvent systems
         """
-        Get the full reaction optimization dictionary for all images - reaction SMILES + reaction conditions        
-        Should be able to streamline code further
+        pass
+    
+    
+    def process_indiv_images(self,
+                            image_name:str,
+                            image_directory:str,
+                            prompt_directory:str,
+                            get_data_prompt:str,
+                            update_dict_prompt:str,
+                            json_directory:str, 
+                            min_segment_height:int=120):
+        """ 
+        Process individual images to extract reaction information
+        
         """
-        # Extract reaction dictionary
-        print('Extracting reaction dictionaries and reaction SMILES!')
+        print(f'Extracting reaction information from {image_name}!')
+        print('Cropping image...')
+        self.crop_image(image_name, image_directory, min_segment_height)
+        print('Images cropped. Passing subimages through DataRaider')          
+        self.adaptive_get_data(prompt_directory, get_data_prompt, image_name, image_directory, json_directory)
+        print('Raw reaction dictionary extracted. Updating with footnote information...')
+        self.update_dict_with_footnotes(prompt_directory, update_dict_prompt, image_name, json_directory)
+        print('Footnote information updated. Extracting reaction SMILES...')
+        self.update_dict_with_smiles(image_name, image_directory, json_directory)
+        print('Reaction SMILES extracted. Postprocessing reaction dictionary...')
+        self.postprocess_dict(image_name, json_directory)
+        print(f'{image_name} processed!')
+        print('-----------------------------------')
+    
+    
+    def batch_process_images(self,
+                             image_directory:str,
+                             prompt_directory: str, 
+                             get_data_prompt:str, 
+                             update_dict_prompt:str,
+                             json_directory:str
+                             ): 
+        """
+        Batch process images to extract reaction information
+        """
         for file in os.listdir(image_directory):
             if (file.endswith(".png")):
                 image_name = file.removesuffix('.png')
-                print(f"processing {image_name}")
-                # self.extract_smiles(image_name, json_directory)
-                self.adaptive_get_data(prompt_directory, get_data_prompt, image_name, cropped_image_directory, json_directory)
-        
-        # Update reaction dictionary with footnote information 
-        print("Updating reaction dictionaries with footnote information!")
-        for file in os.listdir(json_directory):
-            if (file.endswith(".json")):
-                json_name = file.removesuffix('.json')
-                print(f"updating {json_name}")
-                self.update_dict(prompt_directory, update_dict_prompt, json_name, json_directory)
-
-        # Update reaction dictionary with reaction SMILES
-        print("Updating reaction dictionaries with reaction SMILES!") 
-        for file in os.listdir(json_directory): 
-            if (file.endswith("_response_updated.json")):
-                file_name = file.removesuffix("_response_updated.json")
-                self.update_dict_with_smiles(self, file_name, json_directory)
-
-        print("All reaction dictionaries are extracted and saved - hopefully")
+                self.process_indiv_images(image_name, image_directory, prompt_directory, get_data_prompt, update_dict_prompt, json_directory)
+        print("DataRaider -- Mission Accomplished. All images processed!")
     
-    def construct_intial_prompt(self, opt_run_keys: list, new_run_keys: dict, output_dir: str):
+    
+    def construct_initial_prompt(self, 
+                                 opt_run_keys: list, 
+                                 new_run_keys: dict):
         """
-        Creates a reaction optimization prompt with opt_run_keys key-value pairs embedded into it
-        Assume that <INSERT_HERE> is the marker for inserting keys
+        Creates a get_data_prompt with opt_run_keys key-value pairs embedded into it
+        Uses <INSERT_HERE> as the location tag for inserting keys
+        Saves the new prompt to a file named get_data_prompt.txt inside the Prompts directory.
         """
         
         marker = "<INSERT_HERE>"
-        # inbuilt_key_pair_file = pkgutil.get_data("mermaid", "Prompts/inbuilt_keyvaluepairs.txt")  # Adjust the path
-        # inbuilt_key_pair_file_contents = inbuilt_key_pair_file.decode("utf-8")  # Convert bytes to string
-        
-        
         package_dir = os.path.dirname(__file__)
+
+        # retrieve all inbuilt keys
         inbuilt_key_pair_file_path = os.path.join(package_dir, "../Prompts/inbuilt_keyvaluepairs.txt")
-        inbuilt_key_pair_file_contents = open(inbuilt_key_pair_file_path, "r")
+        with open(inbuilt_key_pair_file_path, "r") as inbuilt_file:
+            inbuilt_key_pair_file_contents = inbuilt_file.readlines()
         
         # get the list of optimization run dictionary key value pairs
         # add the newly defined keys first
-        opt_run_list = ["\"" + key + "\": " + new_run_keys[key] + "\n" for key in new_run_keys]
+        # opt_run_list = ["\"" + key + "\": " + new_run_keys[key] + "\n" for key in new_run_keys]
+        opt_run_list = [f'"{key}": "{new_run_keys[key]}"\n' for key in new_run_keys]
         for line in inbuilt_key_pair_file_contents:
-            if len(line) == 0:
+            if not line.strip():
                 continue
             key_pattern = r'"([^"]*)"'
             possible_keys = re.findall(key_pattern, line)
-            if len(possible_keys) == 0:
+            if not possible_keys:
                 continue
             if all(key not in opt_run_keys for key in possible_keys):
                 continue
             opt_run_list.append(line)
         
-        
-        # base_prompt_file = pkgutil.get_data("mermaid", "Prompts/base_prompt.txt")  # Adjust the path
-        # base_prompt_file_contents = base_prompt_file.decode("utf-8")  # Convert bytes to string
-        
         base_prompt_file_path = os.path.join(package_dir, "../Prompts/base_prompt.txt")
-        base_prompt_file_contents = open(base_prompt_file_path, "r")
+        with open(base_prompt_file_path, "r") as base_prompt_file:
+            base_prompt_file_contents = base_prompt_file.readlines()
+
         new_prompt_file_contents = []
         for line in base_prompt_file_contents:
-            if marker not in line:
-                new_prompt_file_contents.append(line)
-            else:
-                new_prompt_file_contents.append("\n".join(opt_run_list))
-        return new_prompt_file_contents, "rxn_opt_prompt"
-
-
-
-class GraphJson(RxnOptDataProcessor):
-
-    def pubchem_common_name_to_smiles(self, 
-                                      common_name: str): 
-        try: 
-            c = pcp.get_cids(common_name, 'name')
-            if len(c) ==1: 
-                compound = pcp.Compound.from_cid(c[0])
-                c_smiles = compound.isomeric_smiles
-                return c_smiles, common_name
+            if marker in line: 
+                new_prompt_file_contents.extend(opt_run_list)
             else: 
-                return None, common_name
-        except: 
-            return None, common_name
+                new_prompt_file_contents.append(line)
 
+            # if marker not in line:
+            #     new_prompt_file_contents.append(line)
+            # else:
+            #     new_prompt_file_contents.append("\n".join(opt_run_list))
+        
+        # saves the defined prompt as get_data_prompt
+        new_prompt_file_path = os.path.join(package_dir, "../Prompts/get_data_prompt.txt")
+        with open(new_prompt_file_path, "w") as new_prompt_file:
+            new_prompt_file.writelines(new_prompt_file_contents)
+        print(f"Prompt file created with custom keys!")
+
+
+    def clear_temp_files(self, 
+                         prompt_directory:str, 
+                         image_directory:str):
+        """
+        Removes temporary files (cropped images)
+        """
+        cropped_image_directory = os.path.join(image_directory, "cropped_images")
+        if os.path.exists(cropped_image_directory) and os.path.isdir(cropped_image_directory):
+            shutil.rmtree(cropped_image_directory)
+            print("Temporary files and 'cropped_images' directory removed!")
+        else:
+            print("No temporary files to remove!")
+
+        custom_prompt_path = os.path.join(prompt_directory, "get_data_prompt.txt")
+        if os.path.exists(custom_prompt_path):
+            os.remove(custom_prompt_path)
+            print("Custom prompt file removed!")
+        else:
+            print("No custom prompt file to remove!")
