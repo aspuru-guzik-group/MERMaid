@@ -1,10 +1,13 @@
 ## MERMaid (Multimodal aid for Reaction Mining)
 
-<img src="./Examples/MERMaid-overview.jpg" alt="Overview" width="800">
+<img src="./Examples/MERMaid-overview.jpg" alt="Overview" width="600">
 
-home/sleong/MERMES2.0/Examples/MERMaid-overview.jpg
-
-Note: 
+## Note: 
+* MERMaid is an end-to-end knowledge ingestion pipeline to automatically convert disparate information conveyed through figures, schemes, and tables across various PDFs into a coherent and machine-actionable knowledge graph. It integrates three seqeuntial modules: 
+    * VisualHeist for table and figure segmentation from PDFs 
+    * DataRaider for multimodal analysis to extract relevant information as structured reaction schema
+    * KGWizard for automated knowledge graph construction
+* You can run MERMaid directly or use each module as a standalone tool for its specific functionality.
 * MERMaid is integrated with the OpenAI provider at present. We will extend MERMaid to support other providers and open-source VLMs in future updates. 
 * Please note that a GPU is required to run VisualHeist locally. 
 
@@ -12,11 +15,14 @@ Note:
 
 ### Option 1 (quick installation) 
 Directly install the package to your pip environment. 
-```
+
 For full MERMaid pipeline: 
+```
 pip install git+https://github.com/aspuru-guzik-group/MERMaid/git
+```
 
 For individual modules: 
+```
 pip install XXXXXXXXXXXXXXXX
 ```
 ### Option 2 (for development purposes)
@@ -41,7 +47,7 @@ The main command to launch and run MERMaid is:
 ```
 python -m mermaid.main
 ```
-All intermediate files from each module will be saved in your stipulated output directory. 
+All intermediate files from each module will be saved in your stipulated output directory by default.
 
 ### 2.3 Running individual modules 
 #### 2.3.1 VisualHeist for image segmentation from scientific PDF documents 
