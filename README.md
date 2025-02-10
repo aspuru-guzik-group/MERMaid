@@ -1,6 +1,6 @@
 ## MERMaid (Multimodal aid for Reaction Mining)
 
-<img src="./Examples/MERMaid-overview.jpg" alt="Overview" width="300">
+<img src="./Examples/MERMaid-overview.jpg" alt="Overview" width="800">
 
 home/sleong/MERMES2.0/Examples/MERMaid-overview.jpg
 
