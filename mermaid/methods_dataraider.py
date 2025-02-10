@@ -411,7 +411,6 @@ class RxnOptDataProcessor:
         print(f'{image_name} reaction dictionary updated with reaction SMILES')
     
 
-    #TODO (integrate postprocess.py code here)
     def postprocess_dict(self, 
                          image_name:str,
                          json_directory:str):
@@ -419,7 +418,7 @@ class RxnOptDataProcessor:
         1. converts common chemical names to smiles using pubchem and user-defined dictionary
         2. unifies format for mixed solvent systems
         """
-        pass
+        pp._process_raw_dict(image_name, json_directory, keys=pp.KEYS, common_names=pp.COMMON_NAMES)
     
     
     def process_indiv_images(self,
@@ -445,7 +444,7 @@ class RxnOptDataProcessor:
         self.update_dict_with_smiles(image_name, image_directory, json_directory)
         print('Reaction SMILES extracted. Postprocessing reaction dictionary...')
         self.postprocess_dict(image_name, json_directory)
-        print(f'{image_name} processed!')
+        print(f'{image_name} cleaned and saved!')
         print('-----------------------------------')
     
     

@@ -13,7 +13,7 @@ import json
 import glob
 import pkgutil
 import regex as re
-import postprocess as pp
+import mermaid.postprocess as pp
 import shutil
 
 class RxnOptDataProcessor:

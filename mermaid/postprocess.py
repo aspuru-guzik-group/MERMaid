@@ -3,6 +3,32 @@ import re
 import json 
 import os
 
+COMMON_NAMES = {"nBu4NBF4": "Tetrabutylammonium tetrafluoroborate", 
+                "n-Bu4NBF4": "Tetrabutylammonium tetrafluoroborate",
+                "Bu4NBF4": "Tetrabutylammonium tetrafluoroborate",
+                "nBu4NCl": "Tetrabutylammonium chloride", 
+                "n-Bu4NCl": "Tetrabutylammonium chloride",
+                "Bu4NCl": "Tetrabutylammonium chloride", 
+                "TBAC": "Tetrabutylammonium chloride",
+                "nBu4NPF6": "Tetrabutylammonium hexafluorophosphate",
+                "n-Bu4NPF6": "Tetrabutylammonium hexafluorophosphate",
+                "nBu4NPF6": "Tetrabutylammonium hexafluorophosphate",
+                "nBu4NI": "Tetrabutylammonium iodide",
+                "n-Bu4NI": "Tetrabutylammonium iodide",
+                "Bu4NI": "Tetrabutylammonium iodide",
+                "nBu4NClO4": "Tetrabutylammonium perchlorate",
+                "n-Bu4NClO4": "Tetrabutylammonium perchlorate",
+                "Bu4NClO4": "Tetrabutylammonium perchlorate", 
+                "TBAB": "Tetrabutylammonium bromide", 
+                "n-Bu4NBr": "Tetrabutylammonium bromide", 
+                "nBu4NBr": "Tetrabutylammonium bromide", 
+                "Bu4NBr": "Tetrabutylammonium bromide", 
+                "IPA": "2-Propanol",
+                "DCM": "Dichloromethane"} 
+
+KEYS =  ['Catalyst', 'Ligand', 'Solvents', 'Chemicals', 'Additives', 'Electrolytes']
+
+
 def split_chemicals(value:str):
     components = [comp.strip() for comp in value.split(',')]
     result = []
@@ -13,9 +39,7 @@ def split_chemicals(value:str):
         if match:
             chemical_name = match.group(1).strip()
             quantity = match.group(2).strip().replace('(', '').replace(')', '').replace('[', '').replace(']', '') if match.group(2) else None
-        
             result.append((chemical_name, quantity))
-        
     return result
 
 
@@ -24,27 +48,35 @@ def load_json(file_path:str):
         return json.load(file)
 
 
-def pubchem_to_smiles(chemical: str): 
+def pubchem_to_smiles(chemical: str, 
+                      max_retries:int=1): 
     """
-    Helper function to replace a given common name/ chemical formula with the SMILES using Pubchempy, if found
-    TODO: Should we implement for chemical formula -- usually there's multiple identifiers. 
+    Helper function to replace a given common name/ chemical formula with the SMILES using Pubchempy, if found.
+    NOTE: new feature - implemented a retry mechanism if the chemical is still not in SMILES to minimize random errors during API call.
+
     """
-    try: 
-        c = pcp.get_cids(chemical, 'name')
-        if len(c) != 0: 
-            compound = pcp.Compound.from_cid(c[0])
-            c_smiles = compound.isomeric_smiles
-            return c_smiles
-    except:
-        pass
-    try: 
-        c = pcp.get_compounds(chemical, 'formula')
-        if len(c) != 0:
-            c_smiles = c[0].isomeric_smiles
-            return c_smiles
-    except:
-        pass
+    def get_smiles(chemical):
+        try: 
+            c = pcp.get_cids(chemical, 'name')
+            if len(c) != 0: 
+                compound = pcp.Compound.from_cid(c[0])
+                c_smiles = compound.isomeric_smiles
+                return c_smiles
+        except:
+            pass
+        try: 
+            c = pcp.get_compounds(chemical, 'formula')
+            if len(c) != 0:
+                c_smiles = c[0].isomeric_smiles
+                return c_smiles
+        except:
+            pass
+        return None
     
+    for _ in range(max_retries + 1):  
+        smiles = get_smiles(chemical) 
+        if smiles:
+            return smiles
     return chemical
 
 
@@ -84,9 +116,11 @@ def _split_chemical(value: str, common_names: dict):
 def _process_mixed_chemicals(common_names:dict, chemicals:str):
     """
     Helper function to resolve mixed chemical systems.
+    Note: cannot tackle delimiter - because it will mess up names like n-Bu4NBr or 1,2-DCE
     """
-    if ":" in chemicals or "/" in chemicals: 
-        delimiter = ":" if ":" in chemicals else "/"
+    if ":" in chemicals or "/" in chemicals or "–" in chemicals:
+        chemicals = re.sub(r"[:/–]", ":", chemicals)
+        delimiter = ":"
         components = chemicals.split(delimiter)
         resolved_components = [_replace_chemical(common_names, comp) for comp in components]
         resolved_components = [pubchem_to_smiles(comp) for comp in resolved_components]
@@ -101,7 +135,6 @@ def _replace_chemical(common_names:dict, chemical:str):
     Helper function to replace a chemical with a Pubchem common name using a customized list to cover commonly missed chemicals
     """
     try:
-        chemical = chemical.replace('TBA', 'nBu4N')
         value = common_names[chemical]
         return value
     except:
@@ -125,11 +158,21 @@ def _entity_resolution_entry(entry: dict, keys: list, common_names: dict):
 
 def _entity_resolution_rxn_dict(rxn_dict: dict, keys: list, common_names: dict):
     """
-    Resolves and updates chemical entities for a given reaction dictionary
+    Resolves and updates chemical entities for a given reaction dictionary. 
+    It also consolidates mixed solvent systems into a single string.
     """
     opt_runs = rxn_dict.get("Optimization Runs", {})
     for entry_id, rxn_entry in opt_runs.items():
         rxn_dict["Optimization Runs"][entry_id] = _entity_resolution_entry(rxn_entry, keys, common_names)
+
+        solvents = rxn_entry.get("Solvents", None)
+        if solvents and len(solvents) > 1:
+            names = ":".join(str(s[0]) for s in solvents)
+            values = ":".join(str(s[1]) for s in solvents)
+            values = None if all(v == "None" for v in values.split(":")) else values
+            rxn_entry['Solvents'] = [[names, values]]
+
+        rxn_dict["Optimization Runs"][entry_id] = rxn_entry
     return rxn_dict
 
 
@@ -137,33 +180,15 @@ def _save_json(file_path:str, data:dict):
     with open(file_path, "w") as file:
         json.dump(data, file, indent=4)
 
-COMMON_NAMES = {"nBu4NBF4": "Tetrabutylammonium tetrafluoroborate", 
-                "n-Bu4NBF4": "Tetrabutylammonium tetrafluoroborate",
-                "nBu4NCl": "Tetrabutylammonium chloride", 
-                "n-Bu4NCl": "Tetrabutylammonium chloride",
-                "nBu4NPF6": "Tetrabutylammonium hexafluorophosphate",
-                "n-Bu4NPF6": "Tetrabutylammonium hexafluorophosphate",
-                "nBu4NI": "Tetrabutylammonium iodide",
-                "n-Bu4NI": "Tetrabutylammonium iodide",
-                "nBu4NClO4": "Tetrabutylammonium perchlorate",
-                "n-Bu4NClO4": "Tetrabutylammonium perchlorate"} 
 
-KEYS =  ['Catalyst', 'Ligand', 'Solvents', 'Chemicals', 'Additives', 'Electrolytes']
+def _process_raw_dict(image_name:str, 
+                      json_directory:str, 
+                      keys=KEYS, 
+                      common_names=COMMON_NAMES):
+
+    file_path = os.path.join(json_directory, f"{image_name}.json")
+    rxn_dict = load_json(file_path)
+    resolved_dict = _entity_resolution_rxn_dict(rxn_dict, keys, common_names)
+    _save_json(file_path, resolved_dict)
 
 
-def batch_proc_articles(input_dir, output_dir, keys=KEYS, common_names=COMMON_NAMES):
-    for file in os.listdir(input_dir):
-        try: 
-            file_path = os.path.join(input_dir, file)
-            output_path = os.path.join(output_dir, file)
-            rxn_dict = load_json(file_path)
-            resolved_dict = _entity_resolution_rxn_dict(rxn_dict, keys, common_names)
-            _save_json(output_path, resolved_dict)
-        except Exception as e: 
-            continue
-
-
-input_dir = "../extracted_rxn_dictionaries/organic_synthesis/"
-output_dir = "../extracted_rxn_dictionaries/organic_synthesis_resolved/"
-custom_keys = []
-custom_common_names = {}        
