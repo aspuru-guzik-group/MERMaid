@@ -1,5 +1,5 @@
-import torch
-from rxnscribe import RxnScribe #need separate installation from https://github.com/thomas0809/RxnScribe 
+# import torch
+#from rxnscribe import RxnScribe #need separate installation from https://github.com/thomas0809/RxnScribe 
 import cv2
 import math
 import numpy as np
@@ -11,21 +11,29 @@ import json
 import json
 import glob
 import regex as re
-import mermaid.postprocess as pp
+import postprocess as pp
 import shutil
+
+#TODO: check if all import statements are necessary
+#TODO: check if it is possible to reconcile the dependency conflicts
+#TODO: check if it is possible to decouple RxnScribe from the rest 
+#TODO: implement logging for all 
+#TODO: add filtering
+#TODO: test postprocessing
 
 class RxnOptDataProcessor:
     """
-    Handles image processing tasks to extract reaction optimization-related data from images.
+    Handles image processing tasks to extract reaction optimization-related 
+    data from images.
     """
-    def __init__(self, 
-                 ckpt_path:str, 
+    def __init__(self,  
                  api_key:str,
                  vlm_model = "gpt-4o-2024-08-06",
-                 device='cpu'):
+                 device='cpu', 
+                 ckpt_path:str=None):
         self.api_key = api_key
         self.vlm_model = vlm_model
-        self.model = RxnScribe(ckpt_path, device=torch.device(device)) # initialize RxnScribe to get SMILES 
+        #self.model = RxnScribe(ckpt_path, device=torch.device(device)) # initialize RxnScribe to get SMILES 
     
     
     #TODO
@@ -51,7 +59,8 @@ class RxnOptDataProcessor:
         image_directory: root directory where original images are saved 
         min_segment_height: minimum height of each segmented subfigure
         """
-        cropped_image_directory = os.path.join(image_directory, "cropped_images") #create temporary directory to save cropped images
+        #create temporary directory to save cropped images
+        cropped_image_directory = os.path.join(image_directory, "cropped_images") 
         os.makedirs(cropped_image_directory, exist_ok=True)
         
         def find_split_line(image, 
@@ -171,25 +180,26 @@ class RxnOptDataProcessor:
 
     
     def batch_crop_image(self, 
-                         input_directory:str, 
-                         cropped_image_directory:str, 
+                         image_directory:str,  
                          min_segment_height:float=120):
         """
         crop all images in a given directory 
         """
         # Create a directory to save the cropped segments
+        cropped_image_directory = os.path.join(image_directory, "cropped_images")
         os.makedirs(cropped_image_directory, exist_ok=True)
 
-        for file in os.listdir(input_directory):
+        for file in os.listdir(image_directory):
             if (file.endswith('.png')):
                 image_name = file.removesuffix('.png')
-                self.crop_image(image_name, input_directory, cropped_image_directory, min_segment_height)
+                self.crop_image(image_name, image_directory, min_segment_height)
     
     
     def reformat_json(self, 
                       input_file:str):
         """
-        Clean and format JSON data by removing unwanted characters and ensuring proper JSON formatting
+        Clean and format JSON data by removing unwanted characters and 
+        ensuring proper JSON formatting
         """
         with open(input_file, 'r') as file:
             json_content = file.read()
@@ -202,6 +212,11 @@ class RxnOptDataProcessor:
         with open(input_file, 'w') as file:
             file.write(formatted_json)
 
+    
+    def encode_image(self, image_path):
+        with open(image_path, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode('utf-8')
+        
     
     def adaptive_get_data(self, 
                           prompt_directory:str, 
@@ -234,6 +249,9 @@ class RxnOptDataProcessor:
             user_message = file.read().strip()
 
         # Get response file paths
+        if not os.path.exists(json_directory):
+            os.makedirs(json_directory, exist_ok=True)
+
         image_caption_path = os.path.join(image_directory, f"{image_name}.txt")
         response_path = os.path.join(json_directory, f"{image_name}.json")
 
@@ -276,12 +294,12 @@ class RxnOptDataProcessor:
             # Save responses
             with open(response_path, 'w') as json_file:
                 json.dump(reaction_data, json_file)
-            print(f"Reaction dictionary extracted!")
+            print(f"Reaction dictionary extracted.")
 
             # Clean response: 
             try: 
                 self.reformat_json(response_path)
-                print(f"{response_path}: Reaction data cleaned!")
+                print(f"{response_path}: Reaction data cleaned.")
 
             except Exception as e: 
                 print(f"{response_path}: Reaction data not cleaned. Error: {e}")
@@ -310,6 +328,9 @@ class RxnOptDataProcessor:
 
         # Replace existing json file with updated json file
         response_path = json_path
+
+        # # Alternative: Save as a new json file
+        # response_path = os.path.join(json_directory, f"{image_name}_updated.json")
 
         # Construct message
         messages = [
@@ -349,14 +370,14 @@ class RxnOptDataProcessor:
             # Save response
             with open(response_path, 'w') as json_file:
                 json.dump(reaction_data, json_file)
-            print(f"Reaction dictionary has been updated with footnote description!")
+            print(f"Reaction dictionary has been updated with footnote description.")
 
             # Clean response
             try:
                 self.reformat_json(response_path)
-                print(f"{response_path}: Updated reaction dictionary has been cleaned.")
+                print("Updated reaction dictionary has been cleaned.")
             except Exception as e:
-                print(f"{response_path}: Updated reaction dictionary not cleaned.Error: {e}")
+                print("Updated reaction dictionary not cleaned.Error: {e}")
         
         except requests.exceptions.RequestException as e:
             print(f"Error during API request: {e}")
@@ -382,6 +403,7 @@ class RxnOptDataProcessor:
         
         except Exception as e: 
             reactions.append({'reactants': ["N.R"], 'products': ["N.R"]})
+            print("No reaction SMILES extracted. Returning 'NR' for reactants and products.")
         
         #Clean extracted cleaned reaction SMILES 
         if not reactions or 'NR' in reactions[0].get('reactants', '') or 'NR' in reactions[0].get('products', ''):
@@ -393,6 +415,7 @@ class RxnOptDataProcessor:
 
         # Update reaction dictionary with reaction SMILES 
         json_path = os.path.join(json_directory, f"{image_name}.json")
+        # json_path = os.path.join(json_directory, f"{image_name}_updated.json") #retrieve updated if saved as new file
         with open(json_path, 'r') as file: 
             opt_dict = json.load(file)
         opt_data = opt_dict["Optimization Runs"]
@@ -404,8 +427,8 @@ class RxnOptDataProcessor:
             }, 
             "Optimization Runs": opt_data
         }
-
-        output_path = os.path.join(json_directory, f"{image_name}.json")
+        output_path = json_path # update the original json file
+        # output_path = os.path.join(json_directory, f"{image_name}_updated_smiles.json") #save as new file
         with open(output_path, 'w') as output_file: 
             json.dump(updated_dict, output_file, indent = 4)
         print(f'{image_name} reaction dictionary updated with reaction SMILES')
@@ -433,18 +456,18 @@ class RxnOptDataProcessor:
         Process individual images to extract reaction information
         
         """
-        print(f'Extracting reaction information from {image_name}!')
+        print(f'Extracting reaction information from {image_name}.')
         print('Cropping image...')
         self.crop_image(image_name, image_directory, min_segment_height)
-        print('Images cropped. Passing subimages through DataRaider')          
+        print('Images cropped. Passing subimages through DataRaider...')          
         self.adaptive_get_data(prompt_directory, get_data_prompt, image_name, image_directory, json_directory)
-        print('Raw reaction dictionary extracted. Updating with footnote information...')
+        print('Updating with footnote information...')
         self.update_dict_with_footnotes(prompt_directory, update_dict_prompt, image_name, json_directory)
-        print('Footnote information updated. Extracting reaction SMILES...')
+        print('Extracting reaction SMILES...')
         self.update_dict_with_smiles(image_name, image_directory, json_directory)
-        print('Reaction SMILES extracted. Postprocessing reaction dictionary...')
+        print('Postprocessing reaction dictionary...')
         self.postprocess_dict(image_name, json_directory)
-        print(f'{image_name} cleaned and saved!')
+        print(f'{image_name} cleaned and saved.')
         print('-----------------------------------')
     
     
@@ -461,7 +484,10 @@ class RxnOptDataProcessor:
         for file in os.listdir(image_directory):
             if (file.endswith(".png")):
                 image_name = file.removesuffix('.png')
-                self.process_indiv_images(image_name, image_directory, prompt_directory, get_data_prompt, update_dict_prompt, json_directory)
+                try: 
+                    self.process_indiv_images(image_name, image_directory, prompt_directory, get_data_prompt, update_dict_prompt, json_directory)
+                except: 
+                    continue
         print("DataRaider -- Mission Accomplished. All images processed!")
     
     
@@ -529,13 +555,13 @@ class RxnOptDataProcessor:
         cropped_image_directory = os.path.join(image_directory, "cropped_images")
         if os.path.exists(cropped_image_directory) and os.path.isdir(cropped_image_directory):
             shutil.rmtree(cropped_image_directory)
-            print("Temporary files and 'cropped_images' directory removed!")
+            print("Temporary files and 'cropped_images' directory removed.")
         else:
-            print("No temporary files to remove!")
+            print("No temporary files to remove.")
 
         custom_prompt_path = os.path.join(prompt_directory, "get_data_prompt.txt")
         if os.path.exists(custom_prompt_path):
             os.remove(custom_prompt_path)
-            print("Custom prompt file removed!")
+            print("Custom prompt file removed.")
         else:
-            print("No custom prompt file to remove!")
+            print("No custom prompt file to remove.")
