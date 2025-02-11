@@ -185,6 +185,9 @@ def _process_raw_dict(image_name:str,
                       json_directory:str, 
                       keys=KEYS, 
                       common_names=COMMON_NAMES):
+    """ 
+    process the extracted reaction dictionary and replace original file.
+    """
 
     file_path = os.path.join(json_directory, f"{image_name}.json")
     rxn_dict = load_json(file_path)
