@@ -8,6 +8,11 @@
     "image_dir": "/path/to/directory/to/store/extracted/images",
     "json_dir": "/path/to/directory/to/store/json/output", 
     "graph_dir": "/path/to/directory/to/store/graph/files",
-    "prompt_dir": "/path/to/directory/to/store/prompt/files",
-    "api_key": "your_api_key_here"
+    "prompt_dir": "./Prompts",
+    "api_key": "your_api_key_here", 
+
+
+    "default_image_dir": "./Results/extracted_images/",
+    "default_json_dir": "./Results/jsons/",
+    "default_graph_dir": "./Results/graphs/"
   }
