@@ -7,13 +7,14 @@ from safetensors import safe_open
 from safetensors.torch import load_file
 
 """
-Extracts all tables and figures from PDF documents, with the associated captions/headings/footnotes, as images. 
+Extracts all tables and figures from PDF documents, with the associated captions/
+headings/footnotes, as images. 
 Adapted from TF-ID model https://github.com/ai8hyf/TF-ID
 Runs on GPU 
 """
-
-MODEL_ID = "yifeihu/TF-ID-large" #TODO: TO BE REPLACED
-SAFETENSORS_PATH = "https://huggingface.co/yifeihu/TF-ID-base/resolve/main/model.safetensors" #TODO: TO BE REPLACED
+#TODO: TO BE REPLACED
+MODEL_ID = "yifeihu/TF-ID-large" 
+SAFETENSORS_PATH = "https://huggingface.co/yifeihu/TF-ID-base/resolve/main/model.safetensors" 
 
 
 def _pdf_to_image(pdf_path):
