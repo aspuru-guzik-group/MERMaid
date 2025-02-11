@@ -45,30 +45,30 @@ pip install -e .
 ### 2.2 Running the end-to-end MERMaid pipeline 
 The main command to launch and run MERMaid is: 
 ```
-python -m mermaid.main
+python mermaid/main.py
 ```
-All intermediate files from each module will be saved in your stipulated output directory by default.
+All intermediate files from each module will be saved in your pdf directory by default.
 
 ### 2.3 Running individual modules 
 #### 2.3.1 VisualHeist for image segmentation from scientific PDF documents 
 The main command to launch and run VisualHeist is: 
 ```
-python -m mermaid.run_visualheist
+python mermaid/run_visualheist.py
 ```
-The extracted image files will be saved to `extracted_images ` subfolder in your stipulated output directory by default. 
+The extracted image files will be saved to an `extracted_images` subfolder in your pdf directory by default. 
 
 #### 2.3.2 DataRaider for image-to-data conversion into JSON dictionaries 
 The main command to launch and run DataRaider is: 
 ```
-python -m mermaid.run_dataraider
+python mermaid/run_dataraider.py
 ```
-The extracted json dictionaries will be saved to `json_files` subfolder in your stipulated output directory by default. 
+The extracted json dictionaries will be saved to `json_files` subfolder in your image directory by default. 
 A sample output json dictionary can be found in `Examples` folder. 
 
 #### 2.3.3 KGWizard for data-to-knowledge graph translation 
 The main command to launch and run KGWizard is: 
 ```
-XXXXXXXXXX
+XXXXXXXXXXXXX
 ```
 
 ## 3. Data Visualization 
