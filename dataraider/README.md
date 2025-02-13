@@ -1,10 +1,10 @@
 # DataRaider
 
-DataRaider is a module of MERMES2.0 that extracts reaction information from tables and figures
+DataRaider is a module of MERMaid that extracts reaction information from images into JSON reaction dictionaries.
 
-## Instalation
+## Standalone Installation
 
-Create a conda envrionment if not created already
+Create a new conda environment if it has not been created yet.
 ```
 conda create -n mermaid python=3.10
 conda activate mermaid
@@ -15,10 +15,10 @@ Install required packages
 ```
 cd mermaid/dataraider
 pip install -r requirements.txt
-sudo apt install libjpeg-dev zlib1g-dev # for RxnScribe
+sudo apt install libjpeg-dev zlib1g-dev  #For optical chemical structure recognition (OCSR) using RxnScribe
 ```
 
-Note that installation of RxnScribe is also needed, follow installation instructions at https://github.com/thomas0809/RxnScribe
+Note that separate installation of RxnScribe is also needed, please follow installation instructions at https://github.com/thomas0809/RxnScribe
 
 
 # Usage
