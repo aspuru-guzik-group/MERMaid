@@ -1,0 +1,454 @@
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "5bB6b9LcyH3U",
+        "outputId": "8878cdec-301c-4516-f967-a08db36a6437"
+      },
+      "outputs": [],
+      "source": [
+        "pip install nltk"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "ZzOf0c3eyXs8",
+        "outputId": "f42cf04c-1a5f-4722-b415-de52af79554d"
+      },
+      "outputs": [],
+      "source": [
+        "pip install scikit-learn"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "DDnDkzka2cjK",
+        "outputId": "81a03caa-364c-4302-bb58-dbed16f14edd"
+      },
+      "outputs": [],
+      "source": [
+        "pip install rouge-score"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "urU1fmTE_Ihe"
+      },
+      "outputs": [],
+      "source": [
+        "pip install torch torchvision torchaudio"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "RqxlNFRh_Sno"
+      },
+      "outputs": [],
+      "source": [
+        "pip install easyocr"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "KRY2PNcQ_YSF"
+      },
+      "outputs": [],
+      "source": [
+        "pip install easyocr[english]"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "Qoou0yTPY5pe"
+      },
+      "outputs": [],
+      "source": [
+        "pip install transformers timm flash_attn einops"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "n-8A15cKzQc_"
+      },
+      "outputs": [],
+      "source": [
+        "import nltk\n",
+        "from nltk.translate.bleu_score import sentence_bleu\n",
+        "from sklearn.feature_extraction.text import TfidfVectorizer\n",
+        "from sklearn.metrics.pairwise import cosine_similarity\n",
+        "from rouge_score import rouge_scorer\n",
+        "from nltk.translate.meteor_score import meteor_score"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "Fq76UIjn1Hkn"
+      },
+      "outputs": [],
+      "source": [
+        "nltk.download('punkt')\n",
+        "nltk.download('wordnet')\n",
+        "nltk.download('omw-1.4')"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Dgfa109nyeO_"
+      },
+      "source": [
+        "# BLEU score"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "BjYMvuMgzBFT"
+      },
+      "outputs": [],
+      "source": [
+        "def calculate_bleu_score(generated: str, ground_truth: str):\n",
+        "  generated = nltk.word_tokenize(generated)\n",
+        "  ground_truth = nltk.word_tokenize(ground_truth)\n",
+        "  return sentence_bleu([ground_truth], generated)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "coLcomMo14-8"
+      },
+      "source": [
+        "# ROUGE score"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "OzeLjXOz2k-c"
+      },
+      "outputs": [],
+      "source": [
+        "def calculate_rouge_score(generated: str, ground_truth: str):\n",
+        "  scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)\n",
+        "\n",
+        "  # Calculate ROUGE scores\n",
+        "  scores = scorer.score(ground_truth, generated)\n",
+        "  return scores[\"rouge1\"].fmeasure, scores[\"rouge2\"].fmeasure, scores[\"rougeL\"].fmeasure"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "YmjnEc7i33Wr"
+      },
+      "source": [
+        "# TER score"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "wA-RXVtq34sp"
+      },
+      "outputs": [],
+      "source": [
+        "def calculate_ter_score(generated: str, ground_truth: str):\n",
+        "    \"\"\"Calculates the Translation Edit Rate (TER).\"\"\"\n",
+        "    edits = edit_distance(ground_truth, generated)\n",
+        "    ref_length = len(ground_truth.split())\n",
+        "\n",
+        "    # TER is the edit distance divided by the length of the reference\n",
+        "    ter_score = edits / ref_length if ref_length > 0 else float('inf')\n",
+        "    return ter_score\n",
+        "\n",
+        "\n",
+        "def edit_distance(ref, hyp):\n",
+        "    \"\"\"Calculates the edit distance between reference and hypothesis.\"\"\"\n",
+        "    ref_words = ref.split()\n",
+        "    hyp_words = hyp.split()\n",
+        "\n",
+        "    # Create a matrix to store distances\n",
+        "    d = [[0] * (len(hyp_words) + 1) for _ in range(len(ref_words) + 1)]\n",
+        "\n",
+        "    # Initialize the distance matrix\n",
+        "    for i in range(len(ref_words) + 1):\n",
+        "        d[i][0] = i\n",
+        "    for j in range(len(hyp_words) + 1):\n",
+        "        d[0][j] = j\n",
+        "\n",
+        "    # Fill the matrix\n",
+        "    for i in range(1, len(ref_words) + 1):\n",
+        "        for j in range(1, len(hyp_words) + 1):\n",
+        "            cost = 0 if ref_words[i - 1] == hyp_words[j - 1] else 1\n",
+        "            d[i][j] = min(d[i - 1][j] + 1,    # Deletion\n",
+        "                           d[i][j - 1] + 1,    # Insertion\n",
+        "                           d[i - 1][j - 1] + cost)  # Substitution\n",
+        "\n",
+        "    return d[len(ref_words)][len(hyp_words)]"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Xa3gikW46aHy"
+      },
+      "source": [
+        "# METEOR score"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "d5DmkXTo6e_j"
+      },
+      "outputs": [],
+      "source": [
+        "def calculate_meteor_score(generated: str, ground_truth: str):\n",
+        "  ground_truth = nltk.word_tokenize(ground_truth)\n",
+        "  generated = nltk.word_tokenize(generated)\n",
+        "  return meteor_score([ground_truth], generated)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "dNFk73Dt_cmQ"
+      },
+      "source": [
+        "# easyOCR wrapper"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "4YPE5TIh_fEB"
+      },
+      "outputs": [],
+      "source": [
+        "import easyocr\n",
+        "\n",
+        "def get_easyOCR(image_path: str):\n",
+        "  reader = easyocr.Reader(['en']) # specify the language\n",
+        "  result = reader.readtext(image_path)\n",
+        "\n",
+        "  final_text = \"\"\n",
+        "  for (bbox, text, prob) in result:\n",
+        "    final_text += \" \" + text\n",
+        "  return text"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Z3PU851CYw3x"
+      },
+      "source": [
+        "# Flourence-2 Wrapper"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "OdlkQRQrYynn"
+      },
+      "outputs": [],
+      "source": [
+        "from transformers import AutoProcessor, AutoModelForCausalLM\n",
+        "from PIL import Image\n",
+        "import requests\n",
+        "import copy\n",
+        "model_id = 'microsoft/Florence-2-large'\n",
+        "model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True).eval().cuda()\n",
+        "processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)\n",
+        "\n",
+        "def run_example(task_prompt, text_input=None):\n",
+        "\tif text_input is None:\n",
+        "    \t\tprompt = task_prompt\n",
+        "\telse:\n",
+        "    \t\tprompt = task_prompt + text_input\n",
+        "\tinputs = processor(text=prompt, images=image, return_tensors=\"pt\")\n",
+        "\tgenerated_ids = model.generate(\n",
+        "  \tinput_ids=inputs[\"input_ids\"].cuda(),\n",
+        "  \tpixel_values=inputs[\"pixel_values\"].cuda(),\n",
+        "  \tmax_new_tokens=1024,\n",
+        "  \tearly_stopping=False,\n",
+        "  \tdo_sample=False,\n",
+        "  \tnum_beams=3,\n",
+        "\t)\n",
+        "\tgenerated_text = processor.batch_decode(generated_ids, skip_special_tokens=False)[0]\n",
+        "\tparsed_answer = processor.post_process_generation(\n",
+        "    \tgenerated_text,\n",
+        "    \ttask=task_prompt,\n",
+        "    \timage_size=(image.width, image.height)\n",
+        "\t)\n",
+        "\n",
+        "\treturn parsed_answer\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "m9RrHU-JYus2"
+      },
+      "source": [
+        "# Examples"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "74vkLO5d_9y3"
+      },
+      "outputs": [],
+      "source": [
+        "ground_truth_dict = {\"./adsc202100082-sup-0001-misc_information_page_14_table_0_caption_0.png\" : \"Table S4 shows the effect that the catalyst loading (mol %) had on the efficiency and selectivity of the reaction. Using C4 as the catalyst, we observed that lowering the catalyst loading to 1 mol% (entry 2) was deleterious for the effciency of the reaction, albeit the enantiocontrol of the process remained suprisingly unchanged (20% yield, 87:13 er). Furthermore, as raising the loading up to 20% (entry 3) didn't improved the overall reaction performance, we chose to maintain 10 mol% as the best loading for the process\",\n",
+        "                \"./anie201805732_page_3_figure_0_caption_0.png\" : \"Scheme 5. Cycloaddition product diversification. Reagents: a) m-CPBA; b) Me3S(O)I, NaH; c) NBS, AIBN, then NaN3; d_Pd(OH)2/C, TBHP, K2CO3; e) CH3NO2, DBU; f) KHMDS, BnBr, HMPA; g) OsO4, NMO; h) Pb(OAc)4, then NaBH3CN, BnNH2, AcOH; i) Me3SiCHN2, nBuLi; j) TsOH; k) DIBAL; i) MeC(OEt)3, PivOH; m) Pd/C, H2; n) RuCl3.3H2O, NaIO4. AIBN =2,2'-azobisisobutyronitrile, DIBAL = di-isobutylaluminium hydride, DBU = 1,8-diazabicyclo[5.4.0]undec-7-ene, HMDS = hexamethyldisilazide, m-CPBA = meta-chloroperbenzoic acid, NBS = N-bromosuccinimide, NMO = N-methylmorpholine N-oxide, Piv = pivaloyl, TBHP = tert-butyl hydrogen peroxide\",\n",
+        "                \"./cs2c01442_page_3_figure_2_caption_0.png\" : \"Figure 2. Photocatalyzed sulfinate salt formation and telescoped reaction from a primary sulfonamide. aReaction conditions: (1) p-CF3-benzyl bromide (1.5 equiv), TBAB (20 mol%), 100 oC, 24 h; (2) NFSI (1.5 equiv), K2CO3 (1.1 equiv), solvent switch to THF/H2) (10:1, 0.2 M), rt./ 12 h; (3) acidify using 2 M a1. H3PO4 extract (Na2CO3). bReaction conditions: step (i) sulfonamide 9 (1.0 equiv), p-anisaldehyde (1.0 equiv), Amberlyst 15 (5 mg/mmol), PhMe (0.1 M), Dean-Stark, 12 H; step (iii) MVK (2.5 equiv), 5CzBN (0.5 mol%) TMS3Si-H (1.5 equiv), PhMe (0.05 M), blue LEDs, 15 oC, 4h\",\n",
+        "                \"./cs2c03805_page_5_figure_0_caption_0.png\" : \"Figure 4. (a) Photoexcitation of benzophenone entails the hydrogen atom abstraction from silane. (b) Microsecond triplet-triplet differential absorbtion spectra recorded at different times after laster excitation of employed BP I in deoxygenated acetonitrile with a 5 ns laser pulse at 319 nm in the presence of an excess of (TMS)3SiH (8.6 equiv). (c) Comparison of microsecond triplet-triplet differ- ential absorbtion spectra recorded at 50 us after 319 excitation in the presence of (red dash) (TMS)3SiH (8.6 equiv) and (green dash) tetrahydrofuran (8.6 equiv).\",\n",
+        "                \"./cs3c05150_page_4_figure_0_caption_0.png\" : \"Figure 3. (A) Possivle pathways suggested by DFT calculations. (B) DFT calculation energy profile and structures of the transition states. (C) Quenching of emission with various substrates (40 mM). Addition of collidine (10 mM) does not enhance the quenching (only additive effect and not cooperative). (D) Fraction of quenching efficiency of Fukuzumiz catalyst emission with two different substrates (40 mM), calculated as 1- Iquenccher/I0, where Iquencher and I0 are the emission intensities in presence and absence of quencher, respectively. The inset shows different areas of contribution of the acridinium and charge transfer states to the fluorescence spectrum of the Fukuzumi catalyst. (E) Transient absorbption spectra with the model alcohol substrate (1o) (40 mM) at 300 ns after laser excitation at 430 nm. (F) Transient absorbption spectra with 4-methylanisole (40nm) at 100 ns after laser excitation at 430 nm. (G) transient absorbtion spectra with the model alcohol substrate (1n) (50 mM).\"}"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "YeCKmb8nIuV4"
+      },
+      "outputs": [],
+      "source": [
+        "for key in ground_truth_dict:\n",
+        "  ground_truth = ground_truth_dict[key]\n",
+        "\n",
+        "  image = Image.open(key)\n",
+        "  task_prompt = '<OCR>'\n",
+        "  generated = run_example(task_prompt)[\"<OCR>\"].strip()\n",
+        "  print (\"############\")\n",
+        "  print(key)\n",
+        "  print(generated)\n",
+        "  # print(ground_truth)\n",
+        "  print(calculate_bleu_score(generated, ground_truth))\n",
+        "  print(calculate_rouge_score(generated, ground_truth))\n",
+        "  print(calculate_ter_score(generated, ground_truth))\n",
+        "  print(calculate_meteor_score(generated, ground_truth))\n",
+        "  print (\"############\")"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 27,
+      "metadata": {},
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "../openchemie/organic_synthesis/eval/10.1039_c6ob00076b_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1016_j.xcrp.2023.101573_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_d4ra03939d_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1016_j.gresc.2024.09.002_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1021_acs.orglett.6b01132_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_d4sc02969k_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1002_ejoc.202400146_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1016_j.tgchem.2024.100051_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_c6sc03236b_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_d1sc01130h_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_d4sc04222k_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1016_j.isci.2019.07.004_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1016_j.chempr.2019.12.011_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_d3gc02735j_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_c6ob00108d_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_d4sc00403e_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_c8sc04482a_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_d0sc00031k_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1016_j.xcrp.2023.101696_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1002_adsc.202100082_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_d1ra02225c_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_d4ra04674a_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1021_acs.orglett.2c00362_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_d3sc00803g_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1016_j.gresc.2021.09.003_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1016_j.isci.2022.105896_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_c5sc00238a_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1039_d4su00258j_caption_evaluation.json\n",
+            "../openchemie/organic_synthesis/eval/10.1021_acs.joc.4c00501_caption_evaluation.json\n"
+          ]
+        }
+      ],
+      "source": [
+        "import os \n",
+        "\n",
+        "result_dir = \"../openchemie/\" + \"organic_synthesis\"\n",
+        "directories = [f for f in os.listdir(result_dir)]\n",
+        "\n",
+        "for dir in directories:\n",
+        "    if not dir.endswith(\".json\") and dir != \"eval\":\n",
+        "        save_path = result_dir + \"/eval/\" + dir + \"_caption_evaluation.json\"\n",
+        "        print(save_path)\n"
+      ]
+    }
+  ],
+  "metadata": {
+    "accelerator": "GPU",
+    "colab": {
+      "gpuType": "T4",
+      "provenance": []
+    },
+    "kernelspec": {
+      "display_name": "mermes_env",
+      "language": "python",
+      "name": "python3"
+    },
+    "language_info": {
+      "codemirror_mode": {
+        "name": "ipython",
+        "version": 3
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython3",
+      "version": "3.12.3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}

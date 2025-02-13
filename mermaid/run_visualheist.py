@@ -16,4 +16,4 @@ if __name__ == "__main__":
     output_dir = config.get('image_dir', config.get('default_image_dir'))
 
     # Use the loaded configuration in the function call
-    batch_pdf_to_figures_and_tables(input_dir, output_dir)
+    batch_pdf_to_figures_and_tables(input_dir, output_dir, large_model=False)
