@@ -8,8 +8,6 @@ from typing import Any, Generic, TypeVar, Type
 import sys
 import types
 
-def sink(_: Any) -> None: pass
-
 @dataclass
 class VertexBase:
     @property
@@ -59,7 +57,7 @@ class EdgeBase(Generic[TSource, TTarget]):
     @property
     def properties(self) -> dict[str, Any]:
         return {
-            field.name: getattr(self, field.name) 
+            field.name: getattr(self, field.name)
             for field in fields(self)
             if field.name not in ("source", "target")
         }
@@ -116,7 +114,7 @@ def get_type_from_annotation(
     annotation_type: types.UnionType | type
 ) -> list[type]:
     if hasattr(annotation_type, '__args__'):
-        non_none_types = [t if t is not type(None) else sink for t in annotation_type.__args__]
+        non_none_types = [t for t in annotation_type.__args__ if t is not type(None)]
     else:
         non_none_types = [annotation_type]
     return non_none_types
@@ -137,18 +135,14 @@ def apply_type_from_list(
     if type_list:
         for t in type_list:
             try: return t(value)
-            except (ValueError, TypeError): continue
+            except ValueError: continue
     return value
 
 
 def build_node_from_dict(
     node_dict: dict[str, Any]
 ) -> VertexBase:
-    prop: dict[str, str]
-    try: 
-        prop = node_dict["properties"]
-    except KeyError:
-        prop = {k: v for k, v in node_dict.items() if k != "label"}
+    prop: dict[str, dict] = node_dict["properties"]
     return VERTEX_CLASSES[node_dict["label"]].from_dict(prop)
 
 
@@ -160,13 +154,13 @@ def build_edge_from_dict(
         source=VERTEX_CLASSES[edge_dict["source"]["label"]],
         target=VERTEX_CLASSES[edge_dict["target"]["label"]]
     )
-    
+
 
 @dataclass
 class Study(VertexBase):
     name: str
 
-    
+
 @dataclass
 class Quantity(VertexBase):
     unit: str | None
@@ -176,6 +170,11 @@ class Quantity(VertexBase):
 @dataclass
 class Compound(VertexBase):
     name: str | None
+
+
+@dataclass
+class Material(VertexBase):
+    name: str
 
 
 @dataclass
@@ -189,12 +188,24 @@ class Comment(VertexBase):
 
 
 @dataclass
+class MaterialFamily(VertexBase):
+    name: str
+
+
+@dataclass
 class Reaction(VertexBase):
     uuid: str
 
 
 TEdgeCompound = EdgeBase[Reaction, Compound]
+TEdgeMaterial = EdgeBase[Reaction, Material]
 TEdgeQuantity = EdgeBase[Reaction, Quantity]
+
+
+@dataclass
+class HasElectrolyte(TEdgeCompound):
+    value: float | None = None
+    unit: str | None = None
 
 
 @dataclass
@@ -216,21 +227,13 @@ class HasSolvent(TEdgeCompound):
 
 
 @dataclass
-class HasCatalyst(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
+class HasAnode(TEdgeMaterial):
+    pass
 
 
 @dataclass
-class HasAdditive(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
-
-
-@dataclass
-class HasLigand(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
+class HasCathode(TEdgeMaterial):
+    pass
 
 
 @dataclass
@@ -244,6 +247,10 @@ class HasTemperature(TEdgeQuantity):
 
 
 @dataclass
+class HasCurrent(TEdgeQuantity):
+    pass
+
+@dataclass
 class HasComment(EdgeBase[Reaction, Comment]):
     pass
 
@@ -254,6 +261,10 @@ class HasAtmosphere(EdgeBase[Reaction, Atmosphere]):
 
 @dataclass
 class HasReaction(EdgeBase[Study, Reaction]):
+    pass
+
+@dataclass
+class IsMemberOfFamily(EdgeBase[Material, MaterialFamily]):
     pass
 
 

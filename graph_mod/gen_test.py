@@ -28,9 +28,7 @@ def get_json_from_react(
         , 'g')
     graph = get_traversal(connection)
 
-    vname_fn = lambda x: ', '.join(get_vnamelist_from_db(x, graph))
-
-    
+    vname_fn = lambda x: ', '.join(get_vnamelist_from_db(x, graph)) or None
     json_react_path = Path(json_react_path)
     with open(json_react_path, 'r') as f:
         react_dict = json.load(f)
@@ -42,26 +40,27 @@ def get_json_from_react(
         , atmosphere=vname_fn(Atmosphere)
         , material_family=vname_fn(MaterialFamily)
     )]
-    breakpoint()
-    # messages.append(get_response(messages))
-    # save_path = RESULTS_FOLDER / Path(str(json_react_path.stem) +  '_1' + '.json')
-    # with open(save_path, 'w') as f:
-    #     f.write(messages[-1]["content"])
-    # for n in optimization_runs[1:]:
-    #     messages.append(build_prompt(ITERATOR_STR.format(number=n)))
-    #     messages.append(get_response(messages))
-    #     save_path = RESULTS_FOLDER / Path(str(json_react_path.stem) +  f'_{n}' + '.json')
-    #     with open(save_path, 'w') as f:
-    #         f.write(messages[-1]["content"])
-    #     print(f"iter: {n}")
+    print(messages)
+    messages.append(get_response(messages))
+    save_path = RESULTS_FOLDER / Path(str(json_react_path.stem) +  '_1' + '.json')
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(save_path, 'w') as f:
+        f.write(messages[-1]["content"])
+    for n in optimization_runs[1:]:
+        messages.append(build_prompt(ITERATOR_STR.format(number=n)))
+        messages.append(get_response(messages))
+        save_path = RESULTS_FOLDER / Path(str(json_react_path.stem) +  f'_{n}' + '.json')
+        with open(save_path, 'w') as f:
+            f.write(messages[-1]["content"])
+        print(f"iter: {n}")
     return messages
 
 
 def pool_proxy(n): get_json_from_react(DATA_FILES[n])
 
 
-# with Pool(100) as p:
-#     p.map(
-#         pool_proxy
-#         , range(0,100)
-#     )
+with Pool(2) as p:
+    p.map(
+        pool_proxy
+        , range(0,5)
+    )

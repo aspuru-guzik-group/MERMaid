@@ -166,7 +166,7 @@ def build_edge_from_dict(
 class Study(VertexBase):
     name: str
 
-    
+
 @dataclass
 class Quantity(VertexBase):
     unit: str | None
@@ -179,6 +179,11 @@ class Compound(VertexBase):
 
 
 @dataclass
+class Material(VertexBase):
+    name: str
+
+
+@dataclass
 class Atmosphere(VertexBase):
     name: str | None
 
@@ -188,13 +193,25 @@ class Comment(VertexBase):
     text: str
 
 
+@dataclass 
+class MaterialFamily(VertexBase):
+    name: str
+
+
 @dataclass
 class Reaction(VertexBase):
     uuid: str
 
 
 TEdgeCompound = EdgeBase[Reaction, Compound]
+TEdgeMaterial = EdgeBase[Reaction, Material]
 TEdgeQuantity = EdgeBase[Reaction, Quantity]
+
+
+@dataclass
+class HasElectrolyte(TEdgeCompound):
+    value: float | None = None
+    unit: str | None = None
 
 
 @dataclass
@@ -216,21 +233,13 @@ class HasSolvent(TEdgeCompound):
 
 
 @dataclass
-class HasCatalyst(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
+class HasAnode(TEdgeMaterial):
+    pass
 
 
 @dataclass
-class HasAdditive(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
-
-
-@dataclass
-class HasLigand(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
+class HasCathode(TEdgeMaterial):
+    pass
 
 
 @dataclass
@@ -244,6 +253,10 @@ class HasTemperature(TEdgeQuantity):
 
 
 @dataclass
+class HasCurrent(TEdgeQuantity):
+    pass
+
+@dataclass
 class HasComment(EdgeBase[Reaction, Comment]):
     pass
 
@@ -254,6 +267,10 @@ class HasAtmosphere(EdgeBase[Reaction, Atmosphere]):
 
 @dataclass
 class HasReaction(EdgeBase[Study, Reaction]):
+    pass
+
+@dataclass
+class IsMemberOfFamily(EdgeBase[Material, MaterialFamily]):
     pass
 
 

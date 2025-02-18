@@ -174,6 +174,11 @@ class Quantity(VertexBase):
 
 
 @dataclass
+class IrradiationConditions(VertexBase):
+    text: str
+
+
+@dataclass
 class Compound(VertexBase):
     name: str | None
 
@@ -216,7 +221,7 @@ class HasSolvent(TEdgeCompound):
 
 
 @dataclass
-class HasCatalyst(TEdgeCompound):
+class HasPhotocatalyst(TEdgeCompound):
     value: float | None = None
     unit: str | None = None
 
@@ -228,18 +233,17 @@ class HasAdditive(TEdgeCompound):
 
 
 @dataclass
-class HasLigand(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
-
-
-@dataclass
 class HasDuration(TEdgeQuantity):
     pass
 
 
 @dataclass
 class HasTemperature(TEdgeQuantity):
+    pass
+
+
+@dataclass
+class HasConditions(EdgeBase[Reaction, IrradiationConditions]):
     pass
 
 
