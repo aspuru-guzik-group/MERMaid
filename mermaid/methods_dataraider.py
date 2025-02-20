@@ -1,4 +1,4 @@
-# import torch
+import torch
 #from rxnscribe import RxnScribe #need separate installation from https://github.com/thomas0809/RxnScribe 
 import cv2
 import math
@@ -25,6 +25,13 @@ class RxnOptDataProcessor:
     """
     Handles image processing tasks to extract reaction optimization-related 
     data from images.
+    
+    :param api_key: OpenAI API key
+    :type api_key: str
+    :param model: RxnScribe instance, used to extract reaction information
+    :type model: RxnScribe
+    :param vlm_model: model id of OpenAI model to use, defaults to gpt-4o-2024-08-06
+    :type vlm_model: str
     """
     def __init__(self,  
                  api_key:str,
@@ -52,12 +59,20 @@ class RxnOptDataProcessor:
                    min_segment_height=120): 
         """
         Adaptively crop a given figure into smaller subfigures before 
-        passing to VLM based on image length
+        passing to VLM based on image length and save to image_directory
 
         parameters: 
-        image_name: base image name
-        image_directory: root directory where original images are saved 
-        min_segment_height: minimum height of each segmented subfigure
+        :param image_name: Base image name
+        :type image_name: str
+        :param image_directory: Root directory where original images are saved
+        :type image_directory: str
+        :param min_segment_height: Minimum height of each segmented subfigure, defaults to 120
+        :type min_segment_height: int
+        
+        :raises ValueError: If split lengths are invalid or if no cropped segment has valid size
+        
+        :return: Returns nothing, all images are saved to image_directory
+        :rtype: None
         """
         #create temporary directory to save cropped images
         cropped_image_directory = os.path.join(image_directory, "cropped_images") 
@@ -69,8 +84,23 @@ class RxnOptDataProcessor:
                             region_end, 
                             percentage_threshold, 
                             step_size):
-            """
-            Helper function to determine where to segment the figure
+            """Helper function to determine where to segment figure
+
+            :param image: OpenCV image
+            :type image: numpy.ndarray
+            :param threshold: Thershold for identifying white pixels
+            :type threshold: float
+            :param region_start: Starting row of finding split line
+            :type region_start: int
+            :param region_end: Ending row of finding split line
+            :type region_end: int
+            :param percentage_threshold: Minimum portion of white pixels required for row to be considered a line
+            :type percentage_threshold: float
+            :param step_size: Number of rows to skip per line check
+            :type step_size: int
+            
+            :return: Returns the index of the split line
+            :rtype: int
             """
             
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) # Convert the image to grayscale            
@@ -96,6 +126,22 @@ class RxnOptDataProcessor:
                                  step_size):
             """
             Helper function to identify all the split lines for an image
+            
+            :param image: OpenCV image
+            :type image: numpy.ndarray
+            :param first_split_line: Index of the first split line
+            :type first_split_line: int
+            :param min_segment_height: minimum height of each segmented subfigure, defaults to 120
+            :type min_segment_height: int
+            :param threshold: Thershold for identifying white pixels
+            :type threshold: float
+            :param percentage_threshold: Minimum portion of white pixels required for row to be considered a line
+            :type percentage_threshold: float
+            :param step_size: Number of rows to skip per line check
+            :type step_size: int
+            
+            :return: Returns the list of indicies of split lines
+            :rtype: list[int]
             """
             
             # Calculate the remaining height after the first split line
@@ -122,6 +168,14 @@ class RxnOptDataProcessor:
         def segment_image(image, split_lines):
             """
             Helper function to crop image based on split lines
+            
+            :param image: OpenCV image
+            :type image: numpy.ndarray
+            :param split_lines: list of split lines
+            :type split_lines: list[int]
+            
+            :return: Returns the different segments of image that were cropped with split_lines
+            :rtype: list[numpy.ndarray]
             """
             segments = []
             prev_line = 0
@@ -179,12 +233,19 @@ class RxnOptDataProcessor:
             cv2.imwrite(os.path.join(cropped_image_directory, f"{image_name}_original.png"), image)
 
     
-    def batch_crop_image(self, 
-                         image_directory:str,  
-                         min_segment_height:float=120):
+    def batch_crop_image(self, image_directory:str, min_segment_height:float=120):
         """
         crop all images in a given directory 
+
+        :param image_directory: Directory of images to crop
+        :type image_directory: str
+        :param min_segment_height: minimum height of each segment, defaults to 120
+        :type min_segment_height: float
+        
+        :return: Returns nothing, all images are saved in image_directory
+        :rtype: None
         """
+        
         # Create a directory to save the cropped segments
         cropped_image_directory = os.path.join(image_directory, "cropped_images")
         os.makedirs(cropped_image_directory, exist_ok=True)
@@ -195,11 +256,16 @@ class RxnOptDataProcessor:
                 self.crop_image(image_name, image_directory, min_segment_height)
     
     
-    def reformat_json(self, 
-                      input_file:str):
+    def reformat_json(self, input_file:str):
         """
         Clean and format JSON data by removing unwanted characters and 
         ensuring proper JSON formatting
+        
+        :param input_file: JSON file to reformat
+        :type input_file: str
+        
+        :return: Returns nothing
+        :rtype: None
         """
         with open(input_file, 'r') as file:
             json_content = file.read()
@@ -225,15 +291,21 @@ class RxnOptDataProcessor:
                           image_directory:str, 
                           json_directory:str):
         """
-        Outputs a reaction dictionary from all subfigures 
+        Retrieves a reaction dictionary from all subfigures and dumps into a JSON
 
-        Parameters: 
-        prompt_directory: directory path to user message prompt
-        get_data_prompt: file name of user message prompt to get reaction conditions
-        image_name: base image name 
-        image_directory: root directory where the original images are stored
-        json_directory: output directory to save all output json files 
+        :param prompt_directory: Directory path to user message prompt
+        :type prompt_directory: str
+        :param get_data_prompt: File name of user message prompt to get reaction conditions
+        :type get_data_prompt: str
+        :param image_name: Name of image
+        :type image_name: str
+        :param image_directory: Root directory where the original images are stored
+        :type image_directory: str
+        :param json_directory: Output directory to save all output json files 
+        :type json_directory: str
 
+        :return: Returns nothing, all data saved in JSON
+        :rtype: None
         """
         # Get all subfigures files 
         image_paths = glob.glob(os.path.join(image_directory, f"cropped_images/{image_name}_*.png"))
@@ -314,7 +386,19 @@ class RxnOptDataProcessor:
                     image_name:str, 
                     json_directory:str):
         """
-        updates the reaction dictionary with information from the footnote dictionary
+        Updates the reaction dictionary with information from the footnote dictionary
+        
+        :param prompt_directory: Directory path to user message prompt
+        :type prompt_directory: str
+        :param update_dict_prompt: Directory path to update message prompt
+        :type update_dict_prompt: str
+        :param image_name: Name of image
+        :type image_name: str
+        :param json_directory: Path to directory of reaction dictionary
+        :type update_dict_prompt: str
+        
+        :return: Returns nothing, all data saved in JSON
+        :rtype: None
         """
         # Get user prompt file
         user_prompt_path = os.path.join(prompt_directory, f"{update_dict_prompt}.txt")
@@ -389,6 +473,16 @@ class RxnOptDataProcessor:
                        json_directory:str):
         """
         Use RxnScribe to get reactants and product SMILES and combine reaction dictionary with reaction SMILES
+        
+        :param image_name: Name of image
+        :type image_name: str
+        :param image_directory: Root directory where the original images are stored
+        :type image_directory: str
+        :param json_directory: Path to directory of reaction dictionary
+        :type json_directory: str
+        
+        :return: Returns nothing, all data saved in JSON
+        :rtype: None
         """
         image_file = os.path.join(image_directory, f"{image_name}.png")
         reactions = []
@@ -438,8 +532,13 @@ class RxnOptDataProcessor:
                          image_name:str,
                          json_directory:str):
         """ 
-        1. converts common chemical names to smiles using pubchem and user-defined dictionary
-        2. unifies format for mixed solvent systems
+        Converts common chemical names to smiles using pubchem and user-defined dictionary
+        Unifies format for mixed solvent systems
+        
+        :param image_name: Name of image
+        :type image_name: str
+        :param json_directory: Path to directory of reaction dictionary
+        :type json_directory: str
         """
         pp._process_raw_dict(image_name, json_directory, keys=pp.KEYS, common_names=pp.COMMON_NAMES)
     
@@ -452,10 +551,27 @@ class RxnOptDataProcessor:
                             update_dict_prompt:str,
                             json_directory:str, 
                             min_segment_height:int=120):
-        """ 
-        Process individual images to extract reaction information
+        """Process individual images to extract reaction information
+
+        :param image_name: Name of image
+        :type image_name: str
+        :param image_directory: Root directory where the original images are stored
+        :type image_directory: str
+        :param prompt_directory: Directory path to user message prompt
+        :type prompt_directory: str
+        :param get_data_prompt: File name of user message prompt to get reaction conditions
+        :type get_data_prompt: str
+        :param update_dict_prompt: Directory path to update message prompt
+        :type update_dict_prompt: str
+        :param json_directory: Path to directory of reaction dictionary
+        :type json_directory: str
+        :param min_segment_height: Minimum height of each segmented subfigure, defaults to 120, defaults to 120
+        :type min_segment_height: int
         
+        :return: Returns nothing, all data saved in JSON
+        :rtype: None
         """
+        
         print(f'Extracting reaction information from {image_name}.')
         print('Cropping image...')
         self.crop_image(image_name, image_directory, min_segment_height)
@@ -480,6 +596,20 @@ class RxnOptDataProcessor:
                              ): 
         """
         Batch process images to extract reaction information
+        
+        :param image_directory: Root directory where the original images are stored
+        :type image_directory: str
+        :param prompt_directory: Directory path to user message prompt
+        :type prompt_directory: str
+        :param get_data_prompt: File name of user message prompt to get reaction conditions
+        :type get_data_prompt: str
+        :param update_dict_prompt: Directory path to update message prompt
+        :type update_dict_prompt: str
+        :param json_directory: Path to directory of reaction dictionary
+        :type json_directory: str
+        
+        :return: Returns nothing, all data saved in JSON
+        :rtype: None
         """
         for file in os.listdir(image_directory):
             if (file.endswith(".png")):
@@ -494,10 +624,17 @@ class RxnOptDataProcessor:
     def construct_initial_prompt(self, 
                                  opt_run_keys: list, 
                                  new_run_keys: dict):
-        """
-        Creates a get_data_prompt with opt_run_keys key-value pairs embedded into it
+        """Creates a get_data_prompt with opt_run_keys key-value pairs embedded into it
         Uses <INSERT_HERE> as the location tag for inserting keys
-        Saves the new prompt to a file named get_data_prompt.txt inside the Prompts directory.
+        Saves the new prompt to a file named get_data_prompt.txt inside the Prompts directory
+
+        :param opt_run_keys: Optimization keys that are pre defined
+        :type opt_run_keys: list
+        :param new_run_keys: New optimization keys that are user defined
+        :type new_run_keys: dict
+        
+        :return: Returns nothing, all data saved in txt file
+        :rtype: None
         """
         
         marker = "<INSERT_HERE>"
@@ -549,8 +686,12 @@ class RxnOptDataProcessor:
     def clear_temp_files(self, 
                          prompt_directory:str, 
                          image_directory:str):
-        """
-        Removes temporary files (cropped images)
+        """Removes temporary files (cropped images)
+
+        :param prompt_directory: Directory path to user message prompt
+        :type prompt_directory: str
+        :param image_directory: Root directory where the original images are stored
+        :type image_directory: str
         """
         cropped_image_directory = os.path.join(image_directory, "cropped_images")
         if os.path.exists(cropped_image_directory) and os.path.isdir(cropped_image_directory):
