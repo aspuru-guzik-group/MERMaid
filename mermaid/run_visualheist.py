@@ -1,10 +1,15 @@
 import json
 from methods_visualheist import batch_pdf_to_figures_and_tables
-import pdb
 import os
 
 def load_config(config_file):
-    
+    """Load configurations from config_file
+
+    :param config_file: Path to config file
+    :type config_file: str
+    :return: Returns a dictionary of fields from config_file
+    :rtype: dict
+    """
     with open(config_file, 'r') as f:
         return json.load(f)
 
