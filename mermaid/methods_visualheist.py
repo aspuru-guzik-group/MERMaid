@@ -5,7 +5,6 @@ from PIL import Image
 from transformers import AutoProcessor, AutoModelForCausalLM 
 from safetensors import safe_open
 from safetensors.torch import load_file
-import pdb
 import torch
 
 """
@@ -16,17 +15,6 @@ Runs on GPU
 """
 
 
-# from unittest.mock import patch
-# from transformers.dynamic_module_utils import get_imports
-
-# def fixed_get_imports(filename: str | os.PathLike) -> list[str]:
-#     if not str(filename).endswith("modeling_florence2.py"):
-#         return get_imports(filename)
-#     imports = get_imports(filename)
-#     imports.remove("flash_attn")
-#     return imports
-
-
 #TODO: TO BE REPLACED
 LARGE_MODEL_ID = "yifeihu/TF-ID-large" 
 BASE_MODEL_ID = "yifeihu/TF-ID-base" 
@@ -35,27 +23,69 @@ BASE_SAFETENSORS_PATH = "https://huggingface.co/yifeihu/TF-ID-base/resolve/main/
 
 
 def _pdf_to_image(pdf_path):
-	images = convert_from_path(pdf_path)
-	return images
+    """Converts a pdf into a list of images
+    :param pdf_path: Path to pdf
+    :type pdf_path: str
+    
+    :return: List of Image instances
+    :rtype: list[Image]
+    """
+    images = convert_from_path(pdf_path)
+    return images
 
 
 def _tf_id_detection(image, model, processor):
-	prompt = "<OD>"
-	inputs = processor(text=prompt, images=image, return_tensors="pt")
-	generated_ids = model.generate(
-		input_ids=inputs["input_ids"],
-		pixel_values=inputs["pixel_values"],
-		max_new_tokens=1024,
-		do_sample=False,
-		num_beams=3
-	)
-	generated_text = processor.batch_decode(generated_ids, skip_special_tokens=False)[0]
-	annotation = processor.post_process_generation(generated_text, task="<OD>", image_size=(image.width, image.height))
-	return annotation["<OD>"]
+    
+    """Performs table and figure identification using model and processor on image
+
+    :param image: Image instance that refers to image we want to detect tables and figures from
+    :type image: Image
+    :param model: The pretrained causal language model used for text generation or inference.
+    :type model: AutoModelForCausalLM
+    :param processor: The processor that tokenizes input text for the model.
+    :type processor: AutoProcessor
+
+    :return: Dictionary of annotations done on image
+    :rtype: dict
+    """
+    prompt = "<OD>"
+    inputs = processor(text=prompt, images=image, return_tensors="pt")
+
+    generated_ids = model.generate(
+        input_ids=inputs["input_ids"],
+        pixel_values=inputs["pixel_values"],
+        max_new_tokens=1024,
+        do_sample=False,
+        num_beams=3
+    )
+
+    generated_text = processor.batch_decode(generated_ids, skip_special_tokens=False)[0]
+    annotation = processor.post_process_generation(
+        generated_text, task="<OD>", image_size=(image.width, image.height)
+    )
+
+    return annotation["<OD>"]
 
 
 def _save_image_from_bbox(image, annotation, image_counter, output_dir, pdf_name):
-	
+    
+    """Saves cropped regions denoted from annotation in image to output_dir
+
+    :param image: Image instance that refers to image we would like to crop
+    :type image: Image
+    :param annotation: Dictionary that contains information on bounding boxes which correlate to points in image
+    :type annotation: dict
+    :param image_counter: Counter to how many images have been saved so far, used for file naming purposes
+    :type image_counter: int
+    :param output_dir: Directory to store the segmented images
+    :type output_dir: str
+    :param pdf_name: Name of the pdf in which image comes from, used for file naming purposes
+    :type pdf_name: str
+
+    :return: The new image_counter after saving all cropped images
+    :rtype: int
+    """
+    
     for counter, bbox in enumerate(annotation['bboxes']):
         x1, y1, x2, y2 = bbox
         cropped_image = image.crop((x1, y1, x2, y2))
@@ -64,10 +94,24 @@ def _save_image_from_bbox(image, annotation, image_counter, output_dir, pdf_name
 
 
 def _create_model(model_id, safetensors_path, base_or_large):
+    
+    """Intializes model used for segmenting tables and figures using either the base or large model
+
+    :param model_id: Model id to use, either LARGE_MODEL_ID or BASE_MODEL_ID
+    :type model_id: str
+    :param safetensors_path: Path to safetensors for model, either LARGE_SAFETENSORS_PATH or BASE_SAFETENSORS_PATH
+    :type safetensors_path: str
+    :param base_or_large: String is either 'base' or 'large' depending on whether we use base or large model
+    :type base_or_large: str
+    
+
+    :return: Returns the model and processor that allows for 
+    :rtype: tuple[AutoModelForCausalLM, AutoProcessor]
+    """
+    
     package_dir = os.path.dirname(__file__)
     safetensors_filename = base_or_large + "_model.safetensors"
     safetensors_download_path = package_dir + "/../safetensors/" + safetensors_filename
-    # pdb.set_trace()
     if not os.path.exists(safetensors_download_path):
         torch.hub.download_url_to_file(safetensors_path, safetensors_download_path)
 
@@ -79,7 +123,21 @@ def _create_model(model_id, safetensors_path, base_or_large):
 
 
 def _pdf_to_figures_and_tables(pdf_path, output_dir, large_model):
-    # pdb.set_trace()
+    
+    """Takes a singke pdf and runs either LARGE_MODEL_ID or BASE_MODEL_ID on it to extract tables and figures.
+    Saves the results in output_dir
+    
+    :param pdf_path: Path to a single pdf
+    :type input_dir: str
+    :param output_dir: Directory to where segmented tables and figures are located
+    :type output_dir: str
+    :param large_model: Whether we use the large or base model when performing table-figure extraction
+    :type large_model: bool
+    
+    :return: Returns nothing, all segmented figures and tables are saved seperatly
+    :rtype: None
+    """
+    
     os.makedirs(output_dir, exist_ok=True)
     pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
     images = _pdf_to_image(pdf_path)
@@ -101,7 +159,20 @@ def _pdf_to_figures_and_tables(pdf_path, output_dir, large_model):
     print("All images saved to: ", output_dir)
 
 
-def batch_pdf_to_figures_and_tables(input_dir: str, output_dir: str=None, large_model: bool=False):
+def batch_pdf_to_figures_and_tables(input_dir, output_dir=None, large_model=False):
+    """Takes a directory of pdfs via input_dir and saves tables and figures in output_dir
+    
+    :param input_dir: Input directory to pdfs
+    :type input_dir: str
+    :param output_dir: Directory to where segmented tables and figures are located, defaults to None
+    :type output_dir: str
+    :param large_model: Whether we use the large or base model when performing table-figure extraction, defaults to False
+    :type large_model: bool
+    
+    :return: None, all files will be saved in output_dir
+    :rtype: None
+    """
+    
     if not output_dir:
           output_dir = os.path.join(input_dir, "extracted_images")
     
