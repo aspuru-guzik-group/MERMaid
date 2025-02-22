@@ -1,6 +1,9 @@
 import os
 import json
-from methods_dataraider import RxnOptDataProcessor
+# from methods_dataraider import RxnOptDataProcessor
+from dataraider.processor_info import DataRaiderInfo
+from dataraider.reaction_dictionary_formating import construct_initial_prompt
+from dataraider.process_images import batch_process_images, clear_temp_files
 from huggingface_hub import hf_hub_download
 
 
@@ -27,10 +30,14 @@ if __name__ == "__main__":
     api_key = config.get('api_key', None)
 
     # Use the loaded configuration in the function call
-    processor = RxnOptDataProcessor(ckpt_path=ckpt_path, device='cpu', api_key=api_key)
+    info = DataRaiderInfo(api_key=api_key, device="cpu", ckpt_path=ckpt_path)
+    # processor = RxnOptDataProcessor(ckpt_path=ckpt_path, device='cpu', api_key=api_key)
     print("Constructing your custom reaction data extraction prompt")
-    processor.construct_initial_prompt(keys, new_keys)
+    construct_initial_prompt(keys, new_keys)
+    # processor.construct_initial_prompt(keys, new_keys)
     print('######################## Starting up DataRaider ############################')
-    processor.batch_process_images(image_dir, prompt_dir, get_data_prompt, update_dict_prompt, output_dir)
+    batch_process_images(info, image_dir, prompt_dir, get_data_prompt, update_dict_prompt, output_dir)
+    # processor.batch_process_images(image_dir, prompt_dir, get_data_prompt, update_dict_prompt, output_dir)
     print('Clearing temporary files and custom prompts')
-    processor.clear_temp_files(prompt_dir, image_dir)
+    clear_temp_files(prompt_dir, image_dir)
+    # processor.clear_temp_files(prompt_dir, image_dir)
