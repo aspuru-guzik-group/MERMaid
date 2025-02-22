@@ -1,4 +1,9 @@
 #from rxnscribe import RxnScribe #need separate installation from https://github.com/thomas0809/RxnScribe 
+
+"""
+Contains DataRaiderInfo class
+"""
+
 class DataRaiderInfo():
     
     """
