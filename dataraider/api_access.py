@@ -6,7 +6,7 @@ from processor_info import DataRaiderInfo
 from reaction_dictionary_formating import reformat_json
 
 """
-Module for OpenAI APi access
+Module for OpenAI API access
 """
 
 def update_dict_with_footnotes( 

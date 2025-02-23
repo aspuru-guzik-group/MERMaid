@@ -1,7 +1,7 @@
 import json
 import os
 import regex as re
-import mermaid.postprocess as pp
+import dataraider.postprocess as pp
 from processor_info import DataRaiderInfo
 
 """
