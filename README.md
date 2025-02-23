@@ -1,6 +1,6 @@
 ## MERMaid (Multimodal aid for Reaction Mining)
 
-<img src="./Examples/MERMaid-overview.jpg" alt="Overview" width="600">
+<img src="./Assets/MERMaid-overview.jpg" alt="Overview" width="600">
 
 ## Note: 
 * MERMaid is an end-to-end knowledge ingestion pipeline to automatically convert disparate information conveyed through figures, schemes, and tables across various PDFs into a coherent and machine-actionable knowledge graph. It integrates three seqeuntial modules: 
@@ -9,7 +9,6 @@
     * KGWizard for automated knowledge graph construction
 * You can run MERMaid directly or use each module as a standalone tool for its specific functionality.
 * MERMaid is integrated with the OpenAI provider at present. We will extend MERMaid to support other providers and open-source VLMs in future updates. 
-* Please note that a GPU is required to run VisualHeist locally. 
 
 ## 1. Installation 
 

@@ -11,7 +11,7 @@ import json
 import json
 import glob
 import regex as re
-import postprocess as pp
+import dataraider.postprocess as pp
 import shutil
 
 #TODO: check if all import statements are necessary
