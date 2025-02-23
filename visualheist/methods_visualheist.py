@@ -6,19 +6,19 @@ from transformers import AutoProcessor, AutoModelForCausalLM
 from safetensors import safe_open
 from safetensors.torch import load_file
 import torch
+from huggingface_hub import hf_hub_download
 
 """
 Extracts all tables and figures from PDF documents, with the associated captions/
 headings/footnotes, as images. 
-Adapted from TF-ID model https://github.com/ai8hyf/TF-ID
-Runs on GPU 
+Adapted from TF-ID model https://github.com/ai8hyf/TF-ID 
 """
 
 
 #TODO: TO BE REPLACED
 LARGE_MODEL_ID = "yifeihu/TF-ID-large" 
 BASE_MODEL_ID = "yifeihu/TF-ID-base" 
-LARGE_SAFETENSORS_PATH = "https://huggingface.co/yifeihu/TF-ID-base/resolve/main/model.safetensors" 
+LARGE_SAFETENSORS_PATH = "https://huggingface.co/yifeihu/TF-ID-large/resolve/main/model.safetensors" 
 BASE_SAFETENSORS_PATH = "https://huggingface.co/yifeihu/TF-ID-base/resolve/main/model.safetensors" 
 
 
@@ -113,7 +113,8 @@ def _create_model(model_id, safetensors_path, base_or_large):
     safetensors_filename = base_or_large + "_model.safetensors"
     safetensors_download_path = package_dir + "/../safetensors/" + safetensors_filename
     if not os.path.exists(safetensors_download_path):
-        torch.hub.download_url_to_file(safetensors_path, safetensors_download_path)
+        safetensors_download_path = hf_hub_download(repo_id=model_id, filename="model.safetensors")
+        # torch.hub.download_url_to_file(safetensors_path, safetensors_download_path)
 
     state_dict = load_file(safetensors_download_path)
     model = AutoModelForCausalLM.from_pretrained(model_id, state_dict=state_dict, trust_remote_code=True)
@@ -176,7 +177,7 @@ def batch_pdf_to_figures_and_tables(input_dir, output_dir=None, large_model=Fals
     
     for file in os.listdir(input_dir): 
         if not file.endswith("pdf"):
-            print("ERROR: " + file + "is not a pdf")
+            print("ERROR: " + file + " is not a pdf")
             continue
         pdf_path = os.path.join(input_dir,file)
         try:

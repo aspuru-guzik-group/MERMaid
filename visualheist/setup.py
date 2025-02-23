@@ -10,7 +10,9 @@ setup(
         "transformers",
         "safetensors",
         "torch", 
-        "huggingface_hub"
+        "huggingface_hub", 
+        "einops", 
+        "timm"
     ],
     entry_points={
         "console_scripts": [
