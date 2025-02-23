@@ -8,9 +8,9 @@ setup(
         "requests",
         "opencv-python",
         "numpy",
-        "regex",
-        "shutil", 
-        "pubchempy"
+        "regex", 
+        "pubchempy", 
+        "huggingface_hub"
     ],
     entry_points={
         "console_scripts": [

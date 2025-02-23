@@ -1,8 +1,8 @@
 import os
-from processor_info import DataRaiderInfo
-from image_cropping import crop_image
-from api_access import adaptive_get_data, update_dict_with_footnotes
-from reaction_dictionary_formating import update_dict_with_smiles, postprocess_dict
+from .processor_info import DataRaiderInfo
+from .image_cropping import crop_image
+from .api_access import adaptive_get_data, update_dict_with_footnotes
+from .reaction_dictionary_formating import update_dict_with_smiles, postprocess_dict
 import shutil
 """
 Contains high level functions that process images
@@ -86,6 +86,7 @@ def batch_process_images(
                 process_indiv_images(info, image_name, image_directory, prompt_directory, get_data_prompt, update_dict_prompt, json_directory)
             except: 
                 continue
+    print()
     print("DataRaider -- Mission Accomplished. All images processed!")
 
 def clear_temp_files(

@@ -2,8 +2,9 @@ import os
 import requests
 import glob
 import json
-from processor_info import DataRaiderInfo
-from reaction_dictionary_formating import reformat_json
+import base64
+from .processor_info import DataRaiderInfo
+from .reaction_dictionary_formating import reformat_json
 
 """
 Module for OpenAI API access
@@ -90,7 +91,7 @@ def update_dict_with_footnotes(
 
             # Clean response
             try:
-                info.reformat_json(response_path)
+                reformat_json(response_path)
                 print("Updated reaction dictionary has been cleaned.")
             except Exception as e:
                 print("Updated reaction dictionary not cleaned.Error: {e}")
@@ -123,14 +124,18 @@ def adaptive_get_data(
 
     :return: Returns nothing, all data saved in JSON
     :rtype: None
-    """
+    """   
     # Get all subfigures files 
     image_paths = glob.glob(os.path.join(image_directory, f"cropped_images/{image_name}_*.png"))
     if not image_paths:
         print(f"No subimages found for {image_name}")
         return
-
-    base64_images = [info.encode_image(image_path) for image_path in image_paths]
+    
+    def encode_image(image_path):
+        with open(image_path, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode('utf-8')
+        
+    base64_images = [encode_image(image_path) for image_path in image_paths]
 
     # Get user prompt file
     user_prompt_path = os.path.join(prompt_directory, f"{get_data_prompt}.txt")
@@ -183,7 +188,7 @@ def adaptive_get_data(
         # Save responses
         with open(response_path, 'w') as json_file:
             json.dump(reaction_data, json_file)
-        print(f"Reaction dictionary extracted.")
+        print(f"Reaction dictionary saved")
 
         # Clean response: 
         try: 

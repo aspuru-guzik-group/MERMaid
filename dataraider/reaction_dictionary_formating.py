@@ -1,8 +1,8 @@
 import json
 import os
 import regex as re
-import dataraider.postprocess as pp
-from processor_info import DataRaiderInfo
+from .processor_info import DataRaiderInfo
+from . import postprocess as pp
 
 """
 Module for reaction dictionary/JSON utilities
@@ -65,6 +65,7 @@ def update_dict_with_smiles(
     except Exception as e: 
         reactions.append({'reactants': ["N.R"], 'products': ["N.R"]})
         print("No reaction SMILES extracted. Returning 'NR' for reactants and products.")
+        return
     
     #Clean extracted cleaned reaction SMILES 
     if not reactions or 'NR' in reactions[0].get('reactants', '') or 'NR' in reactions[0].get('products', ''):
@@ -108,6 +109,7 @@ def postprocess_dict(
     :type json_directory: str
     """
     pp._process_raw_dict(image_name, json_directory, keys=pp.KEYS, common_names=pp.COMMON_NAMES)
+    print("Postprocessing complete")
 
 
 def construct_initial_prompt(

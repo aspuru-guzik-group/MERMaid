@@ -57,13 +57,14 @@ def main():
     api_key = args.api_key or config.get('api_key', None)
 
     info = DataRaiderInfo(api_key=api_key, device="cpu", ckpt_path=ckpt_path)
-
+    print(f'keys are {keys}')
     # Construct the initial reaction data extraction prompt
     print("Constructing your custom reaction data extraction prompt")
     construct_initial_prompt(keys, new_keys)
+    print()
     print('############################ Starting up DataRaider ############################ ')
     batch_process_images(info, image_dir, prompt_dir, "get_data_prompt", "update_dict_prompt", output_dir)
-    
+    print()
     print('Clearing temporary files and custom prompts')
     clear_temp_files(prompt_dir, image_dir)
 
