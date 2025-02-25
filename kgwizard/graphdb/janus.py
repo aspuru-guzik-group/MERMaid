@@ -8,7 +8,7 @@ from gremlin_python.driver import serializer
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
 from gremlin_python.process.graph_traversal import GraphTraversalSource, __
 
-from schema import VertexBase, EdgeBase, Connection
+from .schema_abstract import VertexBase, EdgeBase, Connection
 
 def connect(
     direction: str
@@ -73,7 +73,7 @@ def get_vertex(
 
 
 def get_vertices(
-    vertex_type: Type[VertexBase]
+    vertex_type: Type[VertexBase] | str
     , graph: GraphTraversalSource
 ) -> list[dict[str, Any]]:
     """
@@ -86,17 +86,21 @@ def get_vertices(
     :return: A list of dictionaries representing the properties of matching vertices.
     :rtype: list[dict[str, Any]]
     """
+    if issubclass(vertex_type, VertexBase):
+        vl = vertex_type.__name__
+    else:
+        vl = vertex_type
     return (
         graph
         .V()
-        .hasLabel(vertex_type.__name__)
+        .hasLabel(vl)
         .valueMap()
         .toList()
     )
 
 
 def get_vnamelist_from_db(
-    vertex_type: Type[VertexBase]
+    vertex_type: Type[VertexBase] | str
     , graph: GraphTraversalSource
 ) -> list[str]:
     """
@@ -230,7 +234,7 @@ def add_edge(
     :type force: bool, optional
     :return: The created edge.
     :rtype: Edge
-    :raises StopIteration: If the source or target vertex does not exist in the graph.
+n    :raises StopIteration: If the source or target vertex does not exist in the graph.
     """
     source = graph.V().has('name', edge.source).next()
     target = graph.V().has('name', edge.target).next()
