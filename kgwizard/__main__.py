@@ -5,6 +5,7 @@ import importlib.util
 from itertools import repeat
 from pathlib import Path
 import sys
+from typing import Any, Sequence
 
 import numpy as np
 from graphdb import janus, VertexBase
@@ -32,7 +33,7 @@ def build_rag_parser(subparsers):
     )
     
     parser.add_argument(
-        "--output_dir",
+        "-o", "--output_dir",
         type=Path,
         default=Path("./results"),
         help=""""Folder where the JSON files are stored. The folder will be
@@ -40,7 +41,7 @@ def build_rag_parser(subparsers):
     )
 
     parser.add_argument(
-        "--no-parallel",
+        "-np", "--no-parallel",
         action="store_false",
         help="""If active, run the conversions sequentially instead of using
         the dynamic increase parallel algorithm. Overrides the --workers flag.
@@ -48,14 +49,14 @@ def build_rag_parser(subparsers):
     )
 
     parser.add_argument(
-        "--workers",
+        "-w", "--workers",
         type=int,
         help="""If defined, use this number of parallel workers instead of the
         dynamic increase algorithm."""
     )
 
     parser.add_argument(
-        "--subs",
+        "-s", "--subs",
         type=parse_pair_sep_colon,
         nargs="+",
         help="""Substitution to be made in the instructions file. The input
@@ -66,32 +67,65 @@ def build_rag_parser(subparsers):
     )
 
     parser.add_argument(
-        "--address",
+        "-a", "--address",
         type=str,
         default="ws://localhost",
         help="JanusGraph server address. Defaults to ws://localhost."
     )
 
     parser.add_argument(
-        "--port",
+        "-p", "--port",
         type=int,
         default=8182,
         help="JanusGraph port. Defaults to 8182."
     )
 
     parser.add_argument(
-        "--graph",
+        "-g", "--graph",
         type=str,
         default="g",
         help="JanusGraph graph name. Defaults to g."
     )
+    
+    parser.add_argument(
+        "-ds", "--dynamic_start",
+        type=int,
+        default=1,
+        help="Starting number of workers for the dynamic algorithms.."
+    )
 
     parser.add_argument(
-        ""
+        "-dt", "--dynamic_steps",
+        type=int,
+        default=5,
+        help="Maximum number of steps of the dynamic paralelization algorithm."
     )
-    
+
+    parser.add_argument(
+        "-dw", "--dynamic_max_workers",
+        type=int,
+        default=30,
+        help="Maximum number of workers of the dynamic paralelization algorithm."
+    )
 
     return parser
+
+def build_main_parser() -> argparse.ArgumentParser:
+    main_parser = argparse.ArgumentParser(
+        description="Automatic database parsed."
+    )
+    subparsers = main_parser.add_subparsers(
+        title="Commands",
+        description="Available commands",
+        help="Description",
+        dest="command",
+        required=True
+    )
+    subparsers.required = True  # Make sure at least one subcommand is provided
+    build_rag_parser(subparsers)
+
+    return main_parser
+    
 
 
 def build_rag_subs(
@@ -176,18 +210,10 @@ def parse_pair_sep_colon(
 def get_json_from_react(
     connection: janus.DriverRemoteConnection
     , json_react_path: Path | str
+    , substitutions: dict[str, Any]
 ) -> list[dict[str, str]]:
-    connection = janus.connect(
-        "ws://localhost"
-        , 8182
-        , 'g')
     graph = janus.get_traversal(connection)
-
-    rag_dict = build_rag_subs(graph, {
-        #"material": Material,
-        #"atmosphere": Atmosphere,
-        #"material_family": MaterialFamily
-    })
+    rag_dict = build_rag_subs(graph, substitutions)
     json_react_path = Path(json_react_path)
     with open(json_react_path, 'r') as f:
         react_dict = json.load(f)
@@ -216,7 +242,12 @@ def get_json_from_react(
     return messages
 
 
-def exec(files_set, max_workers=30, steps=5, start=1):
+def exec(
+    files_set: Sequence
+    , max_workers: int=30
+    , steps: int=5
+    , start: int=1
+):
     pool_sizes = generate_pool_sizes(
         total_files=len(files_set)
         , steps=steps
@@ -227,4 +258,6 @@ def exec(files_set, max_workers=30, steps=5, start=1):
 
     
 if __name__ == "__main__":
+    parser = build_main_parser()
+    args = parser.parse_args()
     schema = load_module("schema", SCHEMAS[0])
