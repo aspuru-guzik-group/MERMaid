@@ -1,0 +1,43 @@
+"Entry": Entry number for the run.
+
+"Reactants": Specify the reactant index references. You MUST use index (quantity with UNITS) format.
+
+"Substitutions": Specify ALL substitutions. You MUST use symbol = substitution format, where symbol refers to the substitution symbol used. Common substitution symbols are non-elemental letters (e.g. R, M, Y). 
+
+"Catalyst": Specify ALL catalysts. You MUST use chemical (quantity with UNITS) format, where quantity can refer to amounts, equivalents (eq., equiv.), and concentrations, whichever are present. You MUST assume quantitative values and UNITS from standard conditions when the catalyst changes but explicit quantitative values are not provided.
+
+"Ligand": Specify ALL Ligands. You MUST use chemical (quantity with UNITS) format, where quantity can refer to amounts, equivalents (eq., equiv.), and concentrations, whichever are present. 
+
+"Anode": Anode material (positive end). Use abbreviations if available. NOTE: the anode and cathode may be separated by delimiters such as |, /, //, or ||, with or without space. the anode usually appears before the delimiter. Pay particular attention to SEPARATE before including as anode or cathode. There MUST be NO delimiters in the final output. If no polarity indications or delimiters are used, assume the material is used for both the anode and cathode.
+
+"Cathode": Cathode material (negative end). Use abbreviations if available. Cathode usually appears after the delimiter.
+
+"Current": Specifying the current used in the run (mA, mAcm-2). can be abbreviated by 'I'. Put '0 mA' if there is no current or electricity.
+
+"Electrolytes": Include ALL NON-SOLVENT chemicals, such as electrolytes, additives, bases, acids, mediators etc, separated by commas if there are multiple. You MUST use chemical (quantity) format, where quantity can refer to amounts, equivalents (eq., equiv.), and concentrations, whichever are present. you MUST assume quantitative values and UNITS from standard conditions when the chemical changes but explicit quantitative values are not provided.
+
+"irradiation conditions": specify ALL light-related description (e.g. wavelength, power source, light type etc.)
+
+"Photocatalyst": Specify the photocatalysts. You MUST use chemical (quantity) format, where quantity can refer to amounts, equivalents (eq., equiv.), and concentrations, whichever are present. you MUST assume quantitative values and UNITS from standard conditions when the photocatalyst changes but explicit quantitative values are not provided.
+
+"Chemicals": Include ALL NON-SOLVENT chemicals, such as electrolytes, additives, bases, acids, mediators, surfactants, oxidants etc, separated by commas if there are multiple. You MUST use chemical (ROLE, quantity) format, where quantity can refer to amounts, equivalents (eq., equiv.), and concentrations, whichever are present. Put N.R. if role is not specified. you MUST assume quantitative values and UNITS from standard conditions when the chemical changes but explicit quantitative values are not provided.
+
+"Solvents": Specify ALL SOLVENTS and COSOLVENTS used. You MUST use chemical (quantity with UNITS) format, where quantity can refer to volumes, ratios etc. You must assume quantitative values and units from standard conditions when explicit quantitative values are not provided.
+
+"Duration": Indicate the duration of the run.
+
+"Pressure": Specify pressure of reaction/reactor. 
+
+"Air/Inert": Indicate whether the run was done in air or under inert conditions.
+
+"Temperature": A string describing the temperature of the run.
+
+"Others": Any other reaction conditions or results not covered by the previous fields, such as charge, catalyst, modification to reactants etc.
+
+"Yield": A string representing the yield of the reaction. For multiple products, use product index (yield with UNITS) format. 
+
+"Yield type": The yield type (e.g., isolated, NMR, HPLC), as a string.
+
+"Other product info": All other yield-related information if any, such as product ratios, conversions, enantiomeric excess (ee), enantiomeric ratios (er) etc. Capture all such related information even if named differently.
+
+"Footnote": A string representing all superscript notations associated with the run, separated by commas if there are multiple. Superscript notations may appear in any columns. Use empty string if no superscript.
