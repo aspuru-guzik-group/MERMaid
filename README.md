@@ -20,10 +20,10 @@ For full MERMaid pipeline:
 pip install git+https://github.com/aspuru-guzik-group/MERMaid/git
 ```
 
-For individual modules: 
+<!-- For individual modules: 
 ```
 pip install XXXXXXXXXXXXXXXX
-```
+``` -->
 ### Option 2 (for development purposes)
 Download the entire repository and install the requirements 
 ```
@@ -64,11 +64,11 @@ python mermaid/run_dataraider.py
 The extracted json dictionaries will be saved to `json_files` subfolder in your image directory by default. 
 A sample output json dictionary can be found in `Examples` folder. 
 
-#### 2.3.3 KGWizard for data-to-knowledge graph translation 
+<!-- #### 2.3.3 KGWizard for data-to-knowledge graph translation 
 The main command to launch and run KGWizard is: 
 ```
-XXXXXXXXXXXXX
+<Coming Soon!>
 ```
 
 ## 3. Data Visualization 
-The knowledge graphs can be visualized using XXXXXXXXXXX. 
+<Coming Soon!>  -->
