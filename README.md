@@ -18,7 +18,9 @@ Directly install the package to your pip environment.
 For full MERMaid pipeline: 
 ```
 pip install git+https://github.com/aspuru-guzik-group/MERMaid/git
+```
 OR 
+```
 pip install MERMaid[full]
 ```
 
@@ -38,11 +40,11 @@ pip install -e .
 
 ## 2. Usage 
 ### 2.1 Setting up your plug-and-play configuration file 
-* Fill in your customized details in `mermaid/startup.json` to configure it (e.g. directory paths, reaction parameter key selection etc.)  
+* Fill in your customized details in `startup.json` to configure it (e.g. directory paths, reaction parameter key selection etc.)  
 * The in-built reaction parameter keys can be found in `Prompts/inbuilt_keyvaluepairs.txt`. 
 * For post-processing extracted JSON reaction dictionaries: 
-    * you can add your own common chemical names by modifying the `COMMON_NAMES` constant in `mermaid/postprocess.py`
-    * you can also add your own key names that you want to be cleaned by modifying the `KEYS` constant in `mermaid/postprocess.py`
+    * you can add your own common chemical names by modifying the `COMMON_NAMES` constant in `dataraider/postprocess.py`
+    * you can also add your own key names that you want to be cleaned by modifying the `KEYS` constant in `dataraider/postprocess.py`
 
 
 ### 2.2 Running the end-to-end MERMaid pipeline 
@@ -66,7 +68,7 @@ The main command to launch and run DataRaider is:
 dataraider
 ```
 The extracted json dictionaries will be saved to `json_files` subfolder in your image directory by default. 
-A sample output json dictionary can be found in `Examples` folder. 
+A sample output json dictionary can be found in `Assets` folder. 
 
 #### 2.3.3 KGWizard for data-to-knowledge graph translation 
 The main command to launch and run KGWizard is: 
