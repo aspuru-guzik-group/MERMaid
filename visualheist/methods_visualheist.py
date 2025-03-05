@@ -15,11 +15,10 @@ Adapted from TF-ID model https://github.com/ai8hyf/TF-ID
 """
 
 
-#TODO: TO BE REPLACED
-LARGE_MODEL_ID = "yifeihu/TF-ID-large" 
-BASE_MODEL_ID = "yifeihu/TF-ID-base" 
-LARGE_SAFETENSORS_PATH = "https://huggingface.co/yifeihu/TF-ID-large/resolve/main/model.safetensors" 
-BASE_SAFETENSORS_PATH = "https://huggingface.co/yifeihu/TF-ID-base/resolve/main/model.safetensors" 
+LARGE_MODEL_ID = "shixuanleong/visualheist-large" 
+BASE_MODEL_ID = "shixuanleong/visualheist-base" 
+LARGE_SAFETENSORS_PATH = "https://huggingface.co/shixuanleong/visualheist-large/resolve/main/model.safetensors" 
+BASE_SAFETENSORS_PATH = "https://huggingface.co/shixuanleong/visualheist-base/resolve/main/model.safetensors" 
 
 
 def _pdf_to_image(pdf_path):
