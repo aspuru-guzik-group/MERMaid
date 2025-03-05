@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "MERMaid"
+version = "25.03"
+description = "Multimodal mining of chemical reactions from PDFs"
+dependencies = []
+authors = [
+    { name = "Shi Xuan Leong", email = "shixuan.leong@gmail.com"}, 
+    { name = "Sergio Pablo-Garcia", email = "spgarcica@gmail.com"}, 
+    { name = "Brandon Wong", email = "brandonhywong@gmail.com"}]
+maintainers = [
+     { name = "Shi Xuan Leong", email = "shixuan.leong@gmail.com"}, 
+    {name = "Sergio Pablo-Garcia", email = "spgarcica@gmail.com"}
+]
+readme = "README.md"
+license  = {file = "LICENSE"}
+keywords = ["mining", "chemistry", "PDFs", "vision-language models", "knowledge graphs"]
+
+[project.optional-dependencies]
+visualheist = ["pdf2image", "Pillow", "transformers", "safetensors", "torch", "huggingface_hub", "einops", "timm"]
+dataraider = ["requests", "opencv-python","numpy", "regex", "pubchempy", "openai", "huggingface_hub"]
+kgwizard = ["gremlin", "openai"]
+full = ["visualheist", "dataraider", "kgwizard"]
+
+[project.scripts]
+dataraider = "scripts.run_dataraider:main"
+visualheist = "scripts.run_visualheist:main"
+kgwizard = "scripts.run_kgwizard:main"
+mermaid = "scripts.run_mermaid:main"
