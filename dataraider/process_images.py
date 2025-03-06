@@ -79,6 +79,7 @@ def batch_process_images(
     :return: Returns nothing, all data saved in JSON
     :rtype: None
     """
+    image_directory = os.path.join(image_directory, "/relevant_images/")
     for file in os.listdir(image_directory):
         if (file.endswith(".png")):
             image_name = file.removesuffix('.png')
@@ -99,7 +100,7 @@ def clear_temp_files(
     :param image_directory: Root directory where the original images are stored
     :type image_directory: str
     """
-    cropped_image_directory = os.path.join(image_directory, "cropped_images")
+    cropped_image_directory = os.path.join(image_directory, "relevant_images/cropped_images")
     if os.path.exists(cropped_image_directory) and os.path.isdir(cropped_image_directory):
         shutil.rmtree(cropped_image_directory)
         print("Temporary files and 'cropped_images' directory removed.")

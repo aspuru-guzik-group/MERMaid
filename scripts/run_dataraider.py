@@ -7,6 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataraider.processor_info import DataRaiderInfo
 from dataraider.reaction_dictionary_formating import construct_initial_prompt
 from dataraider.process_images import batch_process_images, clear_temp_files
+from dataraider.filter_image import filter_images
 from huggingface_hub import hf_hub_download
 
 
@@ -76,6 +77,8 @@ def main():
     construct_initial_prompt(keys, new_keys)
     print()
     print('############################ Starting up DataRaider ############################ ')
+    print('Filtering relevant images first.')
+    filter_images(info, prompt_dir, "filter_image_prompt", image_dir)
     batch_process_images(info, image_dir, prompt_dir, "get_data_prompt", "update_dict_prompt", json_dir)
     print()
     print('Clearing temporary files and custom prompts')
