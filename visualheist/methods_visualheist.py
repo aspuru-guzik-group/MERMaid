@@ -152,7 +152,7 @@ def _pdf_to_figures_and_tables(pdf_path, output_dir, large_model):
     for i, image in enumerate(images):
         annotation = _tf_id_detection(image, model, processor)
         image_counter = _save_image_from_bbox(image, annotation, image_counter, output_dir, pdf_name)
-        #print(f"Page {i} saved. Number of objects: {len(annotation['bboxes'])}")
+        print(f"Page {i} saved. Number of objects: {len(annotation['bboxes'])}")
     print(f"All extracted images from {pdf_name} are saved")
     print("=====================================")
 
