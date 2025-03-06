@@ -32,8 +32,8 @@ def main():
     print("\n### Running DataRaider ###\n")
     run_subprocess("scripts/run_dataraider.py")
 
-    print("\n### Running KGWizard ###\n")
-    run_subprocess("scripts/run_kgwizard.py")
+    # print("\n### Running KGWizard ###\n")
+    # run_subprocess("scripts/run_kgwizard.py")
 
 if __name__ == "__main__":
     main()

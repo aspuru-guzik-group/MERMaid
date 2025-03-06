@@ -1,7 +1,9 @@
 import os
 import json
 import argparse
+import sys
 # from methods_dataraider import RxnOptDataProcessor
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataraider.processor_info import DataRaiderInfo
 from dataraider.reaction_dictionary_formating import construct_initial_prompt
 from dataraider.process_images import batch_process_images, clear_temp_files
@@ -20,7 +22,14 @@ def load_config(config_file):
     :rtype: dict
     """
     with open(config_file, 'r') as f:
-        return json.load(f)
+        config = json.load(f)
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(script_dir)
+    config['default_image_dir'] = os.path.join(parent_dir, config.get('default_image_dir', ''))
+    config['default_json_dir'] = os.path.join(parent_dir, config.get('default_json_dir', ''))
+    config['default_graph_dir'] = os.path.join(parent_dir, config.get('default_graph_dir', ''))
+    return config
     
 def main():
     """
@@ -49,12 +58,16 @@ def main():
         config_path = os.path.join(package_dir, 'startup.json')
         config = load_config(config_path) if os.path.exists(config_path) else {}
 
-    image_dir = args.image_dir or config.get('image_dir', config.get('default_image_dir'))
     prompt_dir = args.prompt_dir or config.get('prompt_dir', "./Prompts")
-    json_dir = args.json_dir or config.get('json_dir', config.get('default_json_dir'))
-    keys = args.keys or config.get('keys', ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents"])
-    new_keys = args.new_keys or config.get('new_keys', None)
-    api_key = args.api_key or config.get('api_key', None)
+    image_dir = config.get('image_dir', "").strip() 
+    if not image_dir: 
+        image_dir = config.get('default_image_dir')
+    json_dir = config.get('json_dir', "").strip()
+    if not json_dir:
+        json_dir = config.get('default_json_dir')
+    keys = config.get('keys', ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents"])
+    new_keys = config.get('new_keys', None)
+    api_key = config.get('api_key', None)
 
     info = DataRaiderInfo(api_key=api_key, device="cpu", ckpt_path=ckpt_path)
     print(f'keys are {keys}')

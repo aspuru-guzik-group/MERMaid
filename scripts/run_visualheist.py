@@ -1,6 +1,8 @@
 import json
+import sys
 import os
 import argparse
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from visualheist.methods_visualheist import batch_pdf_to_figures_and_tables
 
 def load_config(config_file):
@@ -12,7 +14,14 @@ def load_config(config_file):
     :rtype: dict
     """
     with open(config_file, 'r') as f:
-        return json.load(f)
+        config = json.load(f)
+    
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(script_dir)
+    config['default_image_dir'] = os.path.join(parent_dir, config.get('default_image_dir', ''))
+    config['default_json_dir'] = os.path.join(parent_dir, config.get('default_json_dir', ''))
+    config['default_graph_dir'] = os.path.join(parent_dir, config.get('default_graph_dir', ''))
+    return config
 
 def main():
     """
@@ -38,12 +47,14 @@ def main():
         config = load_config(config_path) if os.path.exists(config_path) else {}
 
     pdf_dir = args.pdf_dir or config.get('pdf_dir', "./pdfs")
-    image_dir = args.image_dir or config.get('image_dir', config.get('default_image_dir'))
+    image_dir = config.get('image_dir', "").strip() 
+    if not image_dir: 
+        image_dir = config.get('default_image_dir')
+    # image_dir = args.image_dir or config.get('image_dir', config.get('default_image_dir'))
     model_size = args.model_size or config.get('model_size', "base")
     use_large_model = model_size == "large"
 
     print(f"Processing PDFs in: {pdf_dir}")
-    print(f"Saving extracted images to: {image_dir}")
     print(f"Using {'LARGE' if use_large_model else 'BASE'} model.")
 
     batch_pdf_to_figures_and_tables(pdf_dir, image_dir, large_model=model_size)
