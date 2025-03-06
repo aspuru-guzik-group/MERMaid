@@ -13,14 +13,14 @@
 ## 1. Installation 
 
 
-Create a new python environment using conda. The recommended python version is 3.9.
+### 1.1 Create a new python environment using conda. The recommended python version is 3.9.
 
 ```
 conda create -n mermaid-env python=3.9
 conda activate mermaid-env
 ```
 
-### 1.1 Install RxnScribe using the following steps for optical chemical structure recognition:
+### 1.2 Install RxnScribe using the following steps for optical chemical structure recognition:
 ```
 git clone https://github.com/thomas0809/RxnScribe.git
 cd RxnScribe
@@ -28,7 +28,7 @@ pip install -r requirements.txt
 python setup.py install
 cd ..
 ```
-### 1.2 Install MERMaid using the following steps: 
+### 1.3 Install MERMaid using the following steps: 
 
 #### Option 1 (quick installation) 
 Directly install the package. 
