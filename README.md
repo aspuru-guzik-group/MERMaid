@@ -12,6 +12,14 @@
 
 ## 1. Installation 
 
+Install RxnScribe using the following steps:
+```
+git clone https://github.com/thomas0809/RxnScribe.git
+cd RxnScribe
+pip install -r requirements.txt
+python setup.py install
+```
+
 ### Option 1 (quick installation) 
 Directly install the package to your pip environment. 
 
@@ -37,7 +45,7 @@ git clone https://github.com/aspuru-guzik-group/MERMaid/git
 cd MERMaid
 pip install -e .
 ```
-
+Please note that you may get a compatibility warning with MolScribe version 1.1.1 not being compatible with Torch versions >2.0. You can safely ignore this warning.
 ## 2. Usage 
 ### 2.1 Setting up your plug-and-play configuration file 
 * Indicate your configuration settings in `startup.json`: 
