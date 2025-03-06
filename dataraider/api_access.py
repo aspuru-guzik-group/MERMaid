@@ -178,7 +178,6 @@ def adaptive_get_data(
         "messages": messages,
         "max_tokens": 4000
     }
-
     # Send API request
     try:
         response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
@@ -188,15 +187,15 @@ def adaptive_get_data(
         # Save responses
         with open(response_path, 'w') as json_file:
             json.dump(reaction_data, json_file)
-        print(f"Reaction dictionary saved")
+        print("Reaction dictionary saved")
 
         # Clean response: 
         try: 
             reformat_json(response_path)
-            print(f"{response_path}: Reaction data cleaned.")
+            print("Reaction data cleaned.")
 
         except Exception as e: 
-            print(f"{response_path}: Reaction data not cleaned. Error: {e}")
+            print(f"Reaction data not cleaned. Error: {e}")
     
     except requests.exceptions.RequestException as e:
         print(f"Error during API request: {e}")

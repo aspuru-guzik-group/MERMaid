@@ -65,7 +65,6 @@ def update_dict_with_smiles(
     except Exception as e: 
         reactions.append({'reactants': ["N.R"], 'products': ["N.R"]})
         print("No reaction SMILES extracted. Returning 'NR' for reactants and products.")
-        return
     
     #Clean extracted cleaned reaction SMILES 
     if not reactions or 'NR' in reactions[0].get('reactants', '') or 'NR' in reactions[0].get('products', ''):
