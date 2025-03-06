@@ -46,9 +46,6 @@ def update_dict_with_footnotes(
         # Replace existing json file with updated json file
         response_path = json_path
 
-        # # Alternative: Save as a new json file
-        # response_path = os.path.join(json_directory, f"{image_name}_updated.json")
-
         # Construct message
         messages = [
             {
@@ -98,6 +95,7 @@ def update_dict_with_footnotes(
         
         except requests.exceptions.RequestException as e:
             print(f"Error during API request: {e}")
+
 
 def adaptive_get_data( 
                     info:DataRaiderInfo,

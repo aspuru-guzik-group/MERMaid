@@ -3,6 +3,10 @@ import re
 import json 
 import os
 
+"""
+File containing post processing functions
+"""
+
 COMMON_NAMES = {"nBu4NBF4": "Tetrabutylammonium tetrafluoroborate", 
                 "n-Bu4NBF4": "Tetrabutylammonium tetrafluoroborate",
                 "Bu4NBF4": "Tetrabutylammonium tetrafluoroborate",
@@ -28,13 +32,13 @@ COMMON_NAMES = {"nBu4NBF4": "Tetrabutylammonium tetrafluoroborate",
 
 KEYS =  ['Catalyst', 'Ligand', 'Solvents', 'Chemicals', 'Additives', 'Electrolytes']
 
-
 def split_chemicals(value:str):
     """
     Splits a string containing chemical information into components and their associated quantities.
 
     :param value: A string containing chemicals and their quantities (e.g., 'Tetrabutylammonium chloride (2.5 g), IPA (10 mL)').
     :type value: str
+    
     :return: A list of tuples where each tuple contains the chemical name and its quantity.
     :rtype: list[tuple[str, str]]
     """
@@ -57,6 +61,7 @@ def load_json(file_path:str):
 
     :param file_path: Path to the JSON file.
     :type file_path: str
+    
     :return: Parsed JSON content.
     :rtype: dict
     """
@@ -72,8 +77,9 @@ def pubchem_to_smiles(chemical: str,
 
     :param chemical: The common name or chemical formula to search for.
     :type chemical: str
-    :param max_retries: Number of retries if the first attempt fails, default is 1.
+    :param max_retries: Number of retries if the first attempt fails, defaults to 1.
     :type max_retries: int
+    
     :return: SMILES representation of the chemical, or the original chemical name if not found.
     :rtype: str
     """
@@ -110,6 +116,7 @@ def _split_chemical(value: str, common_names: dict):
     :type value: str
     :param common_names: A dictionary of common names for chemicals to resolve ambiguous entries.
     :type common_names: dict
+
     :return: A list of tuples where each tuple contains the resolved chemical name and its quantity.
     :rtype: list[tuple[str, str]]
     """
@@ -150,6 +157,7 @@ def _process_mixed_chemicals(common_names:dict, chemicals:str):
     :type common_names: dict
     :param chemicals: The string containing mixed chemical systems to resolve.
     :type chemicals: str
+    
     :return: The resolved string of chemicals with SMILES or common names.
     :rtype: str
     """
@@ -173,6 +181,7 @@ def _replace_chemical(common_names:dict, chemical:str):
     :type common_names: dict
     :param chemical: The chemical name to resolve.
     :type chemical: str
+    
     :return: The resolved chemical name.
     :rtype: str
     """
@@ -193,6 +202,7 @@ def _entity_resolution_entry(entry: dict, keys: list, common_names: dict):
     :type keys: list[str]
     :param common_names: A dictionary of common names for chemicals.
     :type common_names: dict
+    
     :return: The updated entry with resolved chemical entities.
     :rtype: dict
     """
@@ -217,6 +227,7 @@ def _entity_resolution_rxn_dict(rxn_dict: dict, keys: list, common_names: dict):
     :type keys: list[str]
     :param common_names: A dictionary of common names for chemicals.
     :type common_names: dict
+    
     :return: The updated reaction dictionary with resolved chemical entities.
     :rtype: dict
     """
@@ -243,6 +254,9 @@ def _save_json(file_path:str, data:dict):
     :type file_path: str
     :param data: The data to save to the JSON file.
     :type data: dict
+    
+    :return: Nothing, all information saved to the JSON at file_path
+    :rtype: None
     """    
     with open(file_path, "w") as file:
         json.dump(data, file, indent=4)
@@ -259,10 +273,13 @@ def _process_raw_dict(image_name:str,
     :type image_name: str
     :param json_directory: The directory where the JSON file is located.
     :type json_directory: str
-    :param keys: List of keys representing the chemical entities to resolve.
+    :param keys: List of keys representing the chemical entities to resolve, defaults to KEYS.
     :type keys: list[str]
-    :param common_names: Dictionary of common names to replace ambiguous chemicals.
+    :param common_names: Dictionary of common names to replace ambiguous chemicals, defaults to COMMON_NAMES.
     :type common_names: dict
+    
+    :return: Nothing, all file saved to the JSON at file_path
+    :rtype: None
     """
     file_path = os.path.join(json_directory, f"{image_name}.json")
     rxn_dict = load_json(file_path)

@@ -1,14 +1,13 @@
 import os
 import requests
 import shutil
-import glob
-import json
 import base64
 from .processor_info import DataRaiderInfo
 
 """
 Filter images using OpenAI model
 """
+
 def filter_images(info:DataRaiderInfo, 
                  prompt_directory:str, 
                  filter_prompt:str, 
@@ -16,8 +15,8 @@ def filter_images(info:DataRaiderInfo,
     """
     Determines if an image and its caption is relevant to the specified task.
     
-    :param info: Object containing API credentials and model details (must have `api_key` and `vlm_model` attributes).
-    :type info: Any
+    :param info: Global information required for processing containing API credentials and model details (must have `api_key` and `vlm_model` attributes).
+    :type info: DataRaiderInfo
     :param prompt_directory: Path to the directory containing prompt files.
     :type prompt_directory: str
     :param filter_prompt: (Unused in the function; kept for future modifications).

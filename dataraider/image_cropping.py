@@ -47,12 +47,13 @@ def _find_split_line(image,
 
     return split_line if split_line > region_start else region_start
 
+
 def _adaptive_split_lines(image, 
-                            first_split_line, 
-                            min_segment_height, 
-                            threshold, 
-                            percentage_threshold, 
-                            step_size):
+                        first_split_line, 
+                        min_segment_height, 
+                        threshold, 
+                        percentage_threshold, 
+                        step_size):
     """
     Helper function to identify all the split lines for an image
     
@@ -60,7 +61,7 @@ def _adaptive_split_lines(image,
     :type image: numpy.ndarray
     :param first_split_line: Index of the first split line
     :type first_split_line: int
-    :param min_segment_height: minimum height of each segmented subfigure, defaults to 120
+    :param min_segment_height: Minimum height of each segmented subfigure
     :type min_segment_height: int
     :param threshold: Thershold for identifying white pixels
     :type threshold: float
@@ -94,13 +95,14 @@ def _adaptive_split_lines(image,
 
     return split_lines
 
+
 def _segment_image(image, split_lines):
     """
     Helper function to crop image based on split lines
     
     :param image: OpenCV image
     :type image: numpy.ndarray
-    :param split_lines: list of split lines
+    :param split_lines: List of split lines
     :type split_lines: list[int]
     
     :return: Returns the different segments of image that were cropped with split_lines
@@ -125,7 +127,6 @@ def crop_image(image_name:str,
         Adaptively crop a given figure into smaller subfigures before 
         passing to VLM based on image length and save to image_directory
 
-        parameters: 
         :param image_name: Base image name
         :type image_name: str
         :param image_directory: Root directory where original images are saved
@@ -193,7 +194,7 @@ def batch_crop_image(image_directory:str, min_segment_height:float=120):
 
     :param image_directory: Directory of images to crop
     :type image_directory: str
-    :param min_segment_height: minimum height of each segment, defaults to 120
+    :param min_segment_height: Minimum height of each segment, defaults to 120
     :type min_segment_height: float
     
     :return: Returns nothing, all images are saved in image_directory

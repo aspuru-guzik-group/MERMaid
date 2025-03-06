@@ -115,7 +115,7 @@ def construct_initial_prompt(
                             opt_run_keys: list, 
                             new_run_keys: dict):
     """Creates a get_data_prompt with opt_run_keys key-value pairs embedded into it
-    Uses <INSERT_HERE> as the location tag for inserting keys
+    Uses <INSERT_HERE> as the location tag for inserting keys.
     Saves the new prompt to a file named get_data_prompt.txt inside the Prompts directory
 
     :param opt_run_keys: Optimization keys that are pre defined
@@ -130,14 +130,12 @@ def construct_initial_prompt(
     marker = "<INSERT_HERE>"
     package_dir = os.path.dirname(__file__)
 
-    # retrieve all inbuilt keys
+    # Retrieve all inbuilt keys
     inbuilt_key_pair_file_path = os.path.join(package_dir, "../Prompts/inbuilt_keyvaluepairs.txt")
     with open(inbuilt_key_pair_file_path, "r") as inbuilt_file:
         inbuilt_key_pair_file_contents = inbuilt_file.readlines()
     
-    # get the list of optimization run dictionary key value pairs
-    # add the newly defined keys first
-    # opt_run_list = ["\"" + key + "\": " + new_run_keys[key] + "\n" for key in new_run_keys]
+    # Get the list of optimization run dictionary key value pairs
     opt_run_list = [f'"{key}": "{new_run_keys[key]}"\n' for key in new_run_keys]
     for line in inbuilt_key_pair_file_contents:
         if not line.strip():
@@ -160,13 +158,8 @@ def construct_initial_prompt(
             new_prompt_file_contents.extend(opt_run_list)
         else: 
             new_prompt_file_contents.append(line)
-
-        # if marker not in line:
-        #     new_prompt_file_contents.append(line)
-        # else:
-        #     new_prompt_file_contents.append("\n".join(opt_run_list))
     
-    # saves the defined prompt as get_data_prompt
+    # Save the defined prompt as get_data_prompt
     new_prompt_file_path = os.path.join(package_dir, "../Prompts/get_data_prompt.txt")
     with open(new_prompt_file_path, "w") as new_prompt_file:
         new_prompt_file.writelines(new_prompt_file_contents)
