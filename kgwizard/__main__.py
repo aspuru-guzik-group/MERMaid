@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import argparse
-from types import ModuleType
 import importlib.util
 from itertools import repeat
 from pathlib import Path
 import sys
+from types import ModuleType
 from typing import Any, Sequence
 
 import numpy as np
@@ -17,14 +17,72 @@ from prompt import (
 
 
 SCHEMA_DEFAULT_PATH = Path(janus.__file__).parent / "schemas"
-SCHEMAS = tuple(SCHEMA_DEFAULT_PATH.glob("*.py"))
+SCHEMAS = dict(map(
+    lambda x: (x.stem, x)
+    , SCHEMA_DEFAULT_PATH.glob("*.py")
+))
 
-def build_rag_parser(subparsers):
-    parser = subparsers.add_parser(
-        "retrieve",
-        help="""Converts a set of json files into the target format and stores
-        them in the given graph database."""
+
+def build_janus_argparser():
+    parser = argparse.ArgumentParser(add_help=False)
+
+    parser.add_argument(
+        "-a", "--address",
+        type=str,
+        default="ws://localhost",
+        help="JanusGraph server address. Defaults to ws://localhost."
     )
+
+    parser.add_argument(
+        "-p", "--port",
+        type=int,
+        default=8182,
+        help="JanusGraph port. Defaults to 8182."
+    )
+
+    parser.add_argument(
+        "-g", "--graph",
+        type=str,
+        default="g",
+        help="JanusGraph graph name. Defaults to g."
+    )
+
+    
+    parser.add_argument(
+        "-sc", "--schema",
+        type=load_schema,
+        help=f"""Node/Edge schema to be used during the json conversion. Can be
+        either a path or any of the default schemas: {', '.join(SCHEMAS.keys())}."""
+    )
+
+    return parser
+
+
+def build_parser_argparser():
+    parser = argparse.ArgumentParser(add_help=False)
+
+    parser.add_argument(
+        "input_dir",
+        type=Path,
+        help="Folder where the JSON files are stored."
+    )
+
+    parser.add_argument(
+        "-o", "--output_dir",
+        type=Path,
+        default=Path("./results"),
+        help=""""Folder where the generate JSON intermediate files will be
+        stored. The folder will be automatically created. Defaults to
+        ./results."""
+    )
+
+    return parser
+
+
+
+def build_transform_argparser():
+
+    parser = argparse.ArgumentParser(add_help=False) 
 
     parser.add_argument(
         "input_dir",
@@ -36,8 +94,9 @@ def build_rag_parser(subparsers):
         "-o", "--output_dir",
         type=Path,
         default=Path("./results"),
-        help=""""Folder where the JSON files are stored. The folder will be
-        automatically created. Defaults to ./results."""
+        help=""""Folder where the generate JSON intermediate files will be
+        stored. The folder will be automatically created. Defaults to
+        ./results."""
     )
 
     parser.add_argument(
@@ -65,27 +124,6 @@ def build_rag_parser(subparsers):
         are not given, RAG module will not be executed.
         """
     )
-
-    parser.add_argument(
-        "-a", "--address",
-        type=str,
-        default="ws://localhost",
-        help="JanusGraph server address. Defaults to ws://localhost."
-    )
-
-    parser.add_argument(
-        "-p", "--port",
-        type=int,
-        default=8182,
-        help="JanusGraph port. Defaults to 8182."
-    )
-
-    parser.add_argument(
-        "-g", "--graph",
-        type=str,
-        default="g",
-        help="JanusGraph graph name. Defaults to g."
-    )
     
     parser.add_argument(
         "-ds", "--dynamic_start",
@@ -110,10 +148,19 @@ def build_rag_parser(subparsers):
 
     return parser
 
-def build_main_parser() -> argparse.ArgumentParser:
-    main_parser = argparse.ArgumentParser(
-        description="Automatic database parsed."
-    )
+
+def load_schema(schema: str):
+    p: Path
+    if s := SCHEMAS.get(schema): p = s
+    else: p = Path(schema)
+    return load_module("schema", p)
+    
+
+def build_main_argparser() -> argparse.ArgumentParser:
+
+    parent_parser = build_janus_argparser()
+
+    main_parser = argparse.ArgumentParser(description="Automated database parser.")
     subparsers = main_parser.add_subparsers(
         title="Commands",
         description="Available commands",
@@ -121,11 +168,25 @@ def build_main_parser() -> argparse.ArgumentParser:
         dest="command",
         required=True
     )
-    subparsers.required = True  # Make sure at least one subcommand is provided
-    build_rag_parser(subparsers)
+    subparsers.required = True
+
+    subparsers.add_parser(
+        "transform",
+        help="""Converts a set of JSON files within a folder into an
+        intermediate JSON structured format ready to be uploaded to a certain
+        database. Optinioally, uploads the transformed files into a database
+        and uses RAG to retrieve already known nodes. Address, port and graph
+        arguments are only used if RAG is active (see --subs).""",
+        parents=[build_transform_argparser(), build_janus_argparser()]
+    )
+    subparsers.add_parser(
+        "parse",
+        help="""Converts a set of JSON files into the target format and stores
+        them in the given graph database.""",
+        parents=[build_parser_argparser(), build_janus_argparser()]
+    )
 
     return main_parser
-    
 
 
 def build_rag_subs(
@@ -215,6 +276,7 @@ def get_json_from_react(
     graph = janus.get_traversal(connection)
     rag_dict = build_rag_subs(graph, substitutions)
     json_react_path = Path(json_react_path)
+
     with open(json_react_path, 'r') as f:
         react_dict = json.load(f)
     optimization_runs = list(react_dict["Optimization Runs"].keys())
@@ -258,6 +320,6 @@ def exec(
 
     
 if __name__ == "__main__":
-    parser = build_main_parser()
+    parser = build_main_argparser()
     args = parser.parse_args()
-    schema = load_module("schema", SCHEMAS[0])
+    # schema = load_module("schema", SCHEMAS[0])
