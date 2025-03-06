@@ -40,19 +40,28 @@ pip install -e .
 
 ## 2. Usage 
 ### 2.1 Setting up your plug-and-play configuration file 
-* Fill in your customized details in `startup.json` to configure it (e.g. directory paths, reaction parameter key selection etc.)  
-* The in-built reaction parameter keys can be found in `Prompts/inbuilt_keyvaluepairs.txt`. 
+* Indicate your configuration settings in `startup.json`: 
+    * "pdf_dir": "/path/to/directory/storing/pdfs"
+    * "image_dir": "/path/to/directory/to/store/extracted/images"
+    * "json_dir": "/path/to/directory/to/store/json/output"
+    * "graph_dir": "/path/to/directory/to/store/graph/files"
+    * "api_key": "your_api_key_here"
+    * "model_size": "model_size_here" ("base" OR "large")
+    * "keys": ["key1", "key2"] (the in-built reaction parameter keys can be found in `Prompts/inbuilt_keyvaluepairs.txt`) 
+    * "new_keys": define your custom keys here 
+
 * For post-processing extracted JSON reaction dictionaries: 
     * you can add your own common chemical names by modifying the `COMMON_NAMES` constant in `dataraider/postprocess.py`
     * you can also add your own key names that you want to be cleaned by modifying the `KEYS` constant in `dataraider/postprocess.py`
 
+* We have included an additional `filter_prompt` in `Prompts/` folder to identify only images that are relevant to your task of interest. You are highly encouraged to specify your own task and keys. 
 
 ### 2.2 Running the end-to-end MERMaid pipeline 
 The main command to launch and run MERMaid is: 
 ```
 mermaid
 ```
-All intermediate files from each module will be saved in your pdf directory by default.
+All intermediate files from each module will be saved in the `Results` folder of your root directory by default.
 
 ### 2.3 Running individual modules 
 #### 2.3.1 VisualHeist for image segmentation from scientific PDF documents 
@@ -60,14 +69,12 @@ The main command to launch and run VisualHeist is:
 ```
 visualheist
 ```
-The extracted image files will be saved to an `extracted_images` subfolder in your pdf directory by default. 
 
 #### 2.3.2 DataRaider for image-to-data conversion into JSON dictionaries 
 The main command to launch and run DataRaider is: 
 ```
 dataraider
 ```
-The extracted json dictionaries will be saved to `json_files` subfolder in your image directory by default. 
 A sample output json dictionary can be found in `Assets` folder. 
 
 #### 2.3.3 KGWizard for data-to-knowledge graph translation 
