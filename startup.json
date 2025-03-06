@@ -13,7 +13,7 @@
     "model_size": "model_size_here",
 
 
-    "default_image_dir": "./Results/extracted_images/",
-    "default_json_dir": "./Results/jsons/",
-    "default_graph_dir": "./Results/graphs/"
+    "default_image_dir": "Results/extracted_images/",
+    "default_json_dir": "Results/jsons/",
+    "default_graph_dir": "Results/graphs/"
   }
