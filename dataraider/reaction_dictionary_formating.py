@@ -5,7 +5,7 @@ from .processor_info import DataRaiderInfo
 from . import postprocess as pp
 
 """
-Module for reaction dictionary/JSON utilities
+Scripts for reaction dictionary formatting
 """
 
 def reformat_json(input_file:str):
