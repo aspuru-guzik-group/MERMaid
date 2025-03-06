@@ -13,23 +13,25 @@
 ## 1. Installation 
 
 
-Create a new python envrionment using conda. The recommended python version is 3.9.
+Create a new python environment using conda. The recommended python version is 3.9.
 
 ```
-conda create -n mermaid python=3.9
-conda activate mermaid
+conda create -n mermaid-env python=3.9
+conda activate mermaid-env
 ```
 
-Install RxnScribe using the following steps:
+### 1.1 Install RxnScribe using the following steps for optical chemical structure recognition:
 ```
 git clone https://github.com/thomas0809/RxnScribe.git
 cd RxnScribe
 pip install -r requirements.txt
 python setup.py install
+cd ..
 ```
+### 1.2 Install MERMaid using the following steps: 
 
-### Option 1 (quick installation) 
-Directly install the package to your pip environment. 
+#### Option 1 (quick installation) 
+Directly install the package. 
 
 For full MERMaid pipeline: 
 ```
@@ -40,20 +42,21 @@ OR
 pip install MERMaid[full]
 ```
 
-For individual modules: 
+For individual modules only: 
 ```
 pip install MERMaid[visualheist]
 pip install MERMaid[dataraider]
 pip install MERMaid[kgwizard]
 ```
-### Option 2 (for development purposes)
-Download the entire repository and install the requirements 
+#### Option 2 (for development purposes)
+Download the entire repository and install the requirements.
 ```
 git clone https://github.com/aspuru-guzik-group/MERMaid/git
 cd MERMaid
 pip install -e .
 ```
-Please note that you may get a compatibility warning with MolScribe version 1.1.1 not being compatible with Torch versions >2.0. You can safely ignore this warning.
+Please note that you may get a compatibility warning stating that `MolScribe version 1.1.1 not being compatible with Torch versions >2.0`. You can safely ignore this warning.
+
 ## 2. Usage 
 ### 2.1 Setting up your plug-and-play configuration file 
 * Indicate your configuration settings in `startup.json`: 
