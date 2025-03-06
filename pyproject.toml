@@ -20,7 +20,7 @@ license  = {file = "LICENSE"}
 keywords = ["mining", "chemistry", "PDFs", "vision-language models", "knowledge graphs"]
 
 [project.optional-dependencies]
-visualheist = ["pdf2image", "Pillow", "transformers", "safetensors", "torch", "huggingface_hub", "einops", "timm"]
+visualheist = ["pdf2image", "Pillow", "transformers", "safetensors", "torch==2.3.0", "torchvision==0.18.0", "pytorch-lightning==2.3.0", "huggingface_hub", "einops", "timm"]
 dataraider = ["requests", "opencv-python","numpy", "regex", "pubchempy", "openai", "huggingface_hub"]
 kgwizard = ["gremlin", "openai"]
 full = ["visualheist", "dataraider", "kgwizard"]
