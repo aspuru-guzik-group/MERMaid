@@ -12,6 +12,14 @@
 
 ## 1. Installation 
 
+
+Create a new python envrionment using conda. The recommended python version is 3.9.
+
+```
+conda create -n mermaid python=3.9
+conda activate mermaid
+```
+
 Install RxnScribe using the following steps:
 ```
 git clone https://github.com/thomas0809/RxnScribe.git
