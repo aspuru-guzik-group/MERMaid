@@ -1,11 +1,7 @@
 import os
-from pdf2image import convert_from_path, convert_from_bytes
-from pdf2image.exceptions import PDFInfoNotInstalledError, PDFPageCountError, PDFSyntaxError
-from PIL import Image
+from pdf2image import convert_from_path
 from transformers import AutoProcessor, AutoModelForCausalLM 
-from safetensors import safe_open
 from safetensors.torch import load_file
-import torch
 from huggingface_hub import hf_hub_download
 
 """
@@ -14,12 +10,10 @@ headings/footnotes, as images.
 Adapted from TF-ID model https://github.com/ai8hyf/TF-ID 
 """
 
-
 LARGE_MODEL_ID = "shixuanleong/visualheist-large" 
 BASE_MODEL_ID = "shixuanleong/visualheist-base" 
 LARGE_SAFETENSORS_PATH = "https://huggingface.co/shixuanleong/visualheist-large/resolve/main/model.safetensors" 
 BASE_SAFETENSORS_PATH = "https://huggingface.co/shixuanleong/visualheist-base/resolve/main/model.safetensors" 
-
 
 def _pdf_to_image(pdf_path):
     """Converts a pdf into a list of images
@@ -27,7 +21,7 @@ def _pdf_to_image(pdf_path):
     :type pdf_path: str
     
     :return: List of Image instances
-    :rtype: list[Image]
+    :rtype: list[PIL.Image]
     """
     images = convert_from_path(pdf_path)
     return images
@@ -38,10 +32,10 @@ def _tf_id_detection(image, model, processor):
     """Performs table and figure identification using model and processor on image
 
     :param image: Image instance that refers to image we want to detect tables and figures from
-    :type image: Image
-    :param model: The pretrained causal language model used for text generation or inference.
+    :type image: PIL.Image
+    :param model: The pretrained causal language model used for text generation or inference
     :type model: AutoModelForCausalLM
-    :param processor: The processor that tokenizes input text for the model.
+    :param processor: The processor that tokenizes input text for the model
     :type processor: AutoProcessor
 
     :return: Dictionary of annotations done on image
@@ -92,18 +86,15 @@ def _save_image_from_bbox(image, annotation, image_counter, output_dir, pdf_name
     return len(annotation["bboxes"]) + image_counter
 
 
-def _create_model(model_id, safetensors_path, base_or_large):
+def _create_model(model_id, base_or_large):
     
     """Intializes model used for segmenting tables and figures using either the base or large model
 
     :param model_id: Model id to use, either LARGE_MODEL_ID or BASE_MODEL_ID
     :type model_id: str
-    :param safetensors_path: Path to safetensors for model, either LARGE_SAFETENSORS_PATH or BASE_SAFETENSORS_PATH
-    :type safetensors_path: str
     :param base_or_large: String is either 'base' or 'large' depending on whether we use base or large model
     :type base_or_large: str
     
-
     :return: Returns the model and processor that allows for 
     :rtype: tuple[AutoModelForCausalLM, AutoProcessor]
     """
@@ -113,12 +104,10 @@ def _create_model(model_id, safetensors_path, base_or_large):
     safetensors_download_path = package_dir + "/../safetensors/" + safetensors_filename
     if not os.path.exists(safetensors_download_path):
         safetensors_download_path = hf_hub_download(repo_id=model_id, filename="model.safetensors")
-        # torch.hub.download_url_to_file(safetensors_path, safetensors_download_path)
 
     state_dict = load_file(safetensors_download_path)
     model = AutoModelForCausalLM.from_pretrained(model_id, state_dict=state_dict, trust_remote_code=True)
     processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
-    # print("Model loaded with retrained weights from: ", safetensors_path)
     return model, processor
 
 
@@ -144,9 +133,9 @@ def _pdf_to_figures_and_tables(pdf_path, output_dir, large_model):
     print(f"PDF {pdf_name} is loaded.")  
     
     if large_model:
-        model, processor = _create_model(LARGE_MODEL_ID, LARGE_SAFETENSORS_PATH, "large")
+        model, processor = _create_model(LARGE_MODEL_ID, "large")
     else:
-        model, processor = _create_model(BASE_MODEL_ID, BASE_SAFETENSORS_PATH, "base")    
+        model, processor = _create_model(BASE_MODEL_ID, "base")    
     
     image_counter = 0
     for i, image in enumerate(images):
