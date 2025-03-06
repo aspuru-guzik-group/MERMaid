@@ -49,7 +49,7 @@ def filter_images(info:DataRaiderInfo,
                 continue
         
             # Get filter prompt file
-            user_prompt_path = os.path.join(prompt_directory, f"{filter_prompt}")
+            user_prompt_path = os.path.join(prompt_directory, f"{filter_prompt}" + ".txt")
             with open(user_prompt_path, "r") as f:
                 user_message = f.read().strip()
             # Construct message

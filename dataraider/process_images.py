@@ -79,7 +79,7 @@ def batch_process_images(
     :return: Returns nothing, all data saved in JSON
     :rtype: None
     """
-    image_directory = os.path.join(image_directory, "/relevant_images/")
+    image_directory = os.path.join(image_directory, "relevant_images/")
     for file in os.listdir(image_directory):
         if (file.endswith(".png")):
             image_name = file.removesuffix('.png')
