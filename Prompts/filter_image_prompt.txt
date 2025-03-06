@@ -1,0 +1,5 @@
+I will provide a figure from a scientific paper. 
+Does the figure contain *reaction conditions* of reaction optimization runs? If so, put "is_optimization_table" as true.
+Be on the cautious side and put true for images you are not confident about.
+Output your answer in a json with the key "is_optimization_table" with a boolean value. 
+
