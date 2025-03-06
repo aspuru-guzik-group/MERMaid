@@ -1,7 +1,7 @@
-#from rxnscribe import RxnScribe #need separate installation from https://github.com/thomas0809/RxnScribe 
-
+from rxnscribe import RxnScribe #need separate installation from https://github.com/thomas0809/RxnScribe 
+import torch
 """
-Contains DataRaiderInfo class
+Contains DataRaiderInfo class, global information shared throughout different files of dataraider module
 """
 
 class DataRaiderInfo():
@@ -25,6 +25,5 @@ class DataRaiderInfo():
                  ckpt_path:str=None):
         self.api_key = api_key
         self.vlm_model = vlm_model
-        # TODO fix rxnscribe compatibility issue
         self.model = None
-        #self.model = RxnScribe(ckpt_path, device=torch.device(device)) # initialize RxnScribe to get SMILES 
+        self.model = RxnScribe(ckpt_path, device=torch.device(device)) # initialize RxnScribe to get SMILES 
