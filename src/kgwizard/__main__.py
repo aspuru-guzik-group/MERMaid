@@ -1,26 +1,43 @@
 # -*- coding: utf-8 -*-
 import argparse
 import importlib.util
+import json
+import sys
 from itertools import repeat
 from pathlib import Path
-import sys
 from types import ModuleType
-from typing import Any, Sequence
+from typing import Any, Callable, Sequence, NewType, TypeAlias, TypeVar
 
+from gremlin_python.process import graph_traversal
 import numpy as np
-from graphdb import janus, VertexBase
-from prompt import (
-    build_prompt
-    , build_prompt_from_react_file
-    , get_response
-    )
+from graphdb import VertexBase, janus
+from gremlin_python.structure.graph import GraphTraversalSource
+from prompt import build_prompt, build_prompt_from_react_file, get_response
 
+C = TypeVar('C', bound=janus.Connection)
+TypeEDict = NewType("TypeEDict", dict[Any, Any])
+KeyEDict = NewType("KeyEDict", dict[Any, Any])
+ParseResult: TypeAlias = tuple[
+    list[C]
+    , list[TypeEDict]
+    , list[KeyEDict]
+]
 
 SCHEMA_DEFAULT_PATH = Path(janus.__file__).parent / "schemas"
 SCHEMAS = dict(map(
     lambda x: (x.stem, x)
     , SCHEMA_DEFAULT_PATH.glob("*.py")
 ))
+ITERATOR_STR = "Now let's go for optimize iteration number {number}"
+
+
+def read_and_clean_file(path: Path | str) -> dict[Any, Any] | None:
+    try:
+        with open(path) as f:
+            content = f.read().split('```json')[1].split('```')[0]
+            return json.loads(content.strip())
+    except (FileNotFoundError, json.JSONDecodeError, IndexError):
+        return None
 
 
 def build_janus_argparser():
@@ -81,7 +98,6 @@ def build_parser_argparser():
 
 
 def build_transform_argparser():
-
     parser = argparse.ArgumentParser(add_help=False) 
 
     parser.add_argument(
@@ -151,8 +167,10 @@ def build_transform_argparser():
 
 def load_schema(schema: str):
     p: Path
-    if s := SCHEMAS.get(schema): p = s
-    else: p = Path(schema)
+    if s := SCHEMAS.get(schema):
+        p = s
+    else:
+        p = Path(schema)
     return load_module("schema", p)
     
 
@@ -192,11 +210,10 @@ def build_main_argparser() -> argparse.ArgumentParser:
 def build_rag_subs(
     graph: janus.GraphTraversalSource
     , sub_dict: dict[str, str]
-) -> janus.GraphTraversalSource:
-    vname_fn = lambda x: ', '.join(janus.get_vnamelist_from_db(x, graph)) or None
+) -> dict[str, str]:
     out_dict = {}
     for k, v in sub_dict.items():
-        if (resp := vname_fn(v)) is not None:
+        if (resp := ', '.join(janus.get_vnamelist_from_db(v, graph))) or None is not None:
             out_dict[k] = resp
     return out_dict
 
@@ -268,10 +285,55 @@ def parse_pair_sep_colon(
     return (l[0], l[1])
 
 
+def parse_or_skip(
+    reaction: list[dict[Any, Any]]
+    , conn_constructor: type[C]
+) -> ParseResult:
+    connections = []
+    type_e = []
+    key_e = []
+    for item in reaction:
+        try:
+            connections.append(conn_constructor.from_dict(item))
+        except TypeError:
+            type_e.append(TypeEDict(item))
+            continue
+        except KeyError:
+            key_e.append(KeyEDict(item))
+            continue
+    return (connections, type_e, key_e)
+
+
+def rag_exec(
+    graph: GraphTraversalSource
+    , file_name: Path
+    , conn_constructor: type[C]
+    , add_connection: Callable[[C, GraphTraversalSource], janus.Edge]
+) -> None:
+    reaction = read_and_clean_file(file_name)
+    if not reaction:
+        return None
+    conns, type_e, key_e = parse_or_skip(
+        reaction=reaction
+        , conn_constructor=conn_constructor
+    )
+    if conns:
+        for item in conns:
+            try:
+                add_connection(item, graph)
+            except TypeError:
+                add_connection(item, graph)
+            except:
+                with open("errors.dat", 'w') as f:
+                    f.write(f"{file_name}\n")
+                continue
+
+
 def get_json_from_react(
-    connection: janus.DriverRemoteConnection
+    graph: GraphTraversalSource
     , json_react_path: Path | str
     , substitutions: dict[str, Any]
+    , results_path: Path
 ) -> list[dict[str, str]]:
     graph = janus.get_traversal(connection)
     rag_dict = build_rag_subs(graph, substitutions)
@@ -287,8 +349,8 @@ def get_json_from_react(
         , **rag_dict
     )]
     messages.append(get_response(messages))
-    print(messages)
-    save_path = RESULTS_FOLDER / Path(str(json_react_path.stem) +  '_1' + '.json')
+
+    save_path = results_path / Path(str(json_react_path.stem) +  '_1' + '.json')
     save_path.parent.mkdir(parents=True, exist_ok=True)
     with open(save_path, 'w') as f:
         f.write(messages[-1]["content"])
@@ -296,7 +358,7 @@ def get_json_from_react(
     for n in optimization_runs[1:]:
         messages.append(build_prompt(ITERATOR_STR.format(number=n)))
         messages.append(get_response(messages))
-        save_path = RESULTS_FOLDER / Path(str(json_react_path.stem) +  f'_{n}' + '.json')
+        save_path = results_path / Path(str(json_react_path.stem) +  f'_{n}' + '.json')
         with open(save_path, 'w') as f:
             f.write(messages[-1]["content"])
         print(f"iter: {n}")

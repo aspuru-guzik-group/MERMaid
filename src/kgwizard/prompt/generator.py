@@ -1,14 +1,17 @@
+# -*- coding: utf-8 -*-
 import os
 from pathlib import Path
-from openai import OpenAI
-from .builder import (
-    build_guidelines
-    , apply_substitutions
-    , HEADER_PATH
-    , INSTRUCTIONS_PATH
-    , TAIL_PATH
-)
+from typing import Any
 
+from openai import OpenAI
+
+from .builder import (
+    HEADER_PATH,
+    INSTRUCTIONS_PATH,
+    TAIL_PATH,
+    apply_substitutions,
+    build_guidelines,
+)
 
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
@@ -91,7 +94,7 @@ def build_prompt_from_react_file(
 
 
 def get_response(
-    messages: list[str]
+    messages: list[dict[str, Any]]
 ) -> dict[str, str]:
     """
     Send a list of messages to the OpenAI API and retrieve the assistant's response.
