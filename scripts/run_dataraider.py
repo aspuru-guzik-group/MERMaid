@@ -59,7 +59,7 @@ def main():
         config_path = os.path.join(package_dir, 'startup.json')
         config = load_config(config_path) if os.path.exists(config_path) else {}
 
-    prompt_dir = args.prompt_dir or config.get('prompt_dir', "./Prompts")
+    prompt_dir = config.get('prompt_dir', "./Prompts")
     image_dir = config.get('image_dir', "").strip() 
     if not image_dir: 
         image_dir = config.get('default_image_dir')
@@ -74,7 +74,7 @@ def main():
     print(f'keys are {keys}')
     # Construct the initial reaction data extraction prompt
     print("Constructing your custom reaction data extraction prompt")
-    construct_initial_prompt(keys, new_keys)
+    construct_initial_prompt(prompt_dir, keys, new_keys)
     print()
     print('############################ Starting up DataRaider ############################ ')
     print('Filtering relevant images first.')

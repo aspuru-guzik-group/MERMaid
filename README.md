@@ -8,10 +8,10 @@
     * DataRaider for multimodal analysis to extract relevant information as structured reaction schema
     * KGWizard for automated knowledge graph construction
 * You can run MERMaid directly or use each module as a standalone tool for its specific functionality.
-* MERMaid is integrated with the OpenAI provider at present. We will extend MERMaid to support other providers and open-source VLMs in future updates. 
+* MERMaid is integrated with the OpenAI provider at present. We will extend MERMaid to support other providers and open-source VLMs in future updates.
+* NOTE: VisualHeist works best on systems with high RAM. For optimal performance, ensure that your system has sufficient memory, as running out of memory may cause the process to be terminated prematurely.
 
 ## 1. Installation 
-
 
 ### 1.1 Create a new virtual environment. The recommended python version is 3.9.
 
@@ -33,16 +33,24 @@ pip install -r requirements.txt
 python setup.py install
 cd ..
 ```
+Please note that you may get a compatibility warning stating that `MolScribe version 1.1.1 not being compatible with Torch versions >2.0`. You can safely ignore this warning.
+
 ### 1.3 Install MERMaid using the following steps: 
 
 #### Option 1 (quick installation) 
 Directly install the package. 
-
-For full MERMaid pipeline: 
 ```
 pip install git+https://github.com/aspuru-guzik-group/MERMaid/git
 ```
-OR 
+
+#### Option 2 (for development purposes)
+Download the entire repository and install the requirements.
+```
+git clone https://github.com/aspuru-guzik-group/MERMaid/
+cd MERMaid
+pip install -e .
+```
+For full MERMaid pipeline: 
 ```
 pip install MERMaid[full]
 ```
@@ -53,14 +61,6 @@ pip install MERMaid[visualheist]
 pip install MERMaid[dataraider]
 pip install MERMaid[kgwizard]
 ```
-#### Option 2 (for development purposes)
-Download the entire repository and install the requirements.
-```
-git clone https://github.com/aspuru-guzik-group/MERMaid/git
-cd MERMaid
-pip install -e .
-```
-Please note that you may get a compatibility warning stating that `MolScribe version 1.1.1 not being compatible with Torch versions >2.0`. You can safely ignore this warning.
 
 ## 2. Usage 
 ### 2.1 Setting up your plug-and-play configuration file 

@@ -51,7 +51,7 @@ def update_dict_with_smiles(
     :return: Returns nothing, all data saved in JSON
     :rtype: None
     """
-    image_file = os.path.join(image_directory, f"{image_name}.png")
+    image_file = os.path.join(image_directory, f"/cropped_images/{image_name}_1.png")
     reactions = []
 
     # Extract reactant and product SMILES
@@ -112,12 +112,15 @@ def postprocess_dict(
 
 
 def construct_initial_prompt(
+                            prompt_directory: str, 
                             opt_run_keys: list, 
                             new_run_keys: dict):
     """Creates a get_data_prompt with opt_run_keys key-value pairs embedded into it
     Uses <INSERT_HERE> as the location tag for inserting keys.
     Saves the new prompt to a file named get_data_prompt.txt inside the Prompts directory
 
+    :param prompt_directory: Path to the prompt directory
+    :type prompt_directory: str
     :param opt_run_keys: Optimization keys that are pre defined
     :type opt_run_keys: list
     :param new_run_keys: New optimization keys that are user defined
@@ -128,10 +131,11 @@ def construct_initial_prompt(
     """
     
     marker = "<INSERT_HERE>"
-    package_dir = os.path.dirname(__file__)
+    # package_dir = os.path.dirname(__file__)
 
     # Retrieve all inbuilt keys
-    inbuilt_key_pair_file_path = os.path.join(package_dir, "../Prompts/inbuilt_keyvaluepairs.txt")
+    # inbuilt_key_pair_file_path = os.path.join(package_dir, "../Prompts/inbuilt_keyvaluepairs.txt")
+    inbuilt_key_pair_file_path = os.path.join(prompt_directory, "inbuilt_keyvaluepairs.txt")
     with open(inbuilt_key_pair_file_path, "r") as inbuilt_file:
         inbuilt_key_pair_file_contents = inbuilt_file.readlines()
     
@@ -148,7 +152,8 @@ def construct_initial_prompt(
             continue
         opt_run_list.append(line)
     
-    base_prompt_file_path = os.path.join(package_dir, "../Prompts/base_prompt.txt")
+    # base_prompt_file_path = os.path.join(package_dir, "../Prompts/base_prompt.txt")
+    base_prompt_file_path = os.path.join(prompt_directory, "base_prompt.txt")
     with open(base_prompt_file_path, "r") as base_prompt_file:
         base_prompt_file_contents = base_prompt_file.readlines()
 
@@ -160,7 +165,8 @@ def construct_initial_prompt(
             new_prompt_file_contents.append(line)
     
     # Save the defined prompt as get_data_prompt
-    new_prompt_file_path = os.path.join(package_dir, "../Prompts/get_data_prompt.txt")
+    # new_prompt_file_path = os.path.join(package_dir, "../Prompts/get_data_prompt.txt")
+    new_prompt_file_path = os.path.join(prompt_directory, "get_data_prompt.txt")
     with open(new_prompt_file_path, "w") as new_prompt_file:
         new_prompt_file.writelines(new_prompt_file_contents)
     print(f"Prompt file created with custom keys!")
