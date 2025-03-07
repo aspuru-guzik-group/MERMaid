@@ -46,7 +46,7 @@ pip install git+https://github.com/aspuru-guzik-group/MERMaid/git
 #### Option 2 (for development purposes)
 Download the entire repository and install the requirements.
 ```
-git clone https://github.com/aspuru-guzik-group/MERMaid/git
+git clone https://github.com/aspuru-guzik-group/MERMaid/
 cd MERMaid
 pip install -e .
 ```
