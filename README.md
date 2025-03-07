@@ -22,6 +22,7 @@ conda activate mermaid-env
 OR 
 ```
 python3.9 -m venv mermaid-env
+source mermaid-env/bin/activate
 ```
 
 ### 1.2 Install RxnScribe using the following steps for optical chemical structure recognition:
