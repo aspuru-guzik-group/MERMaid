@@ -8,28 +8,48 @@ version = "25.03"
 description = "Multimodal mining of chemical reactions from PDFs"
 dependencies = []
 authors = [
-    { name = "Shi Xuan Leong", email = "shixuan.leong@gmail.com"}, 
-    { name = "Sergio Pablo-Garcia", email = "spgarcica@gmail.com"}, 
-    { name = "Brandon Wong", email = "brandonhywong@gmail.com"}]
+  { name = "Shi Xuan Leong", email = "shixuan.leong@gmail.com"}, 
+  { name = "Sergio Pablo-Garcia", email = "spgarcica@gmail.com"}, 
+  { name = "Brandon Wong", email = "brandonhywong@gmail.com"}
+]
 maintainers = [
-     { name = "Shi Xuan Leong", email = "shixuan.leong@gmail.com"}, 
-    {name = "Sergio Pablo-Garcia", email = "spgarcica@gmail.com"}
+  { name = "Shi Xuan Leong", email = "shixuan.leong@gmail.com"}, 
+  { name = "Sergio Pablo-Garcia", email = "spgarcica@gmail.com"}
 ]
 readme = "README.md"
-license  = {file = "LICENSE"}
+license = { file = "LICENSE" }
 keywords = ["mining", "chemistry", "PDFs", "vision-language models", "knowledge graphs"]
 
 [project.optional-dependencies]
-visualheist = ["pdf2image", "Pillow", "transformers", "safetensors", "torch==2.3.0", "torchvision==0.18.0", "pytorch-lightning==2.3.0", "huggingface_hub", "einops", "timm"]
-dataraider = ["requests", "opencv-python","numpy", "regex", "pubchempy", "openai", "huggingface_hub"]
+visualheist = [
+    "pdf2image", "Pillow", "transformers", "safetensors",
+    "torch==2.3.0", "torchvision==0.18.0", "pytorch-lightning==2.3.0",
+    "huggingface_hub", "einops", "timm"
+]
+dataraider = [
+    "requests", "opencv-python", "numpy", "regex",
+    "pubchempy", "openai", "huggingface_hub"
+]
 kgwizard = ["gremlin", "openai"]
 full = ["visualheist", "dataraider", "kgwizard"]
 
 [project.scripts]
-dataraider = "scripts.run_dataraider:main"
-visualheist = "scripts.run_visualheist:main"
-kgwizard = "scripts.run_kgwizard:main"
-mermaid = "scripts.run_mermaid:main"
+dataraider   = "scripts.run_dataraider:main"
+visualheist  = "scripts.run_visualheist:main"
+mermaid      = "scripts.run_mermaid:main"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+# Tell setuptools to look in BOTH src/ and the current directory (where "scripts" is).
+packages = { find = { where = [".", "src"] } }
+
+[tool.setuptools.package-data]
+MERMaid = [
+    "dataraider/**/*.py",
+    "kgwizard/**/*.py",
+    "visualheist/**/*.py",
+    "kgwizard/prompt/assets/**/*",
+    "kgwizard/graphdb/schemas/**/*"
+]
+
+[tool.setuptools.exclude-package-data]
+MERMaid = ["**/__pycache__/*", "**/*.pyc", "**/*.pyo"]
