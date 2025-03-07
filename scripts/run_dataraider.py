@@ -3,7 +3,7 @@ import json
 import argparse
 import sys
 # from methods_dataraider import RxnOptDataProcessor
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataraider.processor_info import DataRaiderInfo
 from dataraider.reaction_dictionary_formating import construct_initial_prompt
 from dataraider.process_images import batch_process_images, clear_temp_files

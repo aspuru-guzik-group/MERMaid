@@ -30,3 +30,6 @@ dataraider = "scripts.run_dataraider:main"
 visualheist = "scripts.run_visualheist:main"
 kgwizard = "scripts.run_kgwizard:main"
 mermaid = "scripts.run_mermaid:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,5 @@
+[console_scripts]
+dataraider = scripts.run_dataraider:main
+kgwizard = scripts.run_kgwizard:main
+mermaid = scripts.run_mermaid:main
+visualheist = scripts.run_visualheist:main

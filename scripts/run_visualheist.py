@@ -2,7 +2,7 @@ import json
 import sys
 import os
 import argparse
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from visualheist.methods_visualheist import batch_pdf_to_figures_and_tables
 
 def load_config(config_file):
