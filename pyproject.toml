@@ -30,13 +30,14 @@ dataraider = [
     "requests", "opencv-python", "numpy", "regex",
     "pubchempy", "openai", "huggingface_hub"
 ]
-kgwizard = ["gremlin", "openai"]
+kgwizard = ["gremlinpython", "openai"]
 full = ["visualheist", "dataraider", "kgwizard"]
 
 [project.scripts]
 dataraider   = "scripts.run_dataraider:main"
 visualheist  = "scripts.run_visualheist:main"
 mermaid      = "scripts.run_mermaid:main"
+kgwizard     = "src.kgwizard.__main__:main"
 
 [tool.setuptools]
 # Tell setuptools to look in BOTH src/ and the current directory (where "scripts" is).

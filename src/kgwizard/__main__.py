@@ -23,9 +23,9 @@ from types import ModuleType
 from typing import Any, Callable, NewType, Sequence, TypeAlias, TypeVar
 
 import numpy as np
-from graphdb import janus
+from .graphdb import janus
 from gremlin_python.structure.graph import GraphTraversalSource
-from prompt import build_prompt, build_prompt_from_react_file, get_response
+from .prompt import build_prompt, build_prompt_from_react_file, get_response
 
 # This is the only way I've found to execute the transformation using multiprocessing
 global schema
@@ -867,8 +867,7 @@ def exec_transform(
             , start=args.dynamic_start
         )
 
-    
-if __name__ == "__main__":
+def main() -> None:
     parser = build_main_argparser()
     args = parser.parse_args()
     match args.command:
@@ -876,3 +875,7 @@ if __name__ == "__main__":
             exec_parser(args)
         case Commands.TRANSFORM:
             exec_transform(args)
+
+
+if __name__ == "__main__":
+    main()
