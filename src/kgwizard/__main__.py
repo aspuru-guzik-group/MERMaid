@@ -141,6 +141,14 @@ def build_janus_argparser():
         Defaults to echem"""
     )
 
+    
+    parser.add_argument(
+        "-of", "--output_file",
+        type=Path,
+        help=""""If set, save the generated graph into the specified file after
+        updating the database."""
+    )
+
     return parser
 
 
@@ -158,13 +166,6 @@ def build_parser_argparser():
         "input_dir",
         type=Path,
         help="Folder where the JSON files from transform are stored."
-    )
-
-    parser.add_argument(
-        "-of", "--output_file",
-        type=Path,
-        help=""""If set, save the graph into the specified file after updating
-        the database."""
     )
 
     return parser
@@ -838,10 +839,14 @@ def exec_transform(
 
     # Create output directiory
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    if args.substitutions is not None:
+        subs = dict(args.substitutions)
+    else:
+        subs = None
 
     exec_fn_args = {
         "results_path": args.output_dir
-        , "substitutions": dict(args.substitutions)
+        , "substitutions": subs
         , "address": args.address
         , "port": args.port
         , "graph_name": args.graph_name

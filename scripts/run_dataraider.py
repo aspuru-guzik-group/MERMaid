@@ -56,7 +56,7 @@ def main():
         config = load_config(args.config)
     else:
         package_dir = os.path.dirname(os.path.dirname(__file__))
-        config_path = os.path.join(package_dir, 'startup.json')
+        config_path = os.path.join(package_dir, 'scripts/startup.json')
         config = load_config(config_path) if os.path.exists(config_path) else {}
 
     prompt_dir = config.get('prompt_dir', "./Prompts")

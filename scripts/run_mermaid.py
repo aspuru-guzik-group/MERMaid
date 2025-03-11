@@ -1,16 +1,37 @@
+import argparse
+from pathlib import Path
+import json
 import subprocess
+import os
+from enum import auto, StrEnum
 
-def run_subprocess(module_name):
+from shutil import copyfile
+
+SCRIPT_PATH = Path(os.path.abspath(__file__))
+CFG_PATH = SCRIPT_PATH.parent / "startup.json"
+
+class Commands(StrEnum):
+    RUN = auto()
+    CFG = auto()
+
+def run_subprocess(module_name, opt_args=None, python=True):
     """
     Runs a Python script as a subprocess.
 
     :param module_name: Name of the module to run.
     :type module_name: str
-    :param args: List of command-line arguments to pass to the script (optional).
-    :type args: list, optional
+    :param opt_args: List of command-line arguments to pass to the script (optional).
+    :type opt_args: list, optional
+    :param python: Wether or not use python to execute the script
+    :type python: bool, optional
     :return: None
     """
-    cmd = ["python", module_name]
+    if python:
+        cmd = ["python", module_name]
+    else:
+        cmd = [module_name]
+    if opt_args:
+        cmd += opt_args
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     print(f"\n===== {module_name} Output =====\n")
@@ -20,20 +41,103 @@ def run_subprocess(module_name):
         print(f"\n===== {module_name} Errors =====\n")
         print(result.stderr)
 
+
+def load_json_config(json_path):
+    """Load argument settings from a JSON file."""
+    with open(json_path, 'r') as f:
+        return json.load(f)
+
+
+def json_to_arg_list(config):
+    """Convert JSON config to a list mimicking CLI arguments."""
+    arg_list = []
+    for key, value in config.items():
+        key_arg = f"--{key}"  # Convert to argparse format
+        if isinstance(value, list):  # Handle list arguments
+            arg_list.extend([key_arg] + [str(v) for v in value])
+        elif isinstance(value, bool):  # Handle boolean flags
+            if value:
+                arg_list.append(key_arg)
+        else:  # Normal key-value pairs
+            arg_list.extend([key_arg, str(value)])
+    return arg_list
+
+    
+def build_main_argparser() -> argparse.ArgumentParser:
+    main_parser = argparse.ArgumentParser(description="Mermad runs.")
+    subparsers = main_parser.add_subparsers(
+        title="Commands",
+        description="Available commands",
+        help="Description",
+        dest="command",
+        required=True
+    )
+    subparsers.required = True
+
+    run_parser = subparsers.add_parser(
+        Commands.RUN,
+        help="Run mermad pipeline"
+    )
+
+    run_parser.add_argument(
+        "-c", "--config",
+        type=Path,
+        default=CFG_PATH,
+        help="Path to the configuration file"
+    )
+
+    cfg_parser = subparsers.add_parser(
+        Commands.CFG,
+        help="Output a configuration file"
+    )
+
+    cfg_parser.add_argument(
+        "out_location",
+        type=Path,
+        help="Path to the configuration file"
+    )
+
+    return main_parser
+
+def exec_cfg(args):
+    copyfile(CFG_PATH, args.out_location)
+
+def exec_run(args):
+    cfg = load_json_config(args.config)
+    kgwizard_args = [
+        "transform",
+        cfg["json_dir"],
+        "--output_dir", cfg["json_dir"] + "/results/",
+        "--output_file", cfg["graph_dir"] + f"/{cfg["kgwizard"]["graph_name"]}.graphml",
+    ]
+    kgwizard_args += json_to_arg_list(cfg["kgwizard"])
+
+
+    
+    # print("\n### Running VisualHeist ###\n")
+    # run_subprocess("scripts/run_visualheist.py")
+
+    # print("\n### Running DataRaider ###\n")
+    # run_subprocess("scripts/run_dataraider.py")
+
+    print("\n### Running KGWizard ###\n")
+    run_subprocess("kgwizard", kgwizard_args, python=False)
+
+
 def main():
     """
     Runs VisualHeist, DataRaider and KGWizard sequentially.
 
     :return: None
     """
-    print("\n### Running VisualHeist ###\n")
-    run_subprocess("scripts/run_visualheist.py")
+    parser = build_main_argparser()
+    args = parser.parse_args()
 
-    print("\n### Running DataRaider ###\n")
-    run_subprocess("scripts/run_dataraider.py")
-
-    # print("\n### Running KGWizard ###\n")
-    # run_subprocess("scripts/run_kgwizard.py")
+    match args.command:
+        case Commands.RUN:
+            exec_run(args)
+        case Commands.CFG:
+            exec_cfg(args)
 
 if __name__ == "__main__":
     main()

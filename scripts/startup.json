@@ -15,5 +15,15 @@
 
     "default_image_dir": "Results/extracted_images/",
     "default_json_dir": "Results/jsons/",
-    "default_graph_dir": "Results/graphs/"
+    "default_graph_dir": "Results/graphs/",
+
+    "kgwizard": {
+	"address": "ws://localhost",
+	"port": 8182,
+	"graph_name": "g",
+	"schema": "echem",
+	"dynamic_start": 1,
+	"dynamic_steps": 5,
+	"dynamic_max_workers": 15
+    }
   }

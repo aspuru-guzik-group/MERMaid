@@ -36,8 +36,8 @@ full = ["visualheist", "dataraider", "kgwizard"]
 [project.scripts]
 dataraider   = "scripts.run_dataraider:main"
 visualheist  = "scripts.run_visualheist:main"
-mermaid      = "scripts.run_mermaid:main"
 kgwizard     = "src.kgwizard.__main__:main"
+mermaid      = "scripts.run_mermaid:main"
 
 [tool.setuptools]
 # Tell setuptools to look in BOTH src/ and the current directory (where "scripts" is).
@@ -49,7 +49,8 @@ MERMaid = [
     "kgwizard/**/*.py",
     "visualheist/**/*.py",
     "kgwizard/prompt/assets/**/*",
-    "kgwizard/graphdb/schemas/**/*"
+    "kgwizard/graphdb/schemas/**/*",
+    "scripts/startup.json"
 ]
 
 [tool.setuptools.exclude-package-data]
