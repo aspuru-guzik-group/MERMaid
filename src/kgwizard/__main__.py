@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
+"""
+Automated database parser and transformer.
+
+This module provides functionalities for transforming JSON data, parsing it,
+and optionally uploading it to a JanusGraph database. It includes dynamic
+and static parallel execution for faster processing, as well as a
+substitution mechanism (RAG) for retrieving existing nodes in the database.
+"""
 import argparse
+from concurrent.futures.thread import _worker
 import importlib.util
 import multiprocessing
 import json
@@ -10,7 +19,7 @@ from functools import partial
 from itertools import chain, repeat
 from pathlib import Path
 from types import ModuleType
-from typing import Any, NewType, Sequence, TypeAlias, TypeVar
+from typing import Any, Callable, NewType, Sequence, TypeAlias, TypeVar
 
 import numpy as np
 from graphdb import janus
@@ -36,14 +45,41 @@ ITERATOR_STR = "Now let's go for optimize iteration number {number}"
 
 
 class Commands(StrEnum):
+    """
+    Enumeration of the available commands for the parser.
+
+    :cvar TRANSFORM: Command for transforming raw JSON files into an intermediate
+                     format ready for database insertion.
+    :cvar PARSE: Command for parsing the intermediate files and storing them
+                 directly in the database.
+    """
     TRANSFORM = auto()
     PARSE = auto()
 
 
-def filter_none(xs): return filter(lambda x: x is not None, xs)
+def filter_none(xs):
+    """
+    Filter out None values from an iterable.
+
+    :param xs: The iterable to filter.
+    :type xs: Iterable
+    :return: An iterator that yields only non-None items from xs.
+    :rtype: filter
+    """
+    return filter(lambda x: x is not None, xs)
 
 
 def read_and_clean_file(path: Path | str) -> list[dict[Any, Any]] | None:
+    """
+    Opens a JSON file, extracts data found between ```json ... ``` segments,
+    and returns a list of dictionaries.
+
+    :param path: The path or name of the file to read.
+    :type path: Path | str
+    :return: A list of dictionaries extracted from the JSON file, or None if
+        file not found or JSON is invalid.
+    :rtype: list[dict[Any, Any]] | None
+    """
     try:
         with open(path) as f:
             content = f.read().split('```json')[1].split('```')[0]
@@ -53,6 +89,13 @@ def read_and_clean_file(path: Path | str) -> list[dict[Any, Any]] | None:
 
 
 def build_janus_argparser():
+    """
+    Build an argument parser with arguments related to connecting to a JanusGraph
+    database, including address, port, graph name, and schema.
+
+    :return: The configured ArgumentParser instance.
+    :rtype: argparse.ArgumentParser
+    """
     parser = argparse.ArgumentParser(add_help=False)
 
     parser.add_argument(
@@ -88,6 +131,13 @@ def build_janus_argparser():
 
 
 def build_parser_argparser():
+    """
+    Build an argument parser used for the PARSE command, which parses a set of
+    JSON files and stores them in a JanusGraph database.
+
+    :return: The configured ArgumentParser instance.
+    :rtype: argparse.ArgumentParser
+    """
     parser = argparse.ArgumentParser(add_help=False)
 
     parser.add_argument(
@@ -101,6 +151,14 @@ def build_parser_argparser():
 
 
 def build_transform_argparser():
+    """
+    Build an argument parser used for the TRANSFORM command, which converts a set
+    of JSON files from DataRaider into an intermediate JSON structured format.
+    Also supports RAG (Retrieval-Augmented Generation) if substitutions are given.
+
+    :return: The configured ArgumentParser instance.
+    :rtype: argparse.ArgumentParser
+    """
     parser = argparse.ArgumentParser(add_help=False) 
 
     parser.add_argument(
@@ -119,7 +177,7 @@ def build_transform_argparser():
     )
 
     parser.add_argument(
-        "-np", "--no-parallel",
+        "-np", "--no_parallel",
         action="store_false",
         help="""If active, run the conversions sequentially instead of using
         the dynamic increase parallel algorithm. Overrides the --workers flag.
@@ -169,6 +227,17 @@ def build_transform_argparser():
 
 
 def load_schema(schema: str):
+    """
+    Load a Python module representing a JanusGraph schema from a file path or
+    from a known default schema name.
+
+    :param schema: A string indicating either a name in SCHEMAS or a file path.
+    :type schema: str
+    :return: A loaded Python module containing a Connection class for JanusGraph.
+    :rtype: ModuleType
+    :raises ImportError: If the module spec cannot be created.
+    :raises ValueError: If the module's loader is not found.
+    """
     p: Path
     if s := SCHEMAS.get(schema):
         p = s
@@ -178,6 +247,14 @@ def load_schema(schema: str):
     
 
 def build_main_argparser() -> argparse.ArgumentParser:
+    """
+    Build the main argument parser that includes two subparsers:
+    - TRANSFORM
+    - PARSE
+
+    :return: The main ArgumentParser instance with subcommands.
+    :rtype: argparse.ArgumentParser
+    """
     main_parser = argparse.ArgumentParser(description="Automated database parser.")
     subparsers = main_parser.add_subparsers(
         title="Commands",
@@ -211,6 +288,20 @@ def build_rag_subs(
     graph: janus.GraphTraversalSource
     , sub_dict: dict[str, str]
 ) -> dict[str, str]:
+    """
+    Build a dictionary of substitutions by querying the JanusGraph for each
+    value's name list. The result is a dictionary mapping the original key to
+    a comma-separated string of names.
+
+    :param graph: The JanusGraph traversal source.
+    :type graph: janus.GraphTraversalSource
+    :param sub_dict: A dictionary where the key is the substitution keyword and
+        the value is the node label to query.
+    :type sub_dict: dict[str, str]
+    :return: A dictionary of the same keys, where each value is a comma-separated
+        string of node names retrieved from the database.
+    :rtype: dict[str, str]
+    """
     out_dict = {}
     for k, v in sub_dict.items():
         if (resp := ', '.join(janus.get_vnamelist_from_db(v, graph))) or None is not None:
@@ -222,6 +313,18 @@ def load_module(
     module_name: str
     , module_path: Path
 ) -> ModuleType:
+    """
+    Dynamically load a Python module from a given file path.
+
+    :param module_name: The name to assign to the loaded module.
+    :type module_name: str
+    :param module_path: The path to the module file.
+    :type module_path: Path
+    :return: The loaded module.
+    :rtype: ModuleType
+    :raises ImportError: If the module spec cannot be created.
+    :raises ValueError: If the module's loader is missing.
+    """
     spec = importlib.util.spec_from_file_location(module_name, module_path)
     if spec is None:
         raise ImportError(f"Cannot create a module spec for {module_path}")
@@ -234,7 +337,23 @@ def load_module(
     return module
 
 
-def dynamic_pool_execution(files, pool_sizes):
+def dynamic_pool_execution(
+    files
+    , pool_sizes
+    , exec_fn: Callable[[str | Path], list[dict[str, str]]]
+) -> None:
+    """
+    Execute a function in parallel over a list of files, dynamically batching them
+    according to the provided pool_sizes. Each pool size defines the number of
+    worker processes to start for that batch.
+
+    :param files: List of file paths to process.
+    :type files: list[Path]
+    :param pool_sizes: A list of worker batch sizes.
+    :type pool_sizes: list[int]
+    :param exec_fn: The function to execute for each file, which accepts a file path.
+    :type exec_fn: Callable[[str | Path], list[dict[str, str]]]
+    """
     total_files = len(files)
     start_idx = 0
 
@@ -248,8 +367,8 @@ def dynamic_pool_execution(files, pool_sizes):
         print(f"\nStarting batch with {pool_size} workers, processing {len(batch_files)} files...\n")
 
         workers = []
-        for file in batch_files:
-            p = multiprocessing.Process(target=get_json_from_react, args=(file,))
+        for f in batch_files:
+            p = multiprocessing.Process(target=exec_fn, args=(f,))
             p.start()
             workers.append(p)
 
@@ -267,6 +386,23 @@ def generate_pool_sizes(
     , steps: int=20
     , start: int=1
 ) -> list[int]:
+    """
+    Generate a list of pool sizes (number of workers) for dynamic parallel execution.
+    The sizes start from 'start' and gradually increase up to 'max_workers'
+    across 'steps'. If there are remaining files after these steps, 'max_workers'
+    is repeated until all files are accounted for.
+
+    :param total_files: The total number of files to process.
+    :type total_files: int
+    :param max_workers: The maximum number of workers allowed.
+    :type max_workers: int
+    :param steps: The number of steps used to interpolate from start to max_workers.
+    :type steps: int
+    :param start: The starting number of workers.
+    :type start: int
+    :return: A list of pool sizes to use for parallel execution.
+    :rtype: list[int]
+    """
     increasing_sizes = np.round(
         np.linspace(start, max_workers ** 0.6, steps) ** (1 / 0.6)).astype(int).tolist()
     increasing_sizes = [min(x, max_workers) for x in increasing_sizes]
@@ -282,6 +418,15 @@ def generate_pool_sizes(
 def parse_pair_sep_colon(
     s: str
 ) -> tuple[str, str] | None:
+    """
+    Parse a string in the format 'keyword:node_label' into a tuple (keyword, node_label).
+    If the format is invalid, returns None.
+
+    :param s: The input string to parse.
+    :type s: str
+    :return: A tuple of (keyword, node_label) or None if invalid.
+    :rtype: tuple[str, str] | None
+    """
     if len(l := s.split(':')) != 2:
         return None
     return (l[0], l[1])
@@ -291,6 +436,18 @@ def parse_or_skip(
     reaction: list[dict[Any, Any]]
     , conn_constructor: type[C]
 ) -> ParseResult[C]:
+    """
+    Attempt to parse a list of dictionary items into Connection objects. If a
+    TypeError or KeyError is encountered, store the item in respective lists instead.
+
+    :param reaction: A list of dictionaries to parse.
+    :type reaction: list[dict[Any, Any]]
+    :param conn_constructor: The constructor (class) for building Connection objects.
+    :type conn_constructor: TypeVar('C', bound=janus.Connection)
+    :return: A tuple of:
+        ( list_of_connections, list_of_type_errors, list_of_key_errors )
+    :rtype: ParseResult[C]
+    """
     connections = []
     type_e = []
     key_e = []
@@ -311,6 +468,20 @@ def parse_file_and_update_db(
     , file_name: Path
     , conn_constructor: type[C]
 ) -> ParseResult[C] | None:
+    """
+    Parse a JSON file from disk and insert all valid Connection objects into the
+    JanusGraph database. Invalid items (TypeError/KeyError) are tracked separately.
+
+    :param graph: The JanusGraph traversal source.
+    :type graph: GraphTraversalSource
+    :param file_name: Path to the JSON file to parse.
+    :type file_name: Path
+    :param conn_constructor: The constructor (class) for building Connection objects.
+    :type conn_constructor: TypeVar('C', bound=janus.Connection)
+    :return: A tuple of (list_of_connections, list_of_type_errors, list_of_key_errors),
+        or None if no valid items were found.
+    :rtype: ParseResult[C] | None
+    """
     reaction = read_and_clean_file(file_name)
     if not reaction:
         return None
@@ -332,12 +503,33 @@ def parse_file_and_update_db(
 
 
 def get_json_from_react(
-    graph: GraphTraversalSource
-    , json_react_path: Path | str
+    json_react_path: Path | str
     , results_path: Path
     , schema: ModuleType
     , substitutions: dict[str, Any] | None = None
+    , graph: GraphTraversalSource | None = None
 ) -> list[dict[str, str]]:
+    """
+    Process a JSON file (react file) to generate the final JSON output by making
+    multiple iterations (optimization runs). Optionally uses RAG (if substitutions
+    and graph are provided) to build a dictionary of known nodes.
+
+    :param json_react_path: The path or name of the JSON react file.
+    :type json_react_path: Path | str
+    :param results_path: The output folder path to store the generated JSONs.
+    :type results_path: Path
+    :param schema: The Python module containing the schema definitions.
+    :type schema: ModuleType
+    :param substitutions: A dictionary of substitution keywords mapped to node labels,
+        if RAG is desired. Defaults to None for no RAG.
+    :type substitutions: dict[str, Any] | None
+    :param graph: The JanusGraph traversal source. Required if RAG is active.
+    :type graph: GraphTraversalSource | None
+    :return: A list of the messages (dict) used during the prompt building and iteration.
+    :rtype: list[dict[str, str]]
+    :raises ValueError: If the schema file path is invalid (schema.__file__ is None).
+    """
+    rag_active = substitutions is not None and graph is not None
     # Code substitution, load schema file
     if schema.__file__ is None:
         raise ValueError
@@ -350,7 +542,7 @@ def get_json_from_react(
         react_dict = json.load(f)
 
     # Prepare RAG if needed
-    if substitutions is not None:
+    if rag_active:
         rag_dict |= build_rag_subs(graph, substitutions)
 
     optimization_runs = list(react_dict["Optimization Runs"].keys())
@@ -369,15 +561,15 @@ def get_json_from_react(
     with open(save_path, 'w') as f:
         f.write(messages[-1]["content"])
 
-    rag_fn = partial(
-        parse_file_and_update_db
-        , graph=graph
-        , file_name=save_path
-        , conn_constructor=schema.Connection
-    )
-
-    if substitutions is not None:
+    if rag_active:
+        rag_fn = partial(
+            parse_file_and_update_db
+            , graph=graph
+            , file_name=save_path
+            , conn_constructor=schema.Connection
+        )
         rag_fn()
+
     for n in optimization_runs[1:]:
         messages.append(build_prompt(ITERATOR_STR.format(number=n)))
         messages.append(get_response(messages))
@@ -385,7 +577,7 @@ def get_json_from_react(
         with open(save_path, 'w') as f:
             f.write(messages[-1]["content"])
         print(f"iter: {n}")
-        if substitutions is not None:
+        if rag_active:
             rag_fn()
     return messages
 
@@ -395,6 +587,18 @@ def get_graph_from_janus(
     , port: int
     , graph_name: str
 ) -> GraphTraversalSource:
+    """
+    Retrieve a JanusGraph traversal source given connection parameters.
+
+    :param address: The JanusGraph server address (e.g. ws://localhost).
+    :type address: str
+    :param port: The JanusGraph server port (default 8182).
+    :type port: int
+    :param graph_name: The graph name to use (e.g. 'g').
+    :type graph_name: str
+    :return: A GraphTraversalSource connected to the specified JanusGraph instance.
+    :rtype: GraphTraversalSource
+    """
     return janus.get_traversal(
         janus.connect(
             address=address
@@ -403,19 +607,77 @@ def get_graph_from_janus(
         ))
 
 
-def exec_transform(
+def dynamic_par_exec_transform(
     files_set: Sequence
+    , exec_fn: Callable[[str | Path], list[dict[str, str]]]
     , max_workers: int=30
     , steps: int=5
     , start: int=1
 ):
+    """
+    Transform a set of files using a function, distributing them dynamically across
+    processes. The number of workers increases from 'start' to 'max_workers' in
+    'steps' increments.
+
+    :param files_set: A sequence of file paths to process.
+    :type files_set: Sequence[Path]
+    :param exec_fn: The function to transform each file, which accepts a file path.
+    :type exec_fn: Callable[[str | Path], list[dict[str, str]]]
+    :param max_workers: The maximum number of worker processes allowed. Defaults to 30.
+    :type max_workers: int
+    :param steps: The number of steps for the size generation algorithm. Defaults to 5.
+    :type steps: int
+    :param start: The starting number of workers. Defaults to 1.
+    :type start: int
+    """
     pool_sizes = generate_pool_sizes(
         total_files=len(files_set)
         , steps=steps
         , max_workers=max_workers
         , start=start
     )
-    dynamic_pool_execution(files_set, pool_sizes)
+    dynamic_pool_execution(files_set, pool_sizes, exec_fn)
+
+
+def static_par_exec_transform(
+    files_set: Sequence
+    , exec_fn: Callable[[str | Path], list[dict[str, str]]]
+    , workers: int=30
+):
+    """
+    Transform a set of files using a function in parallel, with a fixed number
+    of worker processes.
+
+    :param files_set: A sequence of file paths to process.
+    :type files_set: Sequence[Path]
+    :param exec_fn: The function to transform each file, which accepts a file path.
+    :type exec_fn: Callable[[str | Path], list[dict[str, str]]]
+    :param workers: The number of parallel worker processes. Defaults to 30.
+    :type workers: int
+    :return: A list of results from each transformation.
+    :rtype: list[Any]
+    """
+    with multiprocessing.Pool(processes=workers) as pool:
+        results = pool.map(exec_fn, files_set)
+    return results
+
+
+def sequential_exec_transform(
+    files_set: Sequence
+    , exec_fn: Callable[[str | Path], list[dict[str, str]]]
+):
+    """
+    Transform a set of files sequentially (one by one) using the given function.
+
+    :param files_set: A sequence of file paths to process.
+    :type files_set: Sequence[Path]
+    :param exec_fn: The function to transform each file, which accepts a file path.
+    :type exec_fn: Callable[[str | Path], list[dict[str, str]]]
+    :return: A list of results from each transformation.
+    :rtype: list[Any]
+    """
+    results = list(map(exec_fn, files_set))
+    return results
 
 
 def print_parse_summary(
@@ -423,6 +685,17 @@ def print_parse_summary(
     , n_files: int | None = None
     , failing_files: list[Path | str] | None = None
 ) -> None:
+    """
+    Print a summary of parsing results, including number of connections, type
+    errors, key errors, and the overall performance.
+
+    :param results: A tuple of lists: (connections, type_errors, key_errors).
+    :type results: ParseResult
+    :param n_files: The number of files successfully parsed, if available.
+    :type n_files: int | None
+    :param failing_files: A list of files that failed to parse or had errors.
+    :type failing_files: list[Path | str] | None
+    """
     conns_total, type_e_total, key_e_total = map(len, results)
     error_total = type_e_total + key_e_total
     total = conns_total + error_total
@@ -444,6 +717,17 @@ def print_parse_summary(
 def exec_parser(
     args: argparse.Namespace
 ) -> None:
+    """
+    Execute the PARSE command, which reads a set of JSON files in the specified
+    folder, parses them into Connection objects, and writes them to the JanusGraph
+    database.
+
+    :param args: Parsed arguments from the command line, including:
+        - input_dir: The folder containing the JSON files
+        - address, port, graph_name: JanusGraph connection parameters
+        - schema: The loaded schema module containing a Connection class
+    :type args: argparse.Namespace
+    """
     rfiles = list(args.input_dir.glob("*.json"))
 
     graph = get_graph_from_janus(
@@ -484,14 +768,71 @@ def exec_parser(
     print_parse_summary((conns, type_e, key_e), n_files, failing_files)
 
 
+def exec_transform(
+    args: argparse.Namespace
+) -> None:
+    """
+    Execute the TRANSFORM command, which reads a set of JSON files from DataRaider
+    and converts them into an intermediate JSON format ready to be stored in a
+    database. Optionally, if substitutions are given, each resulting JSON is also
+    parsed and inserted into JanusGraph via RAG.
+
+    :param args: Parsed arguments from the command line, including:
+        - input_dir: The folder containing the raw JSON files
+        - output_dir: The folder where the transformed JSON files will be stored
+        - no_parallel: Boolean indicating whether to run sequentially
+        - workers: Fixed number of workers if given
+        - dynamic_start, dynamic_steps, dynamic_max_workers: Parameters for
+          dynamic parallel execution
+        - substitutions: Substitutions for RAG, if any
+        - address, port, graph_name: JanusGraph connection parameters
+        - schema: The loaded schema module containing a Connection class
+    :type args: argparse.Namespace
+    """
+    rfiles = list(args.input_dir.glob("*.json"))
+    if args.substitutions is not None:
+        graph = get_graph_from_janus(
+            address=args.address
+            , port=args.port
+            , graph_name=args.graph_name
+        )
+    else:
+        graph = None
+        
+    exec_fn = partial(
+        get_json_from_react
+        , results_path=args.output_dir
+        , schema=args.schema
+        , substitutions=args.substitutions
+        , graph=graph
+    )
+
+    if args.no_parallel:
+        sequential_exec_transform(
+            files_set=rfiles
+            , exec_fn=exec_fn
+        )
+    elif hasattr(args, "workers"):
+        static_par_exec_transform(
+            files_set=rfiles
+            , exec_fn=exec_fn
+            , workers=args.workers
+        )
+    else:
+        dynamic_par_exec_transform(
+            files_set=rfiles
+            , exec_fn=exec_fn
+            , max_workers=args.dynamic_max_workers
+            , steps=args.dynamic_steps
+            , start=args.dynamic_start
+        )
+
+    
 if __name__ == "__main__":
     parser = build_main_argparser()
     args = parser.parse_args()
     match args.command:
         case Commands.PARSE:
             exec_parser(args)
-            pass
         case Commands.TRANSFORM:
-            pass
-
-    # schema = load_module("schema", SCHEMAS[0])
+            exec_transform(args)
