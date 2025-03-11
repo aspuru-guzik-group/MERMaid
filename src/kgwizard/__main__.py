@@ -12,6 +12,7 @@ from concurrent.futures.thread import _worker
 import importlib.util
 import multiprocessing
 import json
+import os
 import sys
 from collections import deque
 from enum import auto, StrEnum
@@ -25,6 +26,9 @@ import numpy as np
 from graphdb import janus
 from gremlin_python.structure.graph import GraphTraversalSource
 from prompt import build_prompt, build_prompt_from_react_file, get_response
+
+# This is the only way I've found to execute the transformation using multiprocessing
+global schema
 
 
 C = TypeVar('C', bound=janus.Connection)
@@ -88,6 +92,14 @@ def read_and_clean_file(path: Path | str) -> list[dict[Any, Any]] | None:
         return None
 
 
+def _get_json_from_react_wrapper(kwargs: dict[str, Any], path: Path):
+    """
+    Calls `exec_fn` with a Path plus any needed keyword arguments.
+    This function is top-level so it can be pickled by multiprocessing.
+    """
+    return get_json_from_react(path, **kwargs)
+
+
 def build_janus_argparser():
     """
     Build an argument parser with arguments related to connecting to a JanusGraph
@@ -123,8 +135,10 @@ def build_janus_argparser():
     parser.add_argument(
         "-sc", "--schema",
         type=load_schema,
+        default="echem",
         help=f"""Node/Edge schema to be used during the json conversion. Can be
-        either a path or any of the default schemas: {', '.join(SCHEMAS.keys())}."""
+        either a path or any of the default schemas: {','.join(SCHEMAS.keys())}.
+        Defaults to echem"""
     )
 
     return parser
@@ -144,6 +158,13 @@ def build_parser_argparser():
         "input_dir",
         type=Path,
         help="Folder where the JSON files from transform are stored."
+    )
+
+    parser.add_argument(
+        "-of", "--output_file",
+        type=Path,
+        help=""""If set, save the graph into the specified file after updating
+        the database."""
     )
 
     return parser
@@ -178,7 +199,7 @@ def build_transform_argparser():
 
     parser.add_argument(
         "-np", "--no_parallel",
-        action="store_false",
+        action="store_true",
         help="""If active, run the conversions sequentially instead of using
         the dynamic increase parallel algorithm. Overrides the --workers flag.
         """
@@ -192,7 +213,7 @@ def build_transform_argparser():
     )
 
     parser.add_argument(
-        "-s", "--subs",
+        "-s", "--substitutions",
         type=parse_pair_sep_colon,
         nargs="+",
         help="""Substitution to be made in the instructions file. The input
@@ -226,7 +247,7 @@ def build_transform_argparser():
     return parser
 
 
-def load_schema(schema: str):
+def load_schema(schema_name: str):
     """
     Load a Python module representing a JanusGraph schema from a file path or
     from a known default schema name.
@@ -238,12 +259,17 @@ def load_schema(schema: str):
     :raises ImportError: If the module spec cannot be created.
     :raises ValueError: If the module's loader is not found.
     """
+    # This is the only way I found to execute the multiprocessing
+    global schema
     p: Path
-    if s := SCHEMAS.get(schema):
+    if s := SCHEMAS.get(schema_name):
         p = s
     else:
-        p = Path(schema)
-    return load_module("schema", p)
+        p = Path(schema_name)
+
+    schema = load_module("schema", p)
+        
+    return 
     
 
 def build_main_argparser() -> argparse.ArgumentParser:
@@ -271,7 +297,7 @@ def build_main_argparser() -> argparse.ArgumentParser:
         intermediate JSON structured format ready to be uploaded to a certain
         database. Optinioally, uploads the transformed files into a database
         and uses RAG to retrieve already known nodes. Address, port and graph
-        arguments are only used if RAG is active (see --subs).""",
+        arguments are only used if RAG is active (see --substitutions).""",
         parents=[build_transform_argparser(), build_janus_argparser()]
     )
     subparsers.add_parser(
@@ -340,7 +366,7 @@ def load_module(
 def dynamic_pool_execution(
     files
     , pool_sizes
-    , exec_fn: Callable[[str | Path], list[dict[str, str]]]
+    , exec_fn_args: dict[str, Any]
 ) -> None:
     """
     Execute a function in parallel over a list of files, dynamically batching them
@@ -357,6 +383,7 @@ def dynamic_pool_execution(
     total_files = len(files)
     start_idx = 0
 
+    results = []
     for pool_size in pool_sizes:
         if start_idx >= total_files:
             print("\nAll files processed. Exiting.\n")
@@ -366,19 +393,16 @@ def dynamic_pool_execution(
 
         print(f"\nStarting batch with {pool_size} workers, processing {len(batch_files)} files...\n")
 
-        workers = []
-        for f in batch_files:
-            p = multiprocessing.Process(target=exec_fn, args=(f,))
-            p.start()
-            workers.append(p)
-
-        for p in workers:
-            p.join()
-
+        static_par_exec_transform(
+            files_set=files
+            , exec_fn_args=exec_fn_args
+            , workers=pool_size
+        )
+        
         print(f"\nBatch of {pool_size} workers finished.\n")
 
         start_idx += len(batch_files)
-
+        
 
 def generate_pool_sizes(
     total_files: int
@@ -403,14 +427,19 @@ def generate_pool_sizes(
     :return: A list of pool sizes to use for parallel execution.
     :rtype: list[int]
     """
+    total = min(max_workers, total_files)
     increasing_sizes = np.round(
-        np.linspace(start, max_workers ** 0.6, steps) ** (1 / 0.6)).astype(int).tolist()
+        np.linspace(start, total ** 0.6, steps) ** (1 / 0.6)).astype(int).tolist()
     increasing_sizes = [min(x, max_workers) for x in increasing_sizes]
     remaining_files = total_files - sum(increasing_sizes)
     if remaining_files > 0:
         increasing_sizes.extend(repeat(max_workers, remaining_files))
     if (tot := sum(increasing_sizes)) > total_files:
         increasing_sizes[-1] -= tot - total_files
+    if increasing_sizes[-1] <= 0:
+        pivot = increasing_sizes[-1]
+        increasing_sizes = increasing_sizes[:-1]
+        increasing_sizes[-1] += pivot
 
     return increasing_sizes
 
@@ -504,10 +533,11 @@ def parse_file_and_update_db(
 
 def get_json_from_react(
     json_react_path: Path | str
+    , address: str
+    , port: int
+    , graph_name: str
     , results_path: Path
-    , schema: ModuleType
     , substitutions: dict[str, Any] | None = None
-    , graph: GraphTraversalSource | None = None
 ) -> list[dict[str, str]]:
     """
     Process a JSON file (react file) to generate the final JSON output by making
@@ -518,8 +548,6 @@ def get_json_from_react(
     :type json_react_path: Path | str
     :param results_path: The output folder path to store the generated JSONs.
     :type results_path: Path
-    :param schema: The Python module containing the schema definitions.
-    :type schema: ModuleType
     :param substitutions: A dictionary of substitution keywords mapped to node labels,
         if RAG is desired. Defaults to None for no RAG.
     :type substitutions: dict[str, Any] | None
@@ -529,6 +557,13 @@ def get_json_from_react(
     :rtype: list[dict[str, str]]
     :raises ValueError: If the schema file path is invalid (schema.__file__ is None).
     """
+    graph = get_graph_from_janus(
+        address=address
+        , port=port
+        , graph_name=graph_name
+    )
+
+    
     rag_active = substitutions is not None and graph is not None
     # Code substitution, load schema file
     if schema.__file__ is None:
@@ -552,7 +587,7 @@ def get_json_from_react(
         , study_name=json_react_path.stem
         , **rag_dict
     )]
-    
+
     messages.append(get_response(messages))
 
     save_path = results_path / Path(str(json_react_path.stem) +  '_1' + '.json')
@@ -609,7 +644,7 @@ def get_graph_from_janus(
 
 def dynamic_par_exec_transform(
     files_set: Sequence
-    , exec_fn: Callable[[str | Path], list[dict[str, str]]]
+    , exec_fn_args: dict[str, Any]
     , max_workers: int=30
     , steps: int=5
     , start: int=1
@@ -636,12 +671,12 @@ def dynamic_par_exec_transform(
         , max_workers=max_workers
         , start=start
     )
-    dynamic_pool_execution(files_set, pool_sizes, exec_fn)
+    dynamic_pool_execution(files_set, pool_sizes, exec_fn_args)
 
 
 def static_par_exec_transform(
     files_set: Sequence
-    , exec_fn: Callable[[str | Path], list[dict[str, str]]]
+    , exec_fn_args: dict[str, Any]
     , workers: int=30
 ):
     """
@@ -658,13 +693,16 @@ def static_par_exec_transform(
     :rtype: list[Any]
     """
     with multiprocessing.Pool(processes=workers) as pool:
-        results = pool.map(exec_fn, files_set)
+        results = pool.map(
+            partial(get_json_from_react, **exec_fn_args)
+            , files_set
+        )
     return results
 
 
 def sequential_exec_transform(
     files_set: Sequence
-    , exec_fn: Callable[[str | Path], list[dict[str, str]]]
+    , exec_fn_args: dict[str, Any]
 ):
     """
     Transform a set of files sequentially (one by one) using the given function.
@@ -676,7 +714,8 @@ def sequential_exec_transform(
     :return: A list of results from each transformation.
     :rtype: list[Any]
     """
-    results = list(map(exec_fn, files_set))
+    exec_fn_partial = partial(get_json_from_react, **exec_fn_args)
+    results = list(map(exec_fn_partial, files_set))
     return results
 
 
@@ -730,12 +769,6 @@ def exec_parser(
     """
     rfiles = list(args.input_dir.glob("*.json"))
 
-    graph = get_graph_from_janus(
-        address=args.address
-        , port=args.port
-        , graph_name=args.graph_name
-    )
-
     sync_fn = partial(
         parse_file_and_update_db
         , graph=graph
@@ -766,6 +799,10 @@ def exec_parser(
     sys.stdout.flush()
 
     print_parse_summary((conns, type_e, key_e), n_files, failing_files)
+    if args.output_file:
+        print("")
+        print(f"Saving graph file at: {args.output_file}")
+        janus.save_graph(graph, args.output_file)
 
 
 def exec_transform(
@@ -798,30 +835,33 @@ def exec_transform(
         )
     else:
         graph = None
-        
-    exec_fn = partial(
-        get_json_from_react
-        , results_path=args.output_dir
-        , schema=args.schema
-        , substitutions=args.substitutions
-        , graph=graph
-    )
+
+    # Create output directiory
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+
+    exec_fn_args = {
+        "results_path": args.output_dir
+        , "substitutions": dict(args.substitutions)
+        , "address": args.address
+        , "port": args.port
+        , "graph_name": args.graph_name
+    }
 
     if args.no_parallel:
         sequential_exec_transform(
             files_set=rfiles
-            , exec_fn=exec_fn
+            , exec_fn_args=exec_fn_args
         )
-    elif hasattr(args, "workers"):
+    elif args.workers is not None:
         static_par_exec_transform(
             files_set=rfiles
-            , exec_fn=exec_fn
+            , exec_fn_args=exec_fn_args
             , workers=args.workers
         )
     else:
         dynamic_par_exec_transform(
             files_set=rfiles
-            , exec_fn=exec_fn
+            , exec_fn_args=exec_fn_args
             , max_workers=args.dynamic_max_workers
             , steps=args.dynamic_steps
             , start=args.dynamic_start

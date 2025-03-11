@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Janusgraph database interface."""
 from typing import Any, Type
+from pathlib import Path
 from itertools import chain
 
 from gremlin_python.structure.graph import Edge, Graph, Vertex
@@ -11,15 +12,15 @@ from gremlin_python.process.graph_traversal import GraphTraversalSource, __
 from .schema_abstract import VertexBase, EdgeBase, Connection
 
 def connect(
-    direction: str
+    address: str
     , port: int
     , graph_name: str
 ) -> DriverRemoteConnection:
     """
     Establish a connection to a Gremlin server.
 
-    :param direction: The network direction (e.g., 'ws' or 'wss') used for the connection.
-    :type direction: str
+    :param address: The network direction (e.g., 'ws' or 'wss') used for the connection.
+    :type address: str
     :param port: The port number on which the Gremlin server is running.
     :type port: int
     :param graph_name: The name of the graph to connect to.
@@ -28,7 +29,7 @@ def connect(
     :rtype: DriverRemoteConnection
     """
     return DriverRemoteConnection(
-        f'{direction}:{port}/gremlin'
+        f'{address}:{port}/gremlin'
         , graph_name
         , message_serializer=serializer.GraphSONSerializersV3d0())
 
@@ -86,10 +87,10 @@ def get_vertices(
     :return: A list of dictionaries representing the properties of matching vertices.
     :rtype: list[dict[str, Any]]
     """
-    if issubclass(vertex_type, VertexBase):
-        vl = vertex_type.__name__
-    else:
+    if isinstance(vertex_type, str):
         vl = vertex_type
+    else:
+        vl = vertex_type.__name__
     return (
         graph
         .V()
@@ -242,3 +243,12 @@ n    :raises StopIteration: If the source or target vertex does not exist in the
     for key, value in edge.properties.items():
         edge_traversal = edge_traversal.property(key, value)
     return edge_traversal.next()
+
+
+def save_graph(
+    graph: GraphTraversalSource
+    , output_path: Path
+) -> None:
+    if not output_path.suffix:
+        output_path = output_path.with_suffix(".graphml")
+    graph.io(output_path).write().iterate()

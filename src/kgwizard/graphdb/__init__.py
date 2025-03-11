@@ -7,6 +7,7 @@ from .janus import (
     , add_connection
     , add_vertex
     , add_edge
+    , save_graph
 )
 from .schema_abstract import (
     VertexBase
