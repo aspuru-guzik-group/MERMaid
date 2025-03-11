@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 import argparse
 import importlib.util
+import multiprocessing
 import json
 import sys
-from itertools import repeat
+from collections import deque
+from enum import auto, StrEnum
+from functools import partial
+from itertools import chain, repeat
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Callable, Sequence, NewType, TypeAlias, TypeVar
+from typing import Any, NewType, Sequence, TypeAlias, TypeVar
 
-from gremlin_python.process import graph_traversal
 import numpy as np
-from graphdb import VertexBase, janus
+from graphdb import janus
 from gremlin_python.structure.graph import GraphTraversalSource
 from prompt import build_prompt, build_prompt_from_react_file, get_response
+
 
 C = TypeVar('C', bound=janus.Connection)
 TypeEDict = NewType("TypeEDict", dict[Any, Any])
@@ -31,7 +35,15 @@ SCHEMAS = dict(map(
 ITERATOR_STR = "Now let's go for optimize iteration number {number}"
 
 
-def read_and_clean_file(path: Path | str) -> dict[Any, Any] | None:
+class Commands(StrEnum):
+    TRANSFORM = auto()
+    PARSE = auto()
+
+
+def filter_none(xs): return filter(lambda x: x is not None, xs)
+
+
+def read_and_clean_file(path: Path | str) -> list[dict[Any, Any]] | None:
     try:
         with open(path) as f:
             content = f.read().split('```json')[1].split('```')[0]
@@ -58,7 +70,7 @@ def build_janus_argparser():
     )
 
     parser.add_argument(
-        "-g", "--graph",
+        "-g", "--graph_name",
         type=str,
         default="g",
         help="JanusGraph graph name. Defaults to g."
@@ -81,16 +93,7 @@ def build_parser_argparser():
     parser.add_argument(
         "input_dir",
         type=Path,
-        help="Folder where the JSON files are stored."
-    )
-
-    parser.add_argument(
-        "-o", "--output_dir",
-        type=Path,
-        default=Path("./results"),
-        help=""""Folder where the generate JSON intermediate files will be
-        stored. The folder will be automatically created. Defaults to
-        ./results."""
+        help="Folder where the JSON files from transform are stored."
     )
 
     return parser
@@ -103,7 +106,7 @@ def build_transform_argparser():
     parser.add_argument(
         "input_dir",
         type=Path,
-        help="Folder where the JSON files are stored."
+        help="Folder where the JSON files from DataRaider are stored."
     )
     
     parser.add_argument(
@@ -175,9 +178,6 @@ def load_schema(schema: str):
     
 
 def build_main_argparser() -> argparse.ArgumentParser:
-
-    parent_parser = build_janus_argparser()
-
     main_parser = argparse.ArgumentParser(description="Automated database parser.")
     subparsers = main_parser.add_subparsers(
         title="Commands",
@@ -189,7 +189,7 @@ def build_main_argparser() -> argparse.ArgumentParser:
     subparsers.required = True
 
     subparsers.add_parser(
-        "transform",
+        Commands.TRANSFORM,
         help="""Converts a set of JSON files within a folder into an
         intermediate JSON structured format ready to be uploaded to a certain
         database. Optinioally, uploads the transformed files into a database
@@ -198,7 +198,7 @@ def build_main_argparser() -> argparse.ArgumentParser:
         parents=[build_transform_argparser(), build_janus_argparser()]
     )
     subparsers.add_parser(
-        "parse",
+        Commands.PARSE,
         help="""Converts a set of JSON files into the target format and stores
         them in the given graph database.""",
         parents=[build_parser_argparser(), build_janus_argparser()]
@@ -227,6 +227,8 @@ def load_module(
         raise ImportError(f"Cannot create a module spec for {module_path}")
 
     module = importlib.util.module_from_spec(spec)
+    if spec.loader is None:
+        raise ValueError
     sys.modules[module_name] = module
     spec.loader.exec_module(module)
     return module
@@ -288,7 +290,7 @@ def parse_pair_sep_colon(
 def parse_or_skip(
     reaction: list[dict[Any, Any]]
     , conn_constructor: type[C]
-) -> ParseResult:
+) -> ParseResult[C]:
     connections = []
     type_e = []
     key_e = []
@@ -304,43 +306,53 @@ def parse_or_skip(
     return (connections, type_e, key_e)
 
 
-def rag_exec(
+def parse_file_and_update_db(
     graph: GraphTraversalSource
     , file_name: Path
     , conn_constructor: type[C]
-    , add_connection: Callable[[C, GraphTraversalSource], janus.Edge]
-) -> None:
+) -> ParseResult[C] | None:
     reaction = read_and_clean_file(file_name)
     if not reaction:
         return None
-    conns, type_e, key_e = parse_or_skip(
+    results = parse_or_skip(
         reaction=reaction
         , conn_constructor=conn_constructor
     )
-    if conns:
+    if conns := results[0]:
         for item in conns:
             try:
-                add_connection(item, graph)
+                janus.add_connection(item, graph)
             except TypeError:
-                add_connection(item, graph)
+                janus.add_connection(item, graph)
             except:
                 with open("errors.dat", 'w') as f:
                     f.write(f"{file_name}\n")
                 continue
+    return results
 
 
 def get_json_from_react(
     graph: GraphTraversalSource
     , json_react_path: Path | str
-    , substitutions: dict[str, Any]
     , results_path: Path
+    , schema: ModuleType
+    , substitutions: dict[str, Any] | None = None
 ) -> list[dict[str, str]]:
-    graph = janus.get_traversal(connection)
-    rag_dict = build_rag_subs(graph, substitutions)
-    json_react_path = Path(json_react_path)
+    # Code substitution, load schema file
+    if schema.__file__ is None:
+        raise ValueError
+    with open(schema.__file__, 'r', encoding="utf8") as f:
+        rag_dict = {"code": f.readlines()}
 
+    # Load target json
+    json_react_path = Path(json_react_path)
     with open(json_react_path, 'r') as f:
         react_dict = json.load(f)
+
+    # Prepare RAG if needed
+    if substitutions is not None:
+        rag_dict |= build_rag_subs(graph, substitutions)
+
     optimization_runs = list(react_dict["Optimization Runs"].keys())
 
     messages = [build_prompt_from_react_file(
@@ -348,13 +360,24 @@ def get_json_from_react(
         , study_name=json_react_path.stem
         , **rag_dict
     )]
+    
     messages.append(get_response(messages))
 
     save_path = results_path / Path(str(json_react_path.stem) +  '_1' + '.json')
     save_path.parent.mkdir(parents=True, exist_ok=True)
+
     with open(save_path, 'w') as f:
         f.write(messages[-1]["content"])
-    rag_exec(graph, save_path)
+
+    rag_fn = partial(
+        parse_file_and_update_db
+        , graph=graph
+        , file_name=save_path
+        , conn_constructor=schema.Connection
+    )
+
+    if substitutions is not None:
+        rag_fn()
     for n in optimization_runs[1:]:
         messages.append(build_prompt(ITERATOR_STR.format(number=n)))
         messages.append(get_response(messages))
@@ -362,11 +385,25 @@ def get_json_from_react(
         with open(save_path, 'w') as f:
             f.write(messages[-1]["content"])
         print(f"iter: {n}")
-        rag_exec(graph, save_path)
+        if substitutions is not None:
+            rag_fn()
     return messages
 
 
-def exec(
+def get_graph_from_janus(
+    address: str
+    , port: int
+    , graph_name: str
+) -> GraphTraversalSource:
+    return janus.get_traversal(
+        janus.connect(
+            address=address
+            , port=port
+            , graph_name=graph_name
+        ))
+
+
+def exec_transform(
     files_set: Sequence
     , max_workers: int=30
     , steps: int=5
@@ -380,8 +417,81 @@ def exec(
     )
     dynamic_pool_execution(files_set, pool_sizes)
 
-    
+
+def print_parse_summary(
+    results: ParseResult
+    , n_files: int | None = None
+    , failing_files: list[Path | str] | None = None
+) -> None:
+    conns_total, type_e_total, key_e_total = map(len, results)
+    error_total = type_e_total + key_e_total
+    total = conns_total + error_total
+    if n_files:
+        sys.stdout.write(f"Parsed {n_files}")
+    if failing_files:
+        sys.stdout.write(f" out of {len(failing_files)}\n")
+    print("-Summary-")
+    print(f"Connections parsed: {conns_total}/{total}")
+    print(f"Total errors: {error_total}")
+    print(f"  - Type errors: {type_e_total}/{error_total}")
+    print(f"  - Key errors: {key_e_total}/{error_total}")
+    print(f"Performance: {conns_total/total:.2f}%")
+    print("-Failing files-")
+    if failing_files:
+        deque(map(print, failing_files), maxlen=0)
+
+
+def exec_parser(
+    args: argparse.Namespace
+) -> None:
+    rfiles = list(args.input_dir.glob("*.json"))
+
+    graph = get_graph_from_janus(
+        address=args.address
+        , port=args.port
+        , graph_name=args.graph_name
+    )
+
+    sync_fn = partial(
+        parse_file_and_update_db
+        , graph=graph
+        , conn_constructor=args.schema.Connection
+    )
+
+    n_files = len(rfiles)
+    type_e = []
+    key_e = []
+    conns = []
+    failing_files = []
+    for n, f in enumerate(rfiles):
+        sys.stdout.write(f"\r{n}/{n_files}")
+        sys.stdout.flush()
+        results = sync_fn(file_name=f)
+
+        if results is None:
+            print(f"Unable to parse {f.stem}, skipping.")
+            failing_files.append(f)
+        else:
+            conns += results[0]
+            type_e += results[1]
+            key_e += results[2]
+            if results[1] or results[2]:
+                failing_files.append(f)
+        
+    sys.stdout.write(f"\r{n_files}/{n_files}\n")
+    sys.stdout.flush()
+
+    print_parse_summary((conns, type_e, key_e), n_files, failing_files)
+
+
 if __name__ == "__main__":
     parser = build_main_argparser()
     args = parser.parse_args()
+    match args.command:
+        case Commands.PARSE:
+            exec_parser(args)
+            pass
+        case Commands.TRANSFORM:
+            pass
+
     # schema = load_module("schema", SCHEMAS[0])
