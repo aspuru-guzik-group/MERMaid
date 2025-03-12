@@ -9,8 +9,6 @@ kgwizard is a Python command-line tool designed to:
 - Support dynamic and static parallelism for efficient processing.
 - Perform RAG (Retrieval-Augmented Generation) lookups against an existing graph to substitute known nodes.
 
----
-
 * Table of Contents
 1. [[#features][Features]]
 2. [[#requirements][Requirements]]
@@ -22,8 +20,6 @@ kgwizard is a Python command-line tool designed to:
 6. [[#contributing][Contributing]]
 7. [[#license][License]]
 
----
-
 * Features                                        :features:
 
 - *Dynamic Parallel Execution* using Python’s ~multiprocessing~ to speed up large-scale transformations.
@@ -31,8 +27,6 @@ kgwizard is a Python command-line tool designed to:
 - *Modular* with separate subcommands for transformation and parsing.
 - *Schema Loading* at runtime, either from built-in defaults or user-provided schema files.
 - *Fallback for Older Typing Features* ensures compatibility with Python 3.9+.
-
----
 
 * Requirements                                     :requirements:
 
@@ -46,8 +40,6 @@ kgwizard is a Python command-line tool designed to:
   - [[https://pypi.org/project/openai/][openai]] (Required for prompt building and RAG functionality)
 
 A running JanusGraph server is also needed if you plan to upload data into a graph database.
-
----
 
 * Installation                                     :installation:
 
@@ -63,7 +55,6 @@ A running JanusGraph server is also needed if you plan to upload data into a gra
 #+end_src
 
 Use the ~-e~ flag command to make changes on the prompt files inside ~prompt/assets~.
----
 
 * Usage                                            :usage:
 
@@ -71,7 +62,6 @@ After installation, you can run:
 #+begin_src bash
   kgwizard <command> [options]
 #+end_src
-
 
 ** Transform Command                               :transform-command:
 
@@ -113,8 +103,6 @@ Example:
 
 This parses each ~.json~ in ~./results~ and updates JanusGraph. Also saves a ~.graphml~ file representing the final graph state.
 
----
-
 * Environment Variables                            :environment-variables:
 
 - ~OPENAI_API_KEY~: This environment variable is needed to use the openai API when using the ~transform~ command.
@@ -124,8 +112,6 @@ This parses each ~.json~ in ~./results~ and updates JanusGraph. Also saves a ~.g
 #+end_src
 
 If unset, only the ~parse~ command will be available.
-
----
 
 * Contributing                                     :contributing:
 
@@ -138,5 +124,3 @@ Contributions are welcomed for:
 - Improving performance or parallelism.
 - Enhancing RAG logic.
 - Adding additional LLMs connectors.
-
----
