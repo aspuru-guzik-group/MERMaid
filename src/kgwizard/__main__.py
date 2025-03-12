@@ -8,20 +8,18 @@ and static parallel execution for faster processing, as well as a
 substitution mechanism (RAG) for retrieving existing nodes in the database.
 """
 import argparse
-from concurrent.futures.thread import _worker
 import importlib.util
 import multiprocessing
 import json
-import os
 import sys
 from collections import deque
-# from enum import auto, StrEnum
-from enum import Enum, auto
+from enum import Enum
 from functools import partial
-from itertools import chain, repeat
+from itertools import repeat
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Callable, NewType, Sequence,TypeVar, Union
+from typing import Any, NewType, Sequence,TypeVar, Union
+# For compatibility
 try:
     from typing import TypeAlias 
 except ImportError:
@@ -39,7 +37,7 @@ global schema
 C = TypeVar('C', bound=janus.Connection)
 TypeEDict = NewType("TypeEDict", dict[Any, Any])
 KeyEDict = NewType("KeyEDict", dict[Any, Any])
-ParseResult: tuple[list[C], list[TypeEDict], list[KeyEDict]]
+ParseResult = tuple[list[C], list[TypeEDict], list[KeyEDict]]
 
 SCHEMA_DEFAULT_PATH = Path(janus.__file__).parent / "schemas"
 SCHEMAS = dict(map(
@@ -58,10 +56,8 @@ class Commands(str, Enum):
     :cvar PARSE: Command for parsing the intermediate files and storing them
                  directly in the database.
     """
-    # TRANSFORM = auto()
-    TRANSFORM = "TRANSFORM"
-    # PARSE = auto()
-    PARSE = "PARSE"
+    TRANSFORM = "transform"
+    PARSE = "parse"
 
 
 def filter_none(xs):
@@ -387,7 +383,6 @@ def dynamic_pool_execution(
     total_files = len(files)
     start_idx = 0
 
-    results = []
     for pool_size in pool_sizes:
         if start_idx >= total_files:
             print("\nAll files processed. Exiting.\n")
@@ -772,6 +767,11 @@ def exec_parser(
     :type args: argparse.Namespace
     """
     rfiles = list(args.input_dir.glob("*.json"))
+    graph = get_graph_from_janus(
+            address=args.address
+            , port=args.port
+            , graph_name=args.graph_name
+        )
 
     sync_fn = partial(
         parse_file_and_update_db
@@ -831,14 +831,6 @@ def exec_transform(
     :type args: argparse.Namespace
     """
     rfiles = list(args.input_dir.glob("*.json"))
-    if args.substitutions is not None:
-        graph = get_graph_from_janus(
-            address=args.address
-            , port=args.port
-            , graph_name=args.graph_name
-        )
-    else:
-        graph = None
 
     # Create output directiory
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -874,15 +866,6 @@ def exec_transform(
             , steps=args.dynamic_steps
             , start=args.dynamic_start
         )
-
-# def main() -> None:
-#     parser = build_main_argparser()
-#     args = parser.parse_args()
-#     match args.command:
-#         case Commands.PARSE:
-#             exec_parser(args)
-#         case Commands.TRANSFORM:
-#             exec_transform(args)
 
 def main() -> None:
     parser = build_main_argparser()
