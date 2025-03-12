@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """Module containing the classes and types to create the desired graph database
 schema."""
-from dataclasses import dataclass, fields
 import inspect
 import json
-from typing import Any, Generic, TypeVar, Type
 import sys
 import types
+from dataclasses import dataclass, fields
+from typing import Any, Generic, Optional, Type, TypeVar, Union
 
 def sink(_: Any) -> None: pass
 
@@ -113,7 +113,7 @@ class Connection:
 
 
 def get_type_from_annotation(
-    annotation_type: types.UnionType | type
+    annotation_type: Union[types.UnionType, type]
 ) -> list[type]:
     if hasattr(annotation_type, '__args__'):
         non_none_types = [t if t is not type(None) else sink for t in annotation_type.__args__]
@@ -123,7 +123,7 @@ def get_type_from_annotation(
 
 
 def get_types_from_class(
-    cls: VertexBase | EdgeBase
+    cls: Union[VertexBase, EdgeBase]
 ) -> dict[str, list[type]]:
     return {
         k: get_type_from_annotation(v) for k, v in cls.__annotations__.items()
@@ -133,7 +133,7 @@ def get_types_from_class(
 def apply_type_from_list(
     type_list: list[type]
     , value: str
-) -> str | Any:
+) -> Union[str, Any]:
     if type_list:
         for t in type_list:
             try: return t(value)
@@ -169,18 +169,18 @@ class Study(VertexBase):
     
 @dataclass
 class Quantity(VertexBase):
-    unit: str | None
+    unit: Optional[str]
     value: float
 
 
 @dataclass
 class Compound(VertexBase):
-    name: str | None
+    name: Optional[str]
 
 
 @dataclass
 class Atmosphere(VertexBase):
-    name: str | None
+    name: Optional[str]
 
 
 @dataclass
@@ -199,38 +199,38 @@ TEdgeQuantity = EdgeBase[Reaction, Quantity]
 
 @dataclass
 class HasProduct(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
+    value: Optional[float] = None
+    unit: Optional[str] = None
 
 
 @dataclass
 class HasReactant(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
+    value: Optional[float] = None
+    unit: Optional[str] = None
 
 
 @dataclass
 class HasSolvent(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
+    value: Optional[float] = None
+    unit: Optional[str] = None
 
 
 @dataclass
 class HasCatalyst(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
+    value: Optional[float] = None
+    unit: Optional[str] = None
 
 
 @dataclass
 class HasAdditive(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
+    value: Optional[float] = None
+    unit: Optional[str] = None
 
 
 @dataclass
 class HasLigand(TEdgeCompound):
-    value: float | None = None
-    unit: str | None = None
+    value: Optional[float] = None
+    unit: Optional[str] = None
 
 
 @dataclass
