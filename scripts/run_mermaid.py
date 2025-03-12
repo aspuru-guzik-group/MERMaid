@@ -130,7 +130,7 @@ def exec_run(args):
     kgwizard_args += json_to_arg_list(cfg["kgwizard"])
 
     print("\n### Running KGWizard ###\n")
-    run_subprocess("src/kgwizard/__main__.py", kgwizard_args, python=True)
+    run_subprocess("kgwizard", kgwizard_args, python=True)
     print("\n### Done running KGWizard ###\n")
 
 
