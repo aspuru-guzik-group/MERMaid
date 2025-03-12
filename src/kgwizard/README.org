@@ -115,9 +115,9 @@ If unset, only the ~parse~ command will be available.
 
 * Contributing                                     :contributing:
 
-1. **Fork or clone** the repository.
-2. **Create a new branch** for your feature or fix.
-3. **Submit a pull request** after you test and finalize your changes.
+1. *Fork or clone* the repository.
+2. *Create a new branch* for your feature or fix.
+3. *Submit a pull request* after you test and finalize your changes.
 
 Contributions are welcomed for:
 - Adding new schemas or database adapters.
