@@ -43,13 +43,13 @@ A running JanusGraph server is also needed if you plan to upload data into a gra
 
 * Installation                                     :installation:
 
-1. **Clone the repository**:
+1. *Clone the repository*:
 #+begin_src bash
   git clone https://github.com/aspuru-guzik-group/MERMaid.git
   cd MERMaid
 #+end_src
 
-2. **Install requirements**:
+2. *Install package*:
 #+begin_src bash
   pip install -e .[kgwizard]
 #+end_src
