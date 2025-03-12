@@ -71,7 +71,6 @@ def main():
     api_key = config.get('api_key', None)
 
     info = DataRaiderInfo(api_key=api_key, device="cpu", ckpt_path=ckpt_path)
-    print(f'keys are {keys}')
     # Construct the initial reaction data extraction prompt
     print("Constructing your custom reaction data extraction prompt")
     construct_initial_prompt(prompt_dir, keys, new_keys)

@@ -15,12 +15,17 @@ import json
 import os
 import sys
 from collections import deque
-from enum import auto, StrEnum
+# from enum import auto, StrEnum
+from enum import Enum, auto
 from functools import partial
 from itertools import chain, repeat
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Callable, NewType, Sequence, TypeAlias, TypeVar
+from typing import Any, Callable, NewType, Sequence,TypeVar, Union
+try:
+    from typing import TypeAlias 
+except ImportError:
+    TypeAlias = type
 
 import numpy as np
 from .graphdb import janus
@@ -34,21 +39,17 @@ global schema
 C = TypeVar('C', bound=janus.Connection)
 TypeEDict = NewType("TypeEDict", dict[Any, Any])
 KeyEDict = NewType("KeyEDict", dict[Any, Any])
-ParseResult: TypeAlias = tuple[
-    list[C]
-    , list[TypeEDict]
-    , list[KeyEDict]
-]
+ParseResult: tuple[list[C], list[TypeEDict], list[KeyEDict]]
 
 SCHEMA_DEFAULT_PATH = Path(janus.__file__).parent / "schemas"
 SCHEMAS = dict(map(
     lambda x: (x.stem, x)
     , SCHEMA_DEFAULT_PATH.glob("*.py")
 ))
-ITERATOR_STR = "Now let's go for optimize iteration number {number}"
+ITERATOR_STR = "Now let's go for optimization iteration number {number}"
 
 
-class Commands(StrEnum):
+class Commands(str, Enum):
     """
     Enumeration of the available commands for the parser.
 
@@ -57,8 +58,10 @@ class Commands(StrEnum):
     :cvar PARSE: Command for parsing the intermediate files and storing them
                  directly in the database.
     """
-    TRANSFORM = auto()
-    PARSE = auto()
+    # TRANSFORM = auto()
+    TRANSFORM = "TRANSFORM"
+    # PARSE = auto()
+    PARSE = "PARSE"
 
 
 def filter_none(xs):
@@ -73,7 +76,7 @@ def filter_none(xs):
     return filter(lambda x: x is not None, xs)
 
 
-def read_and_clean_file(path: Path | str) -> list[dict[Any, Any]] | None:
+def read_and_clean_file(path: Union[Path, str]) -> Union[list[dict[Any, Any]], None]:
     """
     Opens a JSON file, extracts data found between ```json ... ``` segments,
     and returns a list of dictionaries.
@@ -447,7 +450,7 @@ def generate_pool_sizes(
 
 def parse_pair_sep_colon(
     s: str
-) -> tuple[str, str] | None:
+) -> Union[tuple[str, str], None]:
     """
     Parse a string in the format 'keyword:node_label' into a tuple (keyword, node_label).
     If the format is invalid, returns None.
@@ -497,7 +500,7 @@ def parse_file_and_update_db(
     graph: GraphTraversalSource
     , file_name: Path
     , conn_constructor: type[C]
-) -> ParseResult[C] | None:
+) -> Union[ParseResult[C], None]:
     """
     Parse a JSON file from disk and insert all valid Connection objects into the
     JanusGraph database. Invalid items (TypeError/KeyError) are tracked separately.
@@ -533,12 +536,12 @@ def parse_file_and_update_db(
 
 
 def get_json_from_react(
-    json_react_path: Path | str
+    json_react_path: Union[Path, str]
     , address: str
     , port: int
     , graph_name: str
     , results_path: Path
-    , substitutions: dict[str, Any] | None = None
+    , substitutions: Union[dict[str, Any], None] = None
 ) -> list[dict[str, str]]:
     """
     Process a JSON file (react file) to generate the final JSON output by making
@@ -722,8 +725,8 @@ def sequential_exec_transform(
 
 def print_parse_summary(
     results: ParseResult
-    , n_files: int | None = None
-    , failing_files: list[Path | str] | None = None
+    , n_files: Union[int, None] = None
+    , failing_files: Union[list[Union[Path, str]], None] = None
 ) -> None:
     """
     Print a summary of parsing results, including number of connections, type
@@ -872,14 +875,23 @@ def exec_transform(
             , start=args.dynamic_start
         )
 
+# def main() -> None:
+#     parser = build_main_argparser()
+#     args = parser.parse_args()
+#     match args.command:
+#         case Commands.PARSE:
+#             exec_parser(args)
+#         case Commands.TRANSFORM:
+#             exec_transform(args)
+
 def main() -> None:
     parser = build_main_argparser()
     args = parser.parse_args()
-    match args.command:
-        case Commands.PARSE:
-            exec_parser(args)
-        case Commands.TRANSFORM:
-            exec_transform(args)
+
+    if args.command == Commands.PARSE:
+        exec_parser(args)
+    elif args.command == Commands.TRANSFORM:
+        exec_transform(args)
 
 
 if __name__ == "__main__":

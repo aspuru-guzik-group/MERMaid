@@ -3,7 +3,7 @@
 from dataclasses import dataclass, fields
 from abc import ABC, abstractmethod
 import json
-from typing import Any, Generic, TypeVar, Type
+from typing import Any, Generic, TypeVar, Type, Dict
 
 
 @dataclass
@@ -18,7 +18,7 @@ class VertexBase(ABC):
 
     @property
     @abstractmethod
-    def properties(self) -> dict:
+    def properties(self) -> Dict[str, str]:
         """Returns the properties of the vertex as a dictionary."""
         pass
 
@@ -31,7 +31,7 @@ class VertexBase(ABC):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: Type["VertexBase"], properties: dict[str, str]) -> "VertexBase":
+    def from_dict(cls: Type["VertexBase"], properties: Dict[str, str]) -> "VertexBase":
         """Creates a vertex instance from a dictionary of properties."""
         pass
 
@@ -54,7 +54,7 @@ class EdgeBase(Generic[TSource, TTarget], ABC):
 
     @property
     @abstractmethod
-    def properties(self) -> dict[str, Any]:
+    def properties(self) -> Dict[str, Any]:
         """Returns the properties of the edge as a dictionary."""
         pass
 
@@ -71,7 +71,7 @@ class EdgeBase(Generic[TSource, TTarget], ABC):
     @abstractmethod
     def from_dict(
         cls: Type["EdgeBase"],
-        properties: dict[str, str],
+        properties: Dict[str, str],
         source: TSource,
         target: TTarget
     ) -> "EdgeBase":
@@ -88,6 +88,6 @@ class Connection(ABC):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: type["Connection"], conn_dict: dict[str, Any]) -> "Connection":
+    def from_dict(cls: Type["Connection"], conn_dict: Dict[str, Any]) -> "Connection":
         """Creates a connection from a dictionary representation."""
         pass

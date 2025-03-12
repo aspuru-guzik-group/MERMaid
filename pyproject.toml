@@ -40,7 +40,6 @@ kgwizard     = "src.kgwizard.__main__:main"
 mermaid      = "scripts.run_mermaid:main"
 
 [tool.setuptools]
-# Tell setuptools to look in BOTH src/ and the current directory (where "scripts" is).
 packages = { find = { where = [".", "src"] } }
 
 [tool.setuptools.package-data]

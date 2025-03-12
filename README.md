@@ -7,7 +7,7 @@
     * VisualHeist for table and figure segmentation from PDFs 
     * DataRaider for multimodal analysis to extract relevant information as structured reaction schema
     * KGWizard for automated knowledge graph construction
-* You can run MERMaid directly or use each module as a standalone tool for its specific functionality.
+* You can run MERMaid directly or use VisualHeist and DataRaider as standalone tools for their specific functionality.
 * MERMaid is integrated with the OpenAI provider at present. We will extend MERMaid to support other providers and open-source VLMs in future updates.
 * NOTE: VisualHeist works best on systems with high RAM. For optimal performance, ensure that your system has sufficient memory, as running out of memory may cause the process to be terminated prematurely.
 
@@ -73,6 +73,8 @@ pip install MERMaid[kgwizard]
     * "model_size": "model_size_here" ("base" OR "large")
     * "keys": ["key1", "key2"] (the in-built reaction parameter keys can be found in `Prompts/inbuilt_keyvaluepairs.txt`) 
     * "new_keys": define your custom keys here 
+    * "graph_name": define your graph name here
+    * "schema": define your schema name here
 
 * For post-processing extracted JSON reaction dictionaries: 
     * you can add your own common chemical names by modifying the `COMMON_NAMES` constant in `dataraider/postprocess.py`
