@@ -19,11 +19,6 @@ from itertools import repeat
 from pathlib import Path
 from types import ModuleType
 from typing import Any, NewType, Sequence,TypeVar, Union
-# For compatibility
-try:
-    from typing import TypeAlias 
-except ImportError:
-    TypeAlias = type
 
 import numpy as np
 from .graphdb import janus
@@ -556,12 +551,14 @@ def get_json_from_react(
     :rtype: list[dict[str, str]]
     :raises ValueError: If the schema file path is invalid (schema.__file__ is None).
     """
-    graph = get_graph_from_janus(
-        address=address
-        , port=port
-        , graph_name=graph_name
-    )
-
+    if address and port and graph_name:
+        graph = get_graph_from_janus(
+            address=address
+            , port=port
+            , graph_name=graph_name
+        )
+    else:
+        graph = None
     
     rag_active = substitutions is not None and graph is not None
     # Code substitution, load schema file
@@ -866,6 +863,17 @@ def exec_transform(
             , steps=args.dynamic_steps
             , start=args.dynamic_start
         )
+
+    if args.output_file:
+        graph = get_graph_from_janus(
+            address=args.address
+            , port=args.port
+            , graph_name=args.graph_name
+        )
+        print("")
+        print(f"Saving graph file at: {args.output_file}")
+        janus.save_graph(graph, args.output_file)
+
 
 def main() -> None:
     parser = build_main_argparser()
