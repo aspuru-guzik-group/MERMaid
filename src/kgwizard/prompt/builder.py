@@ -54,7 +54,7 @@ class Guidelines(NamedTuple):
     """
     header: Union[Header, None]
     instructions: list[str]
-    tail: Tail | None
+    tail: Union[Tail, None]
 
     def __str__(self):
         return guidelines_to_str(self)
