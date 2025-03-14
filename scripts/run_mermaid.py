@@ -130,7 +130,7 @@ def exec_run(args):
     kgwizard_args += json_to_arg_list(cfg["kgwizard"])
 
     print("\n### Running KGWizard ###\n")
-    run_subprocess("kgwizard", kgwizard_args, python=True)
+    run_subprocess("kgwizard", kgwizard_args, python=False)
     print("\n### Done running KGWizard ###\n")
 
 
@@ -148,12 +148,6 @@ def main():
     elif args.command == Commands.CFG.name:
         exec_cfg(args)
 
-
-    # match args.command:
-    #     case Commands.RUN:
-    #         exec_run(args)
-    #     case Commands.CFG:
-    #         exec_cfg(args)
 
 if __name__ == "__main__":
     main()
