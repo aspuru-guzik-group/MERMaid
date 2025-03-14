@@ -114,7 +114,8 @@ class Connection:
 
 
 def get_type_from_annotation(
-    annotation_type: Union[types.UnionType, type]
+    # annotation_type: Union[types.UnionType, type]
+    annotation_type: Union[type, object]
 ) -> list[type]:
     if hasattr(annotation_type, '__args__'):
         non_none_types = [t if t is not type(None) else sink for t in annotation_type.__args__]
