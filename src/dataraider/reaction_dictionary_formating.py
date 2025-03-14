@@ -169,4 +169,3 @@ def construct_initial_prompt(
     new_prompt_file_path = os.path.join(prompt_directory, "get_data_prompt.txt")
     with open(new_prompt_file_path, "w") as new_prompt_file:
         new_prompt_file.writelines(new_prompt_file_contents)
-    print(f"Prompt file created with custom keys!")

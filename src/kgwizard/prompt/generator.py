@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 from openai import OpenAI
 
@@ -37,9 +37,9 @@ def build_prompt(
 
 def build_prompt_from_react(
     react_str: str
-    , header_path: None | str | Path=HEADER_PATH
-    , instructions_path: None | str | Path=INSTRUCTIONS_PATH
-    , tail_path: None | str | Path=TAIL_PATH
+    , header_path: Union[None, str, Path] = HEADER_PATH
+    , instructions_path: Union[None, str, Path] = INSTRUCTIONS_PATH
+    , tail_path: Union[None, str, Path] = TAIL_PATH
     , **kwargs
 ) -> dict[str,str]:
     """
@@ -67,10 +67,10 @@ def build_prompt_from_react(
 
 
 def build_prompt_from_react_file(
-    path: Path | str
-    , header_path: None | str | Path=HEADER_PATH
-    , instructions_path: None | str | Path=INSTRUCTIONS_PATH
-    , tail_path: None | str | Path=TAIL_PATH
+    path: Union[str, Path]
+    , header_path: Union[None, str, Path] = HEADER_PATH
+    , instructions_path: Union[None, str, Path] = INSTRUCTIONS_PATH
+    , tail_path: Union[None, str, Path] = TAIL_PATH
     , **kwargs
 ) -> dict[str, str]:
     """

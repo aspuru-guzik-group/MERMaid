@@ -1,0 +1,126 @@
+#+TITLE: kgwizard
+#+STARTUP: showall
+
+* Automated Database Parser and Transformer
+
+kgwizard is a Python command-line tool designed to:
+- Transform JSONs from data raider into an intermediate format.
+- Parse that intermediate format and optionally upload it to a JanusGraph database.
+- Support dynamic and static parallelism for efficient processing.
+- Perform RAG (Retrieval-Augmented Generation) lookups against an existing graph to substitute known nodes.
+
+* Table of Contents
+1. [[#features][Features]]
+2. [[#requirements][Requirements]]
+3. [[#installation][Installation]]
+4. [[#usage][Usage]]
+   - [[#transform-command][Transform Command]]
+   - [[#parse-command][Parse Command]]
+5. [[#environment-variables][Environment Variables]]
+6. [[#contributing][Contributing]]
+7. [[#license][License]]
+
+* Features                                        :features:
+
+- *Dynamic Parallel Execution* using Python’s ~multiprocessing~ to speed up large-scale transformations.
+- *RAG Integration* to retrieve existing nodes in the JanusGraph database for substituting references.
+- *Modular* with separate subcommands for transformation and parsing.
+- *Schema Loading* at runtime, either from built-in defaults or user-provided schema files.
+- *Fallback for Older Typing Features* ensures compatibility with Python 3.9+.
+
+* Requirements                                     :requirements:
+
+- *Python 3.9 or higher*
+
+  (Older versions may not work due to dictionary merge operators (~|=~), PEP 585 annotations like ~list[str]~, etc.)
+
+- Additional external libraries (installed automatically when using ~pip~):
+  - [[https://pypi.org/project/numpy/][numpy]] (required for dynamic parallel pool size estimation)
+  - [[https://pypi.org/project/gremlinpython/][gremlin_python]] (Required to communicate with JanusGraph)
+  - [[https://pypi.org/project/openai/][openai]] (Required for prompt building and RAG functionality)
+
+A running JanusGraph server is also needed if you plan to upload data into a graph database.
+
+* Installation                                     :installation:
+
+1. *Clone the repository*:
+#+begin_src bash
+  git clone https://github.com/aspuru-guzik-group/MERMaid.git
+  cd MERMaid
+#+end_src
+
+2. *Install package*:
+#+begin_src bash
+  pip install -e .[kgwizard]
+#+end_src
+
+Use the ~-e~ flag command to make changes on the prompt files inside ~prompt/assets~.
+
+* Usage                                            :usage:
+
+After installation, you can run:
+#+begin_src bash
+  kgwizard <command> [options]
+#+end_src
+
+** Transform Command                               :transform-command:
+
+Purpose: Converts raw JSON from DataRaider files into an intermediate JSON structure, optionally performs RAG lookups, and can update the database.
+
+Example:
+#+begin_src bash
+  kgwizard transform ./input_data \
+    --output_dir ./results \
+    --output_file ./results/my_graph.graphml \
+    --substitutions "material:Material" "atmosphere:Atmosphere" \
+    --address ws://localhost \
+    --port 8182 \
+    --schema echem \
+    --graph_name g
+#+end_src
+
+Options:
+- ~--no_parallel~ — run sequentially.
+- ~--workers N~ — use a fixed number of parallel workers.
+- If neither ~--no_parallel~ nor ~--workers~ is set, kgwizard applies *dynamic parallel execution*.
+- ~--substitutions token:NodeType~ replaces the ~token~ in the prompt files (marked as ~{token}~)  by the unique nodes of ~NodeType~ found in the janus database. Note that lines in ~instructions~ that are contain a token and are not succesfully replaced are removed from the final prompt.
+- ~--schema~ allows to select a file containing node and edge types as defined in the graph schemas (~graphdb/schemas~). It can be also used to select between the already available schemas ~photo~, ~org~ and ~echem~.
+- ~--output-dir~ and ~--output-file~ allow to define the output directory of the intermediate JSONs and the path of the generated graph database respectively.
+
+** Parse Command                                   :parse-command:
+
+Purpose: Reads the intermediate JSON files (from ~transform~), constructs objects using the loaded schema, and uploads them into the database.
+
+Example:
+#+begin_src bash
+  kgwizard parse ./results \
+    --address ws://localhost \
+    --port 8182 \
+    --graph_name g \
+    --schema /path/to/custom_schema.py \
+    --output_file ./final_graph.graphml
+#+end_src
+
+This parses each ~.json~ in ~./results~ and updates JanusGraph. Also saves a ~.graphml~ file representing the final graph state.
+
+* Environment Variables                            :environment-variables:
+
+- ~OPENAI_API_KEY~: This environment variable is needed to use the openai API when using the ~transform~ command.
+
+#+begin_src bash
+  export OPENAI_API_KEY="your-openai-api-key"
+#+end_src
+
+If unset, only the ~parse~ command will be available.
+
+* Contributing                                     :contributing:
+
+1. *Fork or clone* the repository.
+2. *Create a new branch* for your feature or fix.
+3. *Submit a pull request* after you test and finalize your changes.
+
+Contributions are welcomed for:
+- Adding new schemas or database adapters.
+- Improving performance or parallelism.
+- Enhancing RAG logic.
+- Adding additional LLMs connectors.

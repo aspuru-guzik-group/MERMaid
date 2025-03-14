@@ -25,7 +25,7 @@ Classes:
 - `Guidelines`: A named tuple representing structured guidelines with a header,
   a list of instructions, and a tail.
 """
-from typing import NewType, NamedTuple
+from typing import NewType, NamedTuple, Union
 from pathlib import Path
 
 
@@ -52,9 +52,9 @@ class Guidelines(NamedTuple):
     :param tail: The tail section of the guidelines.
     :type tail: Tail | None
     """
-    header: Header | None
+    header: Union[Header, None]
     instructions: list[str]
-    tail: Tail | None
+    tail: Union[Tail, None]
 
     def __str__(self):
         return guidelines_to_str(self)
@@ -63,7 +63,7 @@ class Guidelines(NamedTuple):
 def subs_or_none(
     s: str
     , **kwargs
-) -> str | None:
+) -> Union[str, None]:
     """
     Perform string substitution with placeholders.
 
@@ -75,7 +75,8 @@ def subs_or_none(
     """
     try:
         return s.format(**kwargs)
-    except KeyError: return None
+    except KeyError: 
+        return None
 
     
 def subs_or_still(
@@ -93,7 +94,8 @@ def subs_or_still(
     :rtype: str
     """
     try: return s.format(**kwargs)
-    except KeyError: return s
+    except KeyError: 
+        return s
 
 
 def apply_substitutions(
@@ -139,7 +141,7 @@ def guidelines_to_str(
 
 
 def build_header(
-    path: str | Path=HEADER_PATH
+    path: Union[str, Path]=HEADER_PATH
 ) -> Header:
     """
     Read and return the content of the header file.
@@ -154,7 +156,7 @@ def build_header(
 
 
 def build_tail(
-    path: str | Path=TAIL_PATH
+    path: Union[str, Path]=TAIL_PATH
 ) -> Tail:
     """
     Read and return the content of the tail file.
@@ -168,7 +170,7 @@ def build_tail(
         return Tail(f.read())
 
 def build_instructions(
-    path: str | Path=INSTRUCTIONS_PATH
+    path: Union[str, Path]=INSTRUCTIONS_PATH
 ) -> Instructions:
     """
     Read and return the list of instructions from the instructions file.
@@ -182,9 +184,9 @@ def build_instructions(
         return Instructions([l.strip() for l in f if l.startswith('-')])
 
 def build_guidelines(
-    header_path: None | str | Path=HEADER_PATH
-    , instructions_path: None | str | Path=INSTRUCTIONS_PATH
-    , tail_path: None | str | Path=TAIL_PATH
+    header_path: Union[None, str, Path]=HEADER_PATH
+    , instructions_path: Union[None, str, Path]=INSTRUCTIONS_PATH
+    , tail_path: Union[None, str, Path]=TAIL_PATH
 ) -> Guidelines:
     """
     Construct a `Guidelines` object from optional file paths.

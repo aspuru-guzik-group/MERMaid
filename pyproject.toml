@@ -30,8 +30,15 @@ dataraider = [
     "requests", "opencv-python", "numpy", "regex",
     "pubchempy", "openai", "huggingface_hub"
 ]
-kgwizard = ["gremlinpython", "openai"]
-full = ["visualheist", "dataraider", "kgwizard"]
+kgwizard = ["gremlinpython", "openai", "numpy"]
+full = [
+    "pdf2image", "Pillow", "transformers", "safetensors",
+    "torch==2.3.0", "torchvision==0.18.0", "pytorch-lightning==2.3.0",
+    "huggingface_hub", "einops", "timm",
+    "requests", "opencv-python", "numpy", "regex",
+    "pubchempy", "openai", "huggingface_hub",
+    "gremlinpython"
+]
 
 [project.scripts]
 dataraider   = "scripts.run_dataraider:main"
@@ -40,7 +47,6 @@ kgwizard     = "src.kgwizard.__main__:main"
 mermaid      = "scripts.run_mermaid:main"
 
 [tool.setuptools]
-# Tell setuptools to look in BOTH src/ and the current directory (where "scripts" is).
 packages = { find = { where = [".", "src"] } }
 
 [tool.setuptools.package-data]

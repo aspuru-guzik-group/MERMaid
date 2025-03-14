@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Janusgraph database interface."""
-from typing import Any, Type
+from typing import Any, Type, Optional, Union
 from pathlib import Path
 from itertools import chain
 
@@ -51,7 +51,7 @@ def get_traversal(
 def get_vertex(
     vertex: VertexBase
     , graph: GraphTraversalSource
-) -> Vertex | None:
+) -> Optional[Vertex]:
     """
     Retrieve an existing vertex from the graph based on its label and properties.
 
@@ -64,19 +64,19 @@ def get_vertex(
     """
     vertex_existing = graph.V().hasLabel(vertex.label)
     for key, value in vertex.properties.items():
-        vertex_existing.has(key, value)
+        vertex_existing = vertex_existing.has(key, value)
 
-    if vertex_existing.hasNext():
-        if type(v := vertex_existing.next()) == Vertex:
-            return v
-
-    return None
-
+    try: 
+        v = vertex_existing.next()
+        if isinstance(v, Vertex): 
+            return v 
+    except StopIteration: 
+        return None
 
 def get_vertices(
-    vertex_type: Type[VertexBase] | str
-    , graph: GraphTraversalSource
-) -> list[dict[str, Any]]:
+        vertex_type: Union[Type[VertexBase], str], 
+        graph: GraphTraversalSource
+        ) -> list[dict[str, Any]]:
     """
     Retrieve all vertices of a specified type from the graph.
 
@@ -100,10 +100,9 @@ def get_vertices(
     )
 
 
-def get_vnamelist_from_db(
-    vertex_type: Type[VertexBase] | str
-    , graph: GraphTraversalSource
-) -> list[str]:
+def get_vnamelist_from_db(vertex_type: Union[Type[VertexBase], str], 
+                          graph: GraphTraversalSource
+                          ) -> list[str]:  
     """
     Retrieve a list of vertex names from the database for a given vertex type.
 

@@ -3,16 +3,24 @@ from pathlib import Path
 import json
 import subprocess
 import os
-from enum import auto, StrEnum
+#from enum import auto, StrEnum
+from enum import Enum, auto 
 
 from shutil import copyfile
 
 SCRIPT_PATH = Path(os.path.abspath(__file__))
 CFG_PATH = SCRIPT_PATH.parent / "startup.json"
 
-class Commands(StrEnum):
+# class Commands(StrEnum):
+#     RUN = auto()
+#     CFG = auto()
+
+class Commands(Enum):
     RUN = auto()
     CFG = auto()
+    
+    def __str__(self):
+        return self.name
 
 def run_subprocess(module_name, opt_args=None, python=True):
     """
@@ -64,7 +72,7 @@ def json_to_arg_list(config):
 
     
 def build_main_argparser() -> argparse.ArgumentParser:
-    main_parser = argparse.ArgumentParser(description="Mermad runs.")
+    main_parser = argparse.ArgumentParser(description="Mermaid runs.")
     subparsers = main_parser.add_subparsers(
         title="Commands",
         description="Available commands",
@@ -75,8 +83,8 @@ def build_main_argparser() -> argparse.ArgumentParser:
     subparsers.required = True
 
     run_parser = subparsers.add_parser(
-        Commands.RUN,
-        help="Run mermad pipeline"
+        Commands.RUN.name,
+        help="Run mermaid pipeline (visualheist, dataraider, kgwizard sequentially)"
     )
 
     run_parser.add_argument(
@@ -87,7 +95,7 @@ def build_main_argparser() -> argparse.ArgumentParser:
     )
 
     cfg_parser = subparsers.add_parser(
-        Commands.CFG,
+        Commands.CFG.name,
         help="Output a configuration file"
     )
 
@@ -104,24 +112,26 @@ def exec_cfg(args):
 
 def exec_run(args):
     cfg = load_json_config(args.config)
+
+    # print("\n### Running VisualHeist ###\n")
+    # run_subprocess("scripts/run_visualheist.py", python=True)
+    # print("\n### Done running VisualHeist ###\n")
+    
+    # print("\n### Running DataRaider ###\n")
+    # run_subprocess("scripts/run_dataraider.py", python=True)
+    # print("\n### Done running DataRaider ###\n")
+    
     kgwizard_args = [
         "transform",
         cfg["json_dir"],
-        "--output_dir", cfg["json_dir"] + "/results/",
-        "--output_file", cfg["graph_dir"] + f"/{cfg["kgwizard"]["graph_name"]}.graphml",
+        "--output_dir", cfg["json_dir"] + "results/",
+        "--output_file", cfg["graph_dir"] + f"/{cfg['kgwizard']['graph_name']}.graphml",
     ]
     kgwizard_args += json_to_arg_list(cfg["kgwizard"])
 
-
-    
-    # print("\n### Running VisualHeist ###\n")
-    # run_subprocess("scripts/run_visualheist.py")
-
-    # print("\n### Running DataRaider ###\n")
-    # run_subprocess("scripts/run_dataraider.py")
-
     print("\n### Running KGWizard ###\n")
     run_subprocess("kgwizard", kgwizard_args, python=False)
+    print("\n### Done running KGWizard ###\n")
 
 
 def main():
@@ -133,11 +143,11 @@ def main():
     parser = build_main_argparser()
     args = parser.parse_args()
 
-    match args.command:
-        case Commands.RUN:
-            exec_run(args)
-        case Commands.CFG:
-            exec_cfg(args)
+    if args.command == Commands.RUN.name:
+        exec_run(args)
+    elif args.command == Commands.CFG.name:
+        exec_cfg(args)
+
 
 if __name__ == "__main__":
     main()
