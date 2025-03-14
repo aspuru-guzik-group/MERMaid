@@ -9,7 +9,6 @@
     "json_dir": "/path/to/directory/to/store/json/output", 
     "graph_dir": "/path/to/directory/to/store/graph/files",
     "prompt_dir": "./Prompts",
-    "api_key": "your_api_key_here", 
     "model_size": "model_size_here",
 
 
