@@ -2,120 +2,125 @@
 
 <img src="./Assets/MERMaid-overview.jpg" alt="Overview" width="600">
 
-* Table of Contents
-1. [[#Overview][Overview]]
-2. [[#Installation][1. Installation]]
-3. [[#Usage][2. Usage]]
-4. [[#usage][Usage]]
-   - [[#transform-command][Transform Command]]
-   - [[#parse-command][Parse Command]]
-5. [[#environment-variables][Environment Variables]]
-6. [[#contributing][Contributing]]
-7. [[#license][License]]
+### Table of Contents  
+1. [Overview](#overview)  
+2. [Installation](#1-installation)  
+3. [Usage](#2-usage)  
 
-## Overview: 
-* MERMaid is an end-to-end knowledge ingestion pipeline to automatically convert disparate information conveyed through figures, schemes, and tables across various PDFs into a coherent and machine-actionable knowledge graph. It integrates three seqeuntial modules: 
-    * VisualHeist for table and figure segmentation from PDFs 
-    * DataRaider for multimodal analysis to extract relevant information as structured reaction schema
-    * KGWizard for automated knowledge graph construction
-* You can run MERMaid directly or use VisualHeist and DataRaider as standalone tools for their specific functionality.
-* MERMaid is integrated with the OpenAI provider at present. We will extend MERMaid to support other providers and open-source VLMs in future updates.
-* VisualHeist works best on systems with high RAM. For optimal performance, ensure that your system has sufficient memory, as running out of memory may cause the process to be terminated prematurely.
-* Further usage details on KGWizard can be found in the[KGWizard README file](https://github.com/aspuru-guzik-group/MERMaid/blob/main/src/kgwizard/README.org). 
+## Overview  
+MERMaid is an end-to-end knowledge ingestion pipeline to automatically convert disparate information conveyed through figures, schemes, and tables across various PDFs into a coherent and machine-actionable knowledge graph. It integrates three sequential modules:  
+- **VisualHeist** for table and figure segmentation from PDFs  
+- **DataRaider** for multimodal analysis to extract relevant information as structured reaction schema  
+- **KGWizard** for automated knowledge graph construction  
 
-## 1. Installation 
+You can run MERMaid directly or use VisualHeist and DataRaider as standalone tools for their specific functionality.  
 
-### 1.1 Create a new virtual environment. The recommended python version is 3.9.
+MERMaid is integrated with the OpenAI provider at present. We will extend MERMaid to support other providers and open-source VLMs in future updates.  
 
-```
+VisualHeist works best on systems with **high RAM**. For optimal performance, ensure that your system has sufficient memory, as running out of memory may cause the process to be terminated prematurely.  
+
+Further usage details on KGWizard can be found in the [KGWizard README file](https://github.com/aspuru-guzik-group/MERMaid/blob/main/src/kgwizard/README.org).  
+
+---
+
+## 1. Installation  
+
+### 1.1 Create a new virtual environment  
+The recommended Python version is **3.9**.  
+
+#### Using Conda:
+```sh
 conda create -n mermaid-env python=3.9
 conda activate mermaid-env
 ```
-OR 
-```
+#### Using venv:
+```sh
 python3.9 -m venv mermaid-env
 source mermaid-env/bin/activate
 ```
 
-### 1.2 Install RxnScribe using the following steps for optical chemical structure recognition:
-```
+### 1.2 Install RxnScribe for Optical Chemical Structure Recognition  
+```sh
 git clone https://github.com/thomas0809/RxnScribe.git
 cd RxnScribe
 pip install -r requirements.txt
 python setup.py install
 cd ..
 ```
-Please note that you may get a compatibility warning stating that `MolScribe version 1.1.1 not being compatible with Torch versions >2.0`. You can safely ignore this warning.
+> ⚠️ You may see a compatibility warning about `MolScribe version 1.1.1 not being compatible with Torch versions >2.0`. This can be safely ignored.  
 
-### 1.3 Install MERMaid using the following steps: 
-
-Download the entire repository and install the requirements.
-```
+### 1.3 Install MERMaid  
+Download the repository and install dependencies:  
+```sh
 git clone https://github.com/aspuru-guzik-group/MERMaid/
 cd MERMaid
 pip install -e .
 ```
-For full MERMaid pipeline: 
-```
+For the **full MERMaid pipeline**:  
+```sh
 pip install MERMaid[full]
 ```
-
-For individual modules only: 
-```
+For **individual modules**:  
+```sh
 pip install MERMaid[visualheist]
 pip install MERMaid[dataraider]
 pip install MERMaid[kgwizard]
 ```
 
-## 2. Usage 
-### 2.1 Setting up your plug-and-play configuration file 
-* Indicate your configuration settings in `startup.json`: 
-    * "pdf_dir": "/path/to/directory/storing/pdfs"
-    * "image_dir": "/path/to/directory/to/store/extracted/images"
-    * "json_dir": "/path/to/directory/to/store/json/output"
-    * "graph_dir": "/path/to/directory/to/store/graph/files"
-    * "model_size": "model_size_here" ("base" OR "large")
-    * "keys": ["key1", "key2"] (the in-built reaction parameter keys can be found in `Prompts/inbuilt_keyvaluepairs.txt`) 
-    * "new_keys": define your custom keys here 
-    * "graph_name": define your graph name here
-    * "schema": define your schema name here
+---
 
-* For post-processing extracted JSON reaction dictionaries: 
-    * you can add your own common chemical names by modifying the `COMMON_NAMES` constant in `dataraider/postprocess.py`
-    * you can also add your own key names that you want to be cleaned by modifying the `KEYS` constant in `dataraider/postprocess.py`
+## 2. Usage  
 
-* We have included an additional `filter_prompt` in `Prompts/` folder to identify only images that are relevant to your task of interest. You are highly encouraged to specify your own task and keys. 
-
-### 2.2 Setting up API key
-
-~OPENAI_API_KEY~: This environment variable is needed to use the openai API for dataraider and kgwizard. Set your openAI API key as an environment variable. 
-
+### 2.1 Setting Up Your Configuration File  
+Define settings in `startup.json`:  
+```json
+{
+  "pdf_dir": "/path/to/directory/storing/pdfs",
+  "image_dir": "/path/to/directory/to/store/extracted/images",
+  "json_dir": "/path/to/directory/to/store/json/output",
+  "graph_dir": "/path/to/directory/to/store/graph/files",
+  "model_size": "base",
+  "keys": ["key1", "key2"],
+  "new_keys": [],
+  "graph_name": "your_graph_name",
+  "schema": "your_schema_name"
+}
 ```
-  export OPENAI_API_KEY="your-openai-api-key"
+- The in-built reaction parameter keys are in `Prompts/inbuilt_keyvaluepairs.txt`.  
+- For post-processing extracted JSON reaction dictionaries:  
+  - Modify `COMMON_NAMES` in `dataraider/postprocess.py` to add custom chemical names.  
+  - Modify `KEYS` in `dataraider/postprocess.py` to clean specific key names.  
+- Customize `filter_prompt` in `Prompts/` to filter relevant images.  
+
+### 2.2 Setting Up API Key  
+The environment variable **`OPENAI_API_KEY`** is required for **DataRaider** and **KGWizard**.  
+
+```sh
+export OPENAI_API_KEY="your-openai-api-key"
 ```
-### 2.3 Running the end-to-end MERMaid pipeline 
-The main command to launch and run MERMaid is: 
-```
+
+---
+
+### 2.3 Running the Full MERMaid Pipeline  
+Run the full pipeline with:  
+```sh
 mermaid
 ```
-All intermediate files from each module will be saved in the `Results` folder of your root directory by default.
+Intermediate files will be saved in the `Results/` directory.  
 
-### 2.4 Running individual modules 
-#### 2.4.1 VisualHeist for image segmentation from scientific PDF documents 
-The main command to launch and run VisualHeist is: 
-```
+### 2.4 Running Individual Modules  
+
+#### 2.4.1 VisualHeist – Image Segmentation from PDFs  
+```sh
 visualheist
 ```
 
-#### 2.4.2 DataRaider for image-to-data conversion into JSON dictionaries 
-The main command to launch and run DataRaider is: 
-```
+#### 2.4.2 DataRaider – Image-to-Data Conversion  
+```sh
 dataraider
 ```
-A sample output json dictionary can be found in `Assets` folder. 
+*A sample output JSON is available in the `Assets` folder.*  
 
-#### 2.4.3 KGWizard for data-to-knowledge graph translation 
-The main command to launch and run KGWizard is: 
-```
+#### 2.4.3 KGWizard – Data-to-Knowledge Graph Translation  
+```sh
 kgwizard
-```
