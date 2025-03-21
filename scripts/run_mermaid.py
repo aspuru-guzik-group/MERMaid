@@ -113,13 +113,13 @@ def exec_cfg(args):
 def exec_run(args):
     cfg = load_json_config(args.config)
 
-    # print("\n### Running VisualHeist ###\n")
-    # run_subprocess("scripts/run_visualheist.py", python=True)
-    # print("\n### Done running VisualHeist ###\n")
+    print("\n### Running VisualHeist ###\n")
+    run_subprocess("scripts/run_visualheist.py", python=True)
+    print("\n### Done running VisualHeist ###\n")
     
-    # print("\n### Running DataRaider ###\n")
-    # run_subprocess("scripts/run_dataraider.py", python=True)
-    # print("\n### Done running DataRaider ###\n")
+    print("\n### Running DataRaider ###\n")
+    run_subprocess("scripts/run_dataraider.py", python=True)
+    print("\n### Done running DataRaider ###\n")
     
     kgwizard_args = [
         "transform",
