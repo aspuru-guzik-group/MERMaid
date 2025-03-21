@@ -57,7 +57,7 @@ def main():
     print(f"Processing PDFs in: {pdf_dir}")
     print(f"Using {'LARGE' if use_large_model else 'BASE'} model.")
 
-    batch_pdf_to_figures_and_tables(pdf_dir, image_dir, large_model=model_size)
+    batch_pdf_to_figures_and_tables(pdf_dir, image_dir, large_model=use_large_model)
 
 if __name__ == "__main__":
     main()
