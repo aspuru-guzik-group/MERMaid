@@ -1,8 +1,12 @@
 import os
 from pdf2image import convert_from_path
 from transformers import AutoProcessor, AutoModelForCausalLM 
-from safetensors.torch import load_file
+# from safetensors.torch import load_file
+# from safetensors import safe_open
 from huggingface_hub import hf_hub_download
+from unittest.mock import patch
+from typing import Union
+from transformers.dynamic_module_utils import get_imports
 
 """
 Extracts all tables and figures from PDF documents, with the associated captions/
@@ -14,6 +18,15 @@ LARGE_MODEL_ID = "shixuanleong/visualheist-large"
 BASE_MODEL_ID = "shixuanleong/visualheist-base" 
 LARGE_SAFETENSORS_PATH = "https://huggingface.co/shixuanleong/visualheist-large/resolve/main/model.safetensors" 
 BASE_SAFETENSORS_PATH = "https://huggingface.co/shixuanleong/visualheist-base/resolve/main/model.safetensors" 
+
+def fixed_get_imports(filename: Union[str, os.PathLike]) -> list[str]:
+    """Workaround to remove flash_attn from imports."""
+    if not str(filename).endswith("modeling_florence2.py"):
+        return get_imports(filename)
+    imports = get_imports(filename)
+    if "flash_attn" in imports:
+        imports.remove("flash_attn")
+    return imports
 
 def _pdf_to_image(pdf_path):
     """Converts a pdf into a list of images
@@ -98,22 +111,21 @@ def _create_model(model_id, base_or_large):
     :return: Returns the model and processor that allows for 
     :rtype: tuple[AutoModelForCausalLM, AutoProcessor]
     """
-    
-    package_dir = os.path.dirname(__file__)
-    safetensors_filename = base_or_large + "_model.safetensors"
-    safetensors_download_path = package_dir + "/../safetensors/" + safetensors_filename
-    if not os.path.exists(safetensors_download_path):
-        safetensors_download_path = hf_hub_download(repo_id=model_id, filename="model.safetensors")
-
-    state_dict = load_file(safetensors_download_path)
-    model = AutoModelForCausalLM.from_pretrained(model_id, state_dict=state_dict, trust_remote_code=True)
-    processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
+    #package_dir = os.path.dirname(__file__)
+    #safetensors_filename = base_or_large + "_model.safetensors"
+    #safetensors_download_path = package_dir + "/../safetensors/" + safetensors_filename
+    #if not os.path.exists(safetensors_download_path):
+    #    safetensors_download_path = hf_hub_download(repo_id=model_id, filename="model.safetensors")
+    #state_dict = load_file(safetensors_download_path)
+    with patch("transformers.dynamic_module_utils.get_imports", fixed_get_imports):
+        model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True)
+        processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
     return model, processor
 
 
 def _pdf_to_figures_and_tables(pdf_path, output_dir, large_model):
     
-    """Takes a singke pdf and runs either LARGE_MODEL_ID or BASE_MODEL_ID on it to extract tables and figures.
+    """Takes a single pdf and runs either LARGE_MODEL_ID or BASE_MODEL_ID on it to extract tables and figures.
     Saves the results in output_dir
     
     :param pdf_path: Path to a single pdf
@@ -135,7 +147,8 @@ def _pdf_to_figures_and_tables(pdf_path, output_dir, large_model):
     if large_model:
         model, processor = _create_model(LARGE_MODEL_ID, "large")
     else:
-        model, processor = _create_model(BASE_MODEL_ID, "base")    
+        model, processor = _create_model(BASE_MODEL_ID, "base") 
+        print('model and processor is loaded')   
     
     image_counter = 0
     for i, image in enumerate(images):
