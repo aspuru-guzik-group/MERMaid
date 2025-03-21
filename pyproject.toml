@@ -22,7 +22,7 @@ keywords = ["mining", "chemistry", "PDFs", "vision-language models", "knowledge 
 
 [project.optional-dependencies]
 visualheist = [
-    "pdf2image", "Pillow", "transformers", "safetensors",
+    "pdf2image", "Pillow", "transformers==4.44.1", "safetensors",
     "torch==2.3.0", "torchvision==0.18.0", "pytorch-lightning==2.3.0",
     "huggingface_hub", "einops", "timm"
 ]
@@ -32,7 +32,7 @@ dataraider = [
 ]
 kgwizard = ["gremlinpython", "openai", "numpy"]
 full = [
-    "pdf2image", "Pillow", "transformers", "safetensors",
+    "pdf2image", "Pillow", "transformers==4.44.1", "safetensors",
     "torch==2.3.0", "torchvision==0.18.0", "pytorch-lightning==2.3.0",
     "huggingface_hub", "einops", "timm",
     "requests", "opencv-python", "numpy", "regex",
