@@ -64,6 +64,9 @@ if uploaded_pdf:
         pdf_dir = str(Path(pdf_path).parent)
     else:
         st.error("Error uploading PDF")
+else: 
+    pdf_dir="/placeholder/path/to/pdf"
+    
 # Form fields for other configuration settings
 image_dir = st.text_input("Local directory to save extracted images", "/path/to/images")
 json_dir = st.text_input("Local directory to save reaction JSON dictionaries", "/path/to/json")
