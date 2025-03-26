@@ -9,7 +9,7 @@ from dataraider.reaction_dictionary_formating import construct_initial_prompt
 from dataraider.process_images import batch_process_images, clear_temp_files
 from dataraider.filter_image import filter_images
 from huggingface_hub import hf_hub_download
-
+from dotenv import load_dotenv
 
 ckpt_path = hf_hub_download("yujieq/RxnScribe", "pix2seq_reaction_full.ckpt")
 package_dir = os.path.dirname(__file__)  # This points to the current file's directory
@@ -69,6 +69,7 @@ def main():
     keys = config.get('keys', ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents"])
     new_keys = config.get('new_keys', None)
     # api_key = config.get('api_key', None)
+    load_dotenv()
     api_key = os.environ.get("OPENAI_API_KEY")
 
     info = DataRaiderInfo(api_key=api_key, device="cpu", ckpt_path=ckpt_path)
