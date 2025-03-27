@@ -31,13 +31,13 @@ else:
     inbuilt_keys = {}
 
 keys = st.multiselect(
-    "Select Keys",
+    "Select the reaction parameter keys you wish to extract",
     options=[key for key in inbuilt_keys.keys()],
     format_func=lambda x: f"{x} - {inbuilt_keys.get(x, '')}"
 )
 
 # Optional: add new keys
-st.subheader("Add Custom Keys (Optional)")
+st.text("Add custom reaction parameter keys (optional)")
 if 'custom_keys' not in st.session_state:
     st.session_state.custom_keys = []
 
@@ -55,7 +55,7 @@ for idx, custom_key in enumerate(st.session_state.custom_keys):
         new_keys[key_input] = description_input
 
 #PDF upload 
-uploaded_pdf = st.file_uploader("Upload PDF to analyze", type="pdf")
+uploaded_pdf = st.file_uploader("Upload PDF to analyze (keep field empty if you are only running DataRaider)", type="pdf")
 if uploaded_pdf:
     response = requests.post(f"{API_URL}/upload/", files={"pdf": uploaded_pdf})
     if response.status_code == 200:
@@ -68,9 +68,9 @@ else:
     pdf_dir="/placeholder/path/to/pdf"
     
 # Form fields for other configuration settings
-image_dir = st.text_input("Local directory to save extracted images", "/path/to/images")
-json_dir = st.text_input("Local directory to save reaction JSON dictionaries", "/path/to/json")
-graph_dir = st.text_input("Local directory to save graph file", "/path/to/graphs")
+image_dir = st.text_input("Local directory to save extracted images or where images to be analyzed are located", "full/path/to/images")
+json_dir = st.text_input("Local directory to save reaction JSON dictionaries", "full/path/to/json")
+graph_dir = st.text_input("Local directory to save graph file", "full/path/to/graphs")
 model_size = st.selectbox("Select VisualHeist Model Size", ["BASE", "LARGE"])
 
 kgwizard_address = st.text_input("KGWizard Address", "ws://localhost")
@@ -85,7 +85,7 @@ kgwizard_dynamic_max_workers = st.number_input("Dynamic Max Workers", value=15)
 st.subheader("Choose Pipeline to Run")
 pipeline_option = st.radio(
     "Select Pipeline",
-    ["Run Full Pipeline", "Run VisualHeist", "Run DataRaider"]
+    ["Run Full MERMaid Pipeline", "Run VisualHeist", "Run DataRaider"]
 )
 
 # Submit the form
@@ -132,7 +132,7 @@ if st.button("Save Configuration"):
     
 # Trigger pipeline based on user selection
 if st.button("Run Selected Pipeline"):
-    if pipeline_option == "Run Full Pipeline":
+    if pipeline_option == "Run Full MERMaid Pipeline":
         response = requests.post(f"{API_URL}/run_all")
     elif pipeline_option == "Run VisualHeist":
         response = requests.post(f"{API_URL}/run_visualheist")
@@ -144,4 +144,3 @@ if st.button("Run Selected Pipeline"):
         st.success(f"Pipeline executed successfully. Check your results!")
     else:
         st.error(f"Error executing pipeline: {response.json().get('error', 'Unknown error')}")
-
