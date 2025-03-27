@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Any, Union
 
 from openai import OpenAI
+from dotenv import load_dotenv
+load_dotenv()
 
 from .builder import (
     HEADER_PATH,
