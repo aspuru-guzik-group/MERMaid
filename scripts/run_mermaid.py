@@ -111,7 +111,7 @@ def exec_cfg(args):
     copyfile(CFG_PATH, args.out_location)
 
 def exec_run(args):
-    cfg = load_json_config(args.config)
+    config_path = args.config if args.config else CFG_PATH
     cfg = load_json_config(args.config)
 
     print("\n### Running VisualHeist ###\n")
