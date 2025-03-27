@@ -1,0 +1,5 @@
+dotenv
+uvicorn
+fastapi
+streamli
+python-multipart
