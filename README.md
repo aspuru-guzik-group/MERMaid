@@ -73,26 +73,26 @@ pip install MERMaid[kgwizard]
 ## 2. Usage  
 
 ### 2.1 Setting Up Your Configuration File  
-Define custom settings in `scripts/startup.json`:  
-```json
-{
-  "pdf_dir": "/full/path/to/directory/storing/pdfs",  #Necessary for running VisualHeist
-  "image_dir": "/full/path/to/directory/to/store/extracted/images", #Necessary for running DataRaider
-  "json_dir": "/full/path/to/directory/to/store/json/output", #Necessary for running DataRaider and/or KGWizard
-  "graph_dir": "/full/path/to/directory/to/store/graph/files", #Necessary for running KGwizard
-  "prompt_dir": "/full/path/to/directory/currently/holding/prompts", #Necessary for running DataRaider 
-  "model_size": "choose between base or large", #Necessary for running VisualHeist 
-  "keys": ["key1", "key2"], #Necessary for running DataRaider
-  "new_keys": [], #Necessary for running DataRaider
-  "graph_name": "your_graph_name", #Necessary for running KGwizard
-  "schema": "your_schema_name" #Necessary for running KGwizard
-}
-```
+Define custom settings in `scripts/startup.json`. 
+
+`pdf_dir`: Full path to directory where PDFs are stored (required for running VisualHeist).
+`image_dir`: Full path to directory to store extracted images or where images are currently stored (required for running DataRaider).
+`json_dir`: Full path to directory to store JSON output (required for running DataRaider and/or KGWizard).
+`graph_dir`: Full path to directory to store graph files (required for running KGWizard).
+`prompt_dir`: Full path to directory containing prompt files (required for running DataRaider).
+`model_size`: Choose between 'base' or 'large' (required for running VisualHeist).
+`keys`: List of reaction parameter keys (required for running DataRaider).
+`new_keys`: Additional keys for new reactions (required for running DataRaider).
+`graph_name`: Name for the generated knowledge graph (required for running KGWizard).
+`schema`: User-prepared schema for the knowledge graph (required for running KGWizard).
+
+Additional notes: 
 - The in-built reaction parameter keys are in `Prompts/inbuilt_keyvaluepairs.txt`.  
 - For post-processing extracted JSON reaction dictionaries:  
   - Modify `COMMON_NAMES` in `dataraider/postprocess.py` to add custom chemical names.  
   - Modify `KEYS` in `dataraider/postprocess.py` to clean specific key names.  
 - Customize `filter_prompt` in `Prompts/` to filter relevant images.  
+- You can use one of our prepared schema found in `src/kgwizard/graphdb/schemas`
 
 ### 2.2 Setting Up API Key  
 The environment variable **`OPENAI_API_KEY`** is required for **DataRaider** and **KGWizard**. You can set this variable in your terminal session using the following command:
