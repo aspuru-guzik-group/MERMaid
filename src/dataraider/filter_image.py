@@ -86,7 +86,7 @@ def filter_images(info:DataRaiderInfo,
                 response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
                 response.raise_for_status()  # Raise error if the request failed
                 response_data = response.json()['choices'][0]['message']['content']
-                print(response_data)
+                #print(response_data)
 
                 try: 
                     destination = "relevant_images" if "true" in response_data.lower() else "irrelevant_images"
