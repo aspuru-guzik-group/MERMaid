@@ -82,6 +82,8 @@ def update_dict_with_smiles(
     with open(json_path, 'r') as file: 
         opt_dict = json.load(file)
     opt_data = opt_dict["Optimization Runs"]
+    if not opt_data:
+        opt_data = opt_dict["Optimization Runs Dictionary"]
 
     updated_dict = {
         "SMILES": {
