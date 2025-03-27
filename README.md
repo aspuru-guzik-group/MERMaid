@@ -40,6 +40,7 @@ source mermaid-env/bin/activate
 ```
 
 ### 1.2 Install RxnScribe for Optical Chemical Structure Recognition  
+This module is required to extract the SMILES strings of reactants and products. 
 ```sh
 git clone https://github.com/thomas0809/RxnScribe.git
 cd RxnScribe
@@ -72,18 +73,19 @@ pip install MERMaid[kgwizard]
 ## 2. Usage  
 
 ### 2.1 Setting Up Your Configuration File  
-Define settings in `startup.json`:  
+Define custom settings in `scripts/startup.json`:  
 ```json
 {
-  "pdf_dir": "/path/to/directory/storing/pdfs",
-  "image_dir": "/path/to/directory/to/store/extracted/images",
-  "json_dir": "/path/to/directory/to/store/json/output",
-  "graph_dir": "/path/to/directory/to/store/graph/files",
-  "model_size": "base",
-  "keys": ["key1", "key2"],
-  "new_keys": [],
-  "graph_name": "your_graph_name",
-  "schema": "your_schema_name"
+  "pdf_dir": "/full/path/to/directory/storing/pdfs",  #Necessary for running VisualHeist
+  "image_dir": "/full/path/to/directory/to/store/extracted/images", #Necessary for running DataRaider
+  "json_dir": "/full/path/to/directory/to/store/json/output", #Necessary for running DataRaider and/or KGWizard
+  "graph_dir": "/full/path/to/directory/to/store/graph/files", #Necessary for running KGwizard
+  "prompt_dir": "/full/path/to/directory/currently/holding/prompts", #Necessary for running DataRaider 
+  "model_size": "choose between base or large", #Necessary for running VisualHeist 
+  "keys": ["key1", "key2"], #Necessary for running DataRaider
+  "new_keys": [], #Necessary for running DataRaider
+  "graph_name": "your_graph_name", #Necessary for running KGwizard
+  "schema": "your_schema_name" #Necessary for running KGwizard
 }
 ```
 - The in-built reaction parameter keys are in `Prompts/inbuilt_keyvaluepairs.txt`.  
@@ -93,11 +95,19 @@ Define settings in `startup.json`:
 - Customize `filter_prompt` in `Prompts/` to filter relevant images.  
 
 ### 2.2 Setting Up API Key  
-The environment variable **`OPENAI_API_KEY`** is required for **DataRaider** and **KGWizard**.  
+The environment variable **`OPENAI_API_KEY`** is required for **DataRaider** and **KGWizard**. You can set this variable in your terminal session using the following command:
 
 ```sh
 export OPENAI_API_KEY="your-openai-api-key"
 ```
+This method sets the API key for the current terminal session, and the environment variable will be available to any processes started from that session. 
+
+Alternatively, you can create a `.env` file in the root directory of the MERMaid project (the same directory where `README.md` is located) and add the following line to it: 
+
+```sh
+OPENAI_API_KEY="your-openai-api-key"
+```
+This will automatically set the OPENAI_API_KEY environment variable whenever you run the project.
 
 ---
 
