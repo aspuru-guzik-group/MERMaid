@@ -28,7 +28,7 @@ visualheist = [
 ]
 dataraider = [
     "requests", "opencv-python", "numpy", "regex",
-    "pubchempy", "openai", "huggingface_hub"
+    "pubchempy", "openai", "huggingface_hub", "dotenv"
 ]
 kgwizard = ["gremlinpython", "openai", "numpy"]
 full = [
@@ -36,7 +36,7 @@ full = [
     "torch==2.3.0", "torchvision==0.18.0", "pytorch-lightning==2.3.0",
     "huggingface_hub", "einops", "timm",
     "requests", "opencv-python", "numpy", "regex",
-    "pubchempy", "openai", "huggingface_hub",
+    "pubchempy", "openai", "huggingface_hub", "dotenv", 
     "gremlinpython"
 ]
 
