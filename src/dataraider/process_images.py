@@ -80,13 +80,15 @@ def batch_process_images(
     :rtype: None
     """
     image_directory = os.path.join(image_directory, "relevant_images/")
+    image_extensions = {".png", ".jpg", ".jpeg", ".webp"}
     for file in os.listdir(image_directory):
-        if (file.endswith(".png")):
-            image_name = file.removesuffix('.png')
-            try: 
-                process_indiv_images(info, image_name, image_directory, prompt_directory, get_data_prompt, update_dict_prompt, json_directory)
-            except: 
-                continue
+        for ext in image_extensions:
+            if file.lower().endswith(ext):
+                image_name = file.removesuffix(ext)
+                try: 
+                    process_indiv_images(info, image_name, image_directory, prompt_directory, get_data_prompt, update_dict_prompt, json_directory)
+                except: 
+                    continue
     print()
     print("DataRaider -- Mission Accomplished. All images processed!")
 

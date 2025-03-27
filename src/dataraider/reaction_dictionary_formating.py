@@ -52,6 +52,8 @@ def update_dict_with_smiles(
     :rtype: None
     """
     image_file = os.path.join(image_directory, f"/cropped_images/{image_name}_1.png")
+    if not os.path.exists(image_file):
+        image_file = os.path.join(image_directory, f"/cropped_images/{image_name}_original.png")    
     reactions = []
 
     # Extract reactant and product SMILES
