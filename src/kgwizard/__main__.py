@@ -773,7 +773,7 @@ def exec_parser(
     sync_fn = partial(
         parse_file_and_update_db
         , graph=graph
-        , conn_constructor=args.schema.Connection
+        , conn_constructor=schema.Connection
     )
 
     n_files = len(rfiles)
