@@ -52,6 +52,8 @@ def update_dict_with_smiles(
     :rtype: None
     """
     image_file = os.path.join(image_directory, f"/cropped_images/{image_name}_1.png")
+    if not os.path.exists(image_file):
+        image_file = os.path.join(image_directory, f"/cropped_images/{image_name}_original.png")    
     reactions = []
 
     # Extract reactant and product SMILES
@@ -80,6 +82,8 @@ def update_dict_with_smiles(
     with open(json_path, 'r') as file: 
         opt_dict = json.load(file)
     opt_data = opt_dict["Optimization Runs"]
+    if not opt_data:
+        opt_data = opt_dict["Optimization Runs Dictionary"]
 
     updated_dict = {
         "SMILES": {

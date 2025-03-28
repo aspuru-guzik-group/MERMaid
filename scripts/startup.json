@@ -1,5 +1,5 @@
 {
-    "keys": ["key1", "key2"],
+    "keys": ["Entry", "Anode", "Cathode", "Electrolytes", "Solvents", "Duration", "Air/Inert", "Yield", "Footnote"],
     "new_keys": {
         "NEW_KEY1": "description of new key",
         "NEW_KEY2": "description of new_key2"
@@ -8,7 +8,7 @@
     "image_dir": "/path/to/directory/to/store/extracted/images",
     "json_dir": "/path/to/directory/to/store/json/output", 
     "graph_dir": "/path/to/directory/to/store/graph/files",
-    "prompt_dir": "./Prompts",
+    "prompt_dir": "/path/to/directory/holding/prompts",
     "model_size": "model_size_here",
 
 

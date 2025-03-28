@@ -11,6 +11,7 @@ from dataraider.filter_image import filter_images
 from huggingface_hub import hf_hub_download
 from dotenv import load_dotenv
 
+load_dotenv()
 ckpt_path = hf_hub_download("yujieq/RxnScribe", "pix2seq_reaction_full.ckpt")
 package_dir = os.path.dirname(__file__)  # This points to the current file's directory
         
@@ -66,20 +67,23 @@ def main():
     json_dir = config.get('json_dir', "").strip()
     if not json_dir:
         json_dir = config.get('default_json_dir')
-    keys = config.get('keys', ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents"])
+    keys = config.get('keys', ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents", "Footnote"])
     new_keys = config.get('new_keys', None)
     # api_key = config.get('api_key', None)
-    load_dotenv()
     api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        print("API key not found. Please set the OPENAI_API_KEY environment variable.")
+        return
 
     info = DataRaiderInfo(api_key=api_key, device="cpu", ckpt_path=ckpt_path)
     # Construct the initial reaction data extraction prompt
-    print("Constructing your custom reaction data extraction prompt")
-    construct_initial_prompt(prompt_dir, keys, new_keys)
     print()
     print('############################ Starting up DataRaider ############################ ')
-    print('Filtering relevant images first.')
+    print("Constructing your custom reaction data extraction prompt")
+    construct_initial_prompt(prompt_dir, keys, new_keys)
+    print('Filtering relevant images.')
     filter_images(info, prompt_dir, "filter_image_prompt", image_dir)
+    print('Processing relevant images.')
     batch_process_images(info, image_dir, prompt_dir, "get_data_prompt", "update_dict_prompt", json_dir)
     print()
     print('Clearing temporary files and custom prompts')

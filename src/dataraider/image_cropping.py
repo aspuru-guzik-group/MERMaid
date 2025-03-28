@@ -143,11 +143,22 @@ def crop_image(image_name:str,
         cropped_image_directory = os.path.join(image_directory, "cropped_images") 
         os.makedirs(cropped_image_directory, exist_ok=True)
         
-        image_path = os.path.join(image_directory, f"{image_name}.png")
-        image = cv2.imread(image_path)
+        image_extensions = {".png", ".jpg", ".jpeg", ".webp"}
+        image_path = None
+        for ext in image_extensions: 
+            path = os.path.join(image_directory, f"{image_name}{ext}")
+            if os.path.exists(path):
+                image_path = path
+                break
 
+        if image_path is None:
+            print(f"Error: Image {image_name} not found.")
+            return
+        
+        #Load image
+        image = cv2.imread(image_path)
         if image is None:
-            print(f"Error: Image {image_name}.png not found.")
+            print(f"Error: Unable to read image {image_name}.")
             return
         
         # Set parameters
@@ -166,7 +177,7 @@ def crop_image(image_name:str,
 
             # Check if split lines are valid
             if len(split_lines) < 1:
-                raise ValueError(f"Error: Unable to find valid split lines for {image_name}. Saving original image.")
+                raise ValueError(f"Error: Unable to find valid split lines for {image_name}. No cropping done and original image will be used.")
 
             # Crop the image into segments
             segments = _segment_image(image, split_lines)
@@ -181,7 +192,7 @@ def crop_image(image_name:str,
                     print(f"Warning: Segment {idx+1} of {image_name} has zero size. Skipping.")
             
             if valid_segments == 0:
-                raise ValueError(f"Error: No valid segments for {image_name}. Saving original image.")
+                raise ValueError(f"Error: No valid segments for {image_name}. No cropping done and original image will be used.")
 
         except Exception as e: 
             print(str(e))
@@ -206,6 +217,8 @@ def batch_crop_image(image_directory:str, min_segment_height:float=120):
     os.makedirs(cropped_image_directory, exist_ok=True)
 
     for file in os.listdir(image_directory):
-        if (file.endswith('.png')):
-            image_name = file.removesuffix('.png')
-            crop_image(image_name, image_directory, min_segment_height)
+        image_extensions = {".png", ".jpg", ".jpeg", ".webp"}
+        for ext in image_extensions: 
+            if file.lower().endswith(ext):
+                image_name = file.removesuffix(ext)
+                crop_image(image_name, image_directory, min_segment_height)

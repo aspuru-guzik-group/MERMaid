@@ -36,15 +36,16 @@ def filter_images(info:DataRaiderInfo,
         os.makedirs(irrelevant_folder, exist_ok=True)
 
     #filter images 
+    image_extensions = {".png", ".jpg", ".jpeg", ".webp"}
     for file in os.listdir(image_directory):
-        if (file.endswith(".png")):
+        if any(file.lower().endswith(ext) for ext in image_extensions):
             image_path = os.path.join(image_directory, file)
             print(f"Processing {image_path}")
             try: 
                 with open(image_path, "rb") as image_file:
                     image_data = base64.b64encode(image_file.read()).decode('utf-8')
-            except:
-                print(f"Error reading image {image_path}")
+            except Exception as e:
+                print(f"Error reading image {image_path}:{e}")
                 continue
         
             # Get filter prompt file
@@ -86,7 +87,6 @@ def filter_images(info:DataRaiderInfo,
                 response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
                 response.raise_for_status()  # Raise error if the request failed
                 response_data = response.json()['choices'][0]['message']['content']
-                #print(response_data)
 
                 try: 
                     destination = "relevant_images" if "true" in response_data.lower() else "irrelevant_images"
