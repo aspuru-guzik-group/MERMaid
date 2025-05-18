@@ -46,10 +46,10 @@ def process_indiv_images(
     adaptive_get_data(info, prompt_directory, get_data_prompt, image_name, image_directory, json_directory)
     print('Updating with footnote information...')
     update_dict_with_footnotes(info, prompt_directory, update_dict_prompt, image_name, json_directory)
-    print('Extracting reaction SMILES...')
-    update_dict_with_smiles(info, image_name, image_directory, json_directory)
     print('Postprocessing reaction dictionary...')
     postprocess_dict(image_name, json_directory)
+    print('Extracting reaction SMILES...')
+    update_dict_with_smiles(info, image_name, image_directory, json_directory)
     print(f'{image_name} cleaned and saved.')
     print('-----------------------------------')
 
