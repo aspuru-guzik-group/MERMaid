@@ -5,6 +5,7 @@ import json
 import base64
 from .processor_info import DataRaiderInfo
 from .reaction_dictionary_formating import reformat_json
+from pathlib import Path
 
 """
 Module for OpenAI API access
@@ -34,12 +35,14 @@ def update_dict_with_footnotes(
         :rtype: None
         """
         # Get user prompt file
-        user_prompt_path = os.path.join(prompt_directory, f"{update_dict_prompt}.txt")
+        prompt_directory = Path(prompt_directory)
+        user_prompt_path = prompt_directory / f"{update_dict_prompt}.txt"
         with open(user_prompt_path, "r") as file:
             user_message = file.read().strip()
         
         # Get Json file
-        json_path = os.path.join(json_directory, f"{image_name}.json")
+        json_directory = Path(json_directory)
+        json_path = json_directory / f"{image_name}.json"
         with open(json_path, "r") as file2:
             json_dict = file2.read().strip()
 
@@ -123,8 +126,12 @@ def adaptive_get_data(
     :return: Returns nothing, all data saved in JSON
     :rtype: None
     """   
+    prompt_directory = Path(prompt_directory)
+    image_directory = Path(image_directory)
+    json_directory = Path(json_directory)
+    
     # Get all subfigures files 
-    image_paths = glob.glob(os.path.join(image_directory, f"cropped_images/{image_name}_*.png"))
+    image_paths = sorted((image_directory / "cropped_images").glob(f"{image_name}_*.png"))
     if not image_paths:
         print(f"No subimages found for {image_name}")
         return
@@ -136,16 +143,15 @@ def adaptive_get_data(
     base64_images = [encode_image(image_path) for image_path in image_paths]
 
     # Get user prompt file
-    user_prompt_path = os.path.join(prompt_directory, f"{get_data_prompt}.txt")
+    user_prompt_path = prompt_directory / f"{get_data_prompt}.txt"
     with open(user_prompt_path, "r") as file:
         user_message = file.read().strip()
 
     # Get response file paths
-    if not os.path.exists(json_directory):
-        os.makedirs(json_directory, exist_ok=True)
+    json_directory.mkdir(parents=True, exist_ok=True)
 
-    image_caption_path = os.path.join(image_directory, f"{image_name}.txt")
-    response_path = os.path.join(json_directory, f"{image_name}.json")
+    image_caption_path = image_directory / f"{image_name}.txt"
+    response_path = json_directory / f"{image_name}.json"
 
     # Create base message
     messages = [{
@@ -160,7 +166,7 @@ def adaptive_get_data(
     } for base64_image in base64_images)
     
     # If the image caption file exists, append it to the messages content
-    if os.path.exists(image_caption_path):
+    if image_caption_path.exists():
         with open(image_caption_path, "r") as file:
             image_caption = file.read().strip()
         messages[0]["content"].append({"type": "text","text": image_caption})

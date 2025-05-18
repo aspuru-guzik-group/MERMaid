@@ -3,6 +3,7 @@ import requests
 import shutil
 import base64
 from .processor_info import DataRaiderInfo
+from pathlib import Path
 
 """
 Filter images using OpenAI model
@@ -27,29 +28,29 @@ def filter_images(info:DataRaiderInfo,
     :return: None
     :rtype: None    
     """
-    #create folders to separate relevant and irrelevant folders 
-    relevant_folder = os.path.join(image_directory, "relevant_images")
-    irrelevant_folder = os.path.join(image_directory, "irrelevant_images")
-    if not os.path.exists(relevant_folder):
-        os.makedirs(relevant_folder, exist_ok=True)
-    if not os.path.exists(irrelevant_folder):
-        os.makedirs(irrelevant_folder, exist_ok=True)
+    prompt_directory = Path(prompt_directory)
+    image_directory = Path(image_directory)
 
+    #create folders to separate relevant and irrelevant folders 
+    relevant_folder = image_directory / "relevant_images"
+    irrelevant_folder = image_directory /"irrelevant_images"
+    relevant_folder.mkdir(parents=True, exist_ok=True)
+    irrelevant_folder.mkdir(parents=True, exist_ok=True)
     #filter images 
     image_extensions = {".png", ".jpg", ".jpeg", ".webp"}
-    for file in os.listdir(image_directory):
-        if any(file.lower().endswith(ext) for ext in image_extensions):
-            image_path = os.path.join(image_directory, file)
-            print(f"Processing {image_path}")
+
+    for file in image_directory.iterdir():
+        if file.is_file() and file.suffix.lower() in image_extensions:
+            print(f"Processing {file}")
             try: 
-                with open(image_path, "rb") as image_file:
+                with open(file, "rb") as image_file:
                     image_data = base64.b64encode(image_file.read()).decode('utf-8')
             except Exception as e:
-                print(f"Error reading image {image_path}:{e}")
+                print(f"Error reading image {file}:{e}")
                 continue
         
             # Get filter prompt file
-            user_prompt_path = os.path.join(prompt_directory, f"{filter_prompt}" + ".txt")
+            user_prompt_path = prompt_directory / f"{filter_prompt}.txt"
             with open(user_prompt_path, "r") as f:
                 user_message = f.read().strip()
             # Construct message
@@ -90,9 +91,9 @@ def filter_images(info:DataRaiderInfo,
 
                 try: 
                     destination = "relevant_images" if "true" in response_data.lower() else "irrelevant_images"
-                    destination_path = os.path.join(image_directory, f"{destination}/{file}")
-                    if not os.path.exists(destination_path):
-                        shutil.move(image_path, destination_path)
+                    destination_path = image_directory / destination / file.name
+                    if not destination_path.exists():
+                        shutil.move(str(file), str(destination_path))
                         print(f"Moved {file} to {destination} folder")
                 except Exception as e:
                     continue

@@ -2,6 +2,7 @@ import os
 import json
 import argparse
 import sys
+from pathlib import Path
 # from methods_dataraider import RxnOptDataProcessor
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataraider.processor_info import DataRaiderInfo
@@ -13,7 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 ckpt_path = hf_hub_download("yujieq/RxnScribe", "pix2seq_reaction_full.ckpt")
-package_dir = os.path.dirname(__file__)  # This points to the current file's directory
+# package_dir = os.path.dirname(__file__)  # This points to the current file's directory
         
 def load_config(config_file):
     """Load configurations from config_file
@@ -23,14 +24,16 @@ def load_config(config_file):
     :return: Returns a dictionary of fields from config_file
     :rtype: dict
     """
+    config_file = Path(config_file)
     with open(config_file, 'r') as f:
         config = json.load(f)
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    parent_dir = os.path.dirname(script_dir)
-    config['default_image_dir'] = os.path.join(parent_dir, config.get('default_image_dir', ''))
-    config['default_json_dir'] = os.path.join(parent_dir, config.get('default_json_dir', ''))
-    config['default_graph_dir'] = os.path.join(parent_dir, config.get('default_graph_dir', ''))
+    script_dir = config_file.parent
+    parent_dir = script_dir.parent
+    for key in ['default_image_dir', 'default_json_dir', 'default_graph_dir']:
+        val = config.get(key)
+        if val and not Path(val).is_absolute():
+            config[key] = str((parent_dir / val).resolve())
     return config
     
 def main():
@@ -54,19 +57,16 @@ def main():
     args = parser.parse_args()
 
     if args.config:
-        config = load_config(args.config)
+        config = load_config(Path(args.config))
     else:
-        package_dir = os.path.dirname(os.path.dirname(__file__))
-        config_path = os.path.join(package_dir, 'scripts/startup.json')
-        config = load_config(config_path) if os.path.exists(config_path) else {}
+        package_dir = Path(__file__).resolve().parent.parent
+        config_path = package_dir / "scripts" / "startup.json"
+        config = load_config(config_path) if config_path.exists() else {}
 
-    prompt_dir = config.get('prompt_dir', "./Prompts")
-    image_dir = config.get('image_dir', "").strip() 
-    if not image_dir: 
-        image_dir = config.get('default_image_dir')
-    json_dir = config.get('json_dir', "").strip()
-    if not json_dir:
-        json_dir = config.get('default_json_dir')
+    image_dir = Path(args.image_dir) if args.image_dir else Path(config.get('image_dir') or config.get('default_image_dir'))
+    prompt_dir = Path(args.prompt_dir) if args.prompt_dir else Path(config.get('prompt_dir', "Prompts"))
+    json_dir = Path(args.json_dir) if args.json_dir else Path(config.get('json_dir') or config.get('default_json_dir'))
+    
     keys = config.get('keys', ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents", "Footnote"])
     new_keys = config.get('new_keys', None)
     # api_key = config.get('api_key', None)
@@ -76,17 +76,17 @@ def main():
         return
 
     info = DataRaiderInfo(api_key=api_key, device="cpu", ckpt_path=ckpt_path)
+    
     # Construct the initial reaction data extraction prompt
-    print()
-    print('############################ Starting up DataRaider ############################ ')
+    print('\n############################ Starting up DataRaider ############################ ')
     print("Constructing your custom reaction data extraction prompt")
     construct_initial_prompt(prompt_dir, keys, new_keys)
     print('Filtering relevant images.')
     filter_images(info, prompt_dir, "filter_image_prompt", image_dir)
-    print('Processing relevant images.\n')
+    print('\nProcessing relevant images.\n')
     batch_process_images(info, image_dir, prompt_dir, "get_data_prompt", "update_dict_prompt", json_dir)
     print()
-    print('Clearing temporary files and custom prompts')
+    print('\nClearing temporary files and custom prompts')
     clear_temp_files(prompt_dir, image_dir)
 
 

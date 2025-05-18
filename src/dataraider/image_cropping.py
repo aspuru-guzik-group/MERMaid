@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 import math
+from pathlib import Path
 
 """ 
 Module for cropping images based off of split lines
@@ -140,14 +141,15 @@ def crop_image(image_name:str,
         :rtype: None
         """
         #create temporary directory to save cropped images
-        cropped_image_directory = os.path.join(image_directory, "cropped_images") 
-        os.makedirs(cropped_image_directory, exist_ok=True)
+        image_directory = Path(image_directory)
+        cropped_image_directory = image_directory / "cropped_images"
+        cropped_image_directory.mkdir(parents=True, exist_ok=True)
         
         image_extensions = {".png", ".jpg", ".jpeg", ".webp"}
         image_path = None
         for ext in image_extensions: 
-            path = os.path.join(image_directory, f"{image_name}{ext}")
-            if os.path.exists(path):
+            path = image_directory / f"{image_name}{ext}"
+            if path.exists():
                 image_path = path
                 break
 
@@ -156,7 +158,7 @@ def crop_image(image_name:str,
             return
         
         #Load image
-        image = cv2.imread(image_path)
+        image = cv2.imread(str(image_path))
         if image is None:
             print(f"Error: Unable to read image {image_name}.")
             return
@@ -186,7 +188,8 @@ def crop_image(image_name:str,
             valid_segments = 0
             for idx, segment in enumerate(segments): 
                 if segment.size > 0:
-                    cv2.imwrite(os.path.join(cropped_image_directory, f"{image_name}_{idx+1}.png"), segment)
+                    path = cropped_image_directory / f"{image_name}_{idx+1}.png"
+                    cv2.imwrite(str(path), segment)
                     valid_segments += 1
                 else: 
                     print(f"Warning: Segment {idx+1} of {image_name} has zero size. Skipping.")
@@ -196,7 +199,8 @@ def crop_image(image_name:str,
 
         except Exception as e: 
             print(str(e))
-            cv2.imwrite(os.path.join(cropped_image_directory, f"{image_name}_original.png"), image)
+            save_path = cropped_image_directory / f"{image_name}_original.png"
+            cv2.imwrite(str(save_path), image)
 
     
 def batch_crop_image(image_directory:str, min_segment_height:float=120):
@@ -213,12 +217,12 @@ def batch_crop_image(image_directory:str, min_segment_height:float=120):
     """
     
     # Create a directory to save the cropped segments
-    cropped_image_directory = os.path.join(image_directory, "cropped_images")
-    os.makedirs(cropped_image_directory, exist_ok=True)
+    image_directory = Path(image_directory)
+    cropped_image_directory = image_directory / "cropped_images"
+    cropped_image_directory.mkdir(parents=True, exist_ok=True)
 
-    for file in os.listdir(image_directory):
+    for file in image_directory.iterdir():
         image_extensions = {".png", ".jpg", ".jpeg", ".webp"}
-        for ext in image_extensions: 
-            if file.lower().endswith(ext):
-                image_name = file.removesuffix(ext)
-                crop_image(image_name, image_directory, min_segment_height)
+        if file.is_file() and file.suffix.lower() in image_extensions:
+            image_name = file.stem
+            crop_image(image_name, image_directory, min_segment_height)
