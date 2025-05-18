@@ -2,6 +2,7 @@ import pubchempy as pcp
 import re
 import json 
 import os
+from pathlib import Path
 
 """
 File containing post processing functions
@@ -66,6 +67,7 @@ def load_json(file_path:str):
     :return: Parsed JSON content.
     :rtype: dict
     """
+    file_path = Path(file_path)
     with open(file_path, "r") as file:
         return json.load(file)
 
@@ -291,6 +293,7 @@ def _save_json(file_path:str, data:dict):
     :return: Nothing, all information saved to the JSON at file_path
     :rtype: None
     """    
+    file_path = Path(file_path)
     with open(file_path, "w") as file:
         json.dump(data, file, indent=4)
 
@@ -314,7 +317,8 @@ def _process_raw_dict(image_name:str,
     :return: Nothing, all file saved to the JSON at file_path
     :rtype: None
     """
-    file_path = os.path.join(json_directory, f"{image_name}.json")
+    json_directory = Path(json_directory)
+    file_path = json_directory / f"{image_name}.json"
     rxn_dict = load_json(file_path)
     resolved_dict = _entity_resolution_rxn_dict(rxn_dict, keys, common_names)
     _save_json(file_path, resolved_dict)

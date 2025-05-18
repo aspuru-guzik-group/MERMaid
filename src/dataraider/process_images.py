@@ -4,6 +4,7 @@ from .image_cropping import crop_image
 from .api_access import adaptive_get_data, update_dict_with_footnotes
 from .reaction_dictionary_formating import update_dict_with_smiles, postprocess_dict
 import shutil
+from pathlib import Path
 
 """
 Contains high level functions that process images
@@ -79,16 +80,16 @@ def batch_process_images(
     :return: Returns nothing, all data saved in JSON
     :rtype: None
     """
-    image_directory = os.path.join(image_directory, "relevant_images/")
+    image_directory = Path(image_directory)
+    image_directory = image_directory / "relevant_images/"
     image_extensions = {".png", ".jpg", ".jpeg", ".webp"}
-    for file in os.listdir(image_directory):
-        for ext in image_extensions:
-            if file.lower().endswith(ext):
-                image_name = file.removesuffix(ext)
-                try: 
-                    process_indiv_images(info, image_name, image_directory, prompt_directory, get_data_prompt, update_dict_prompt, json_directory)
-                except: 
-                    continue
+    for file in image_directory.iterdir():
+        if file.is_file() and file.suffix.lower() in image_extensions:
+            image_name = file.stem
+            try: 
+                process_indiv_images(info, image_name, image_directory, prompt_directory, get_data_prompt, update_dict_prompt, json_directory)
+            except: 
+                continue
     print()
     print("DataRaider -- Mission Accomplished. All images processed!")
 
@@ -103,16 +104,18 @@ def clear_temp_files(
     :param image_directory: Root directory where the original images are stored
     :type image_directory: str
     """
-    cropped_image_directory = os.path.join(image_directory, "relevant_images/cropped_images")
-    if os.path.exists(cropped_image_directory) and os.path.isdir(cropped_image_directory):
+    prompt_directory = Path(prompt_directory)
+    image_directory = Path(image_directory)
+    cropped_image_directory = image_directory /"relevant_images" / "cropped_images"
+    if cropped_image_directory.exists() and cropped_image_directory.is_dir():
         shutil.rmtree(cropped_image_directory)
         print("Temporary files and 'cropped_images' directory removed.")
     else:
         print("No temporary files to remove.")
 
-    custom_prompt_path = os.path.join(prompt_directory, "get_data_prompt.txt")
-    if os.path.exists(custom_prompt_path):
-        os.remove(custom_prompt_path)
+    custom_prompt_path = prompt_directory / "get_data_prompt.txt"
+    if custom_prompt_path.exists():
+        custom_prompt_path.unlink()
         print("Custom prompt file removed.")
     else:
         print("No custom prompt file to remove.")

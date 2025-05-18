@@ -3,6 +3,7 @@ import os
 import regex as re
 from .processor_info import DataRaiderInfo
 from . import postprocess as pp
+from pathlib import Path
 
 """
 Scripts for reaction dictionary formatting
@@ -78,7 +79,6 @@ def update_dict_with_smiles_old(
 
     # Update reaction dictionary with reaction SMILES 
     json_path = os.path.join(json_directory, f"{image_name}.json")
-    # json_path = os.path.join(json_directory, f"{image_name}_updated.json") #retrieve updated if saved as new file
     with open(json_path, 'r') as file: 
         opt_dict = json.load(file)
     opt_data = opt_dict["Optimization Runs"]
@@ -93,7 +93,6 @@ def update_dict_with_smiles_old(
         "Optimization Runs": opt_data
     }
     output_path = json_path # update the original json file
-    # output_path = os.path.join(json_directory, f"{image_name}_updated_smiles.json") #save as new file
     with open(output_path, 'w') as output_file: 
         json.dump(updated_dict, output_file, indent = 4)
     print(f'{image_name} reaction dictionary updated with reaction SMILES')
@@ -119,9 +118,12 @@ def update_dict_with_smiles(
     :return: Returns nothing, all data saved in JSON
     :rtype: None
     """
-    image_file = os.path.join(image_directory, f"/cropped_images/{image_name}_1.png")
-    if not os.path.exists(image_file):
-        image_file = os.path.join(image_directory, f"/cropped_images/{image_name}_original.png")    
+    image_directory = Path(image_directory)
+    json_directory = Path(json_directory)
+
+    image_file = image_directory / "cropped_images" / f"{image_name}_1.png"
+    if not image_file.exists():
+        image_file = image_directory / "cropped_images" / f"{image_name}_original.png"    
     reactions = []
 
     # Extract reactant and product SMILES
@@ -143,8 +145,8 @@ def update_dict_with_smiles(
         reactants, products = 'N.R', 'N.R'
 
     # Update reaction dictionary with reaction SMILES 
-    json_path = os.path.join(json_directory, f"{image_name}.json")
-    # json_path = os.path.join(json_directory, f"{image_name}_updated.json") #retrieve updated if saved as new file
+    json_path = json_directory / f"{image_name}.json"
+    # json_path = json_directory / f"{image_name}_updated.json" #retrieve updated if saved as new file
     with open(json_path, 'r') as file: 
         opt_dict = json.load(file)
     opt_key = next((k for k in opt_dict if "optimization" in k.lower()), None)
@@ -161,7 +163,7 @@ def update_dict_with_smiles(
         "Optimization Runs": opt_data
     }
     output_path = json_path # update the original json file
-    # output_path = os.path.join(json_directory, f"{image_name}_updated_smiles.json") #save as new file
+    # output_path = json_directory / f"{image_name}_updated_smiles.json" #save as new file
     with open(output_path, 'w') as output_file: 
         json.dump(updated_dict, output_file, indent = 4)
     print(f'{image_name} reaction dictionary updated with reaction SMILES')
@@ -201,13 +203,11 @@ def construct_initial_prompt(
     :return: Returns nothing, all data saved in txt file
     :rtype: None
     """
-    
+    prompt_directory = Path(prompt_directory)
     marker = "<INSERT_HERE>"
-    # package_dir = os.path.dirname(__file__)
 
     # Retrieve all inbuilt keys
-    # inbuilt_key_pair_file_path = os.path.join(package_dir, "../Prompts/inbuilt_keyvaluepairs.txt")
-    inbuilt_key_pair_file_path = os.path.join(prompt_directory, "inbuilt_keyvaluepairs.txt")
+    inbuilt_key_pair_file_path = prompt_directory /"inbuilt_keyvaluepairs.txt"
     with open(inbuilt_key_pair_file_path, "r") as inbuilt_file:
         inbuilt_key_pair_file_contents = inbuilt_file.readlines()
     
@@ -224,8 +224,7 @@ def construct_initial_prompt(
             continue
         opt_run_list.append(line)
     
-    # base_prompt_file_path = os.path.join(package_dir, "../Prompts/base_prompt.txt")
-    base_prompt_file_path = os.path.join(prompt_directory, "base_prompt.txt")
+    base_prompt_file_path = prompt_directory / "base_prompt.txt"
     with open(base_prompt_file_path, "r") as base_prompt_file:
         base_prompt_file_contents = base_prompt_file.readlines()
 
@@ -237,7 +236,6 @@ def construct_initial_prompt(
             new_prompt_file_contents.append(line)
     
     # Save the defined prompt as get_data_prompt
-    # new_prompt_file_path = os.path.join(package_dir, "../Prompts/get_data_prompt.txt")
-    new_prompt_file_path = os.path.join(prompt_directory, "get_data_prompt.txt")
+    new_prompt_file_path = prompt_directory / "get_data_prompt.txt"
     with open(new_prompt_file_path, "w") as new_prompt_file:
         new_prompt_file.writelines(new_prompt_file_contents)
