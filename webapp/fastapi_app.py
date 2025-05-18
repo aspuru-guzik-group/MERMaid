@@ -8,6 +8,7 @@ import os
 import tempfile 
 from pathlib import Path
 from dotenv import load_dotenv
+import platform
 
 # Load environment variables from .env file
 load_dotenv()
@@ -29,6 +30,36 @@ DATARAIDER_PATH = Path(__file__).resolve().parent.parent / "scripts" / "run_data
 MERMAID_PATH = Path(__file__).resolve().parent.parent / "scripts" / "run_mermaid.py"
 UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+
+import platform
+
+def normalize_path(path_str: str) -> str:
+    try:
+        path_str = path_str.replace("\\", "/").strip()
+
+        # Detect Windows-style path like D:/something
+        is_windows_path = (
+            len(path_str) > 2 and
+            path_str[1] == ':' and
+            path_str[2] == '/'
+        )
+
+        is_wsl_or_linux = platform.system() != "Windows"
+
+        if is_windows_path and is_wsl_or_linux:
+            # Convert D:/path → /mnt/d/path
+            drive = path_str[0].lower()
+            sub_path = path_str[3:]  # everything after D:/
+            wsl_path = f"/mnt/{drive}/{sub_path}"
+            return str(Path(wsl_path).resolve())
+
+        # Otherwise: standard resolution
+        return str(Path(path_str).expanduser().resolve())
+
+    except Exception:
+        return path_str
+
 
 class KGWizardConfig(BaseModel):
     address: str
@@ -82,12 +113,12 @@ async def update_config(config: Config, file_name:str =str(USER_CONFIG_PATH)):
     current_config.update({
         "keys": config_dict["keys"],
         "new_keys": config_dict["new_keys"],
-        "pdf_dir": config_dict["pdf_dir"],
-        "image_dir": config_dict["image_dir"],
-        "json_dir": config_dict["json_dir"],
-        "graph_dir": config_dict["graph_dir"],
+        "pdf_dir": normalize_path(config_dict["pdf_dir"]),
+        "image_dir": normalize_path(config_dict["image_dir"]),
+        "json_dir": normalize_path(config_dict["json_dir"]),
+        "graph_dir": normalize_path(config_dict["graph_dir"]),
         "model_size": config_dict["model_size"],
-        "prompt_dir": config_dict["prompt_dir"],
+        "prompt_dir": normalize_path(config_dict["prompt_dir"]),
         "kgwizard": config_dict["kgwizard"]
         
     })
