@@ -5,12 +5,9 @@
 ### Table of Contents  
 1. [Overview](#1-overview)  
 2. [Installation](#2-installation)  
-3. [Usage](#3-usage)  
-1. [Overview](#1-overview)  
-2. [Installation](#2-installation)  
 3. [Usage](#3-usage) 
 4. [Running the web app](#4-running-the-mermaid-web-app-recommended-for-new-users)
- 
+
 ## 1. Overview  
 MERMaid is an end-to-end knowledge ingestion pipeline to automatically convert disparate information conveyed through figures, schemes, and tables across various PDFs into a coherent and machine-actionable knowledge graph. It integrates three sequential modules:  
 - **VisualHeist** for table and figure segmentation from PDFs  
@@ -65,7 +62,7 @@ cd ..
 ```
 > ⚠️ You may see a compatibility warning about `MolScribe version 1.1.1 not being compatible with Torch versions >2.0`. This can be safely ignored.  
 
-### 2.3 Install MERMaid    
+### 2.3 Install MERMaid  
 Download the repository and install dependencies:  
 ```sh
 git clone https://github.com/aspuru-guzik-group/MERMaid/
@@ -85,7 +82,7 @@ pip install MERMaid[kgwizard]
 
 ---
 
-## 3. Usage    
+## 3. Usage  
 
 ### 3.1 Setting Up Your Configuration File  
 
@@ -110,7 +107,6 @@ pip install MERMaid[kgwizard]
 - You can use one of our prepared schema found in `src/kgwizard/graphdb/schemas`
 
 ### 3.2 Setting Up API Key  
-### 3.2 Setting Up API Key  
 The environment variable **`OPENAI_API_KEY`** is required for **DataRaider** and **KGWizard**. You can set this variable in your terminal session using the following command:
 
 ```sh
@@ -128,20 +124,18 @@ This will automatically set the OPENAI_API_KEY environment variable whenever you
 ---
 
 ### 3.3 Running the Full MERMaid Pipeline  
-### 3.3 Running the Full MERMaid Pipeline  
 Run the full pipeline with:  
 ```sh
 mermaid
 ```
 Intermediate files will be saved in the `Results/` directory.  
 
-### 3.4 Running Individual Modules    
+### 3.4 Running Individual Modules  
 
 #### 3.4.1 VisualHeist – Image Segmentation from PDFs  
 ```sh
 visualheist
 ```
- 
 #### 3.4.2 DataRaider – Image-to-Data Conversion  
 ```sh
 dataraider
@@ -152,7 +146,6 @@ dataraider
 ```sh
 kgwizard
 ```
----
 
 ### 4 Running the MERMaid Web App (Recommended for New Users)
 
