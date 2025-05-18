@@ -4,142 +4,141 @@ import json
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+from PIL import Image
 
-# Load environment variables from .env file
+# Display logo
+logo_path = Path(__file__).resolve().parent.parent / "Assets" / "MERMAID_logo.png"
+try:
+    logo = Image.open(logo_path)
+    col1, col2 = st.columns([3, 7])
+    with col1:
+        st.image(logo)
+    with col2:
+        st.markdown("<h1 style='padding-top: 10px;'>MERMaid Pipeline</h1>", unsafe_allow_html=True)
+except Exception as e:
+    st.title("MERMaid Pipeline")
+    st.warning(f"Logo could not be loaded: {e}")
+
+# Load environment variables
 load_dotenv()
-
-# Get the API key from the environment variable
 api_key = os.getenv("OPENAI_API_KEY")
-
-if api_key is None:
-    st.error("API key is missing in the environment. Please add it to the .env file.")
-else:
-    st.success("API key is successfully retrieved!")
-
-# Endpoint of the FastAPI backend
 API_URL = "http://127.0.0.1:8000"
 
-# Display form for user inputs
-st.title("MERMaid Pipeline")
+# Session flag for saved config
+if "config_saved" not in st.session_state:
+    st.session_state.config_saved = False
 
-# Keys selection
-response = requests.get(f"{API_URL}/inbuilt_keys")
-if response.status_code == 200:
-    inbuilt_keys = response.json()
+# API key check
+if api_key is None:
+    st.error("API key is missing. Please add it to your .env file.")
 else:
-    inbuilt_keys = {}
+    st.success("API key loaded successfully!")
 
-keys = st.multiselect(
-    "Select the reaction parameter keys you wish to extract",
-    options=[key for key in inbuilt_keys.keys()],
-    format_func=lambda x: f"{x} - {inbuilt_keys.get(x, '')}"
+# Module selector
+module = st.radio(
+    "Select a module to run:",
+    ["VisualHeist", "DataRaider", "VisualHeist + DataRaider", "Full MERMaid Pipeline", "KGWizard (coming soon)"],
+    index=0
 )
 
-# Optional: add new keys
-st.text("Add custom reaction parameter keys (optional)")
-if 'custom_keys' not in st.session_state:
-    st.session_state.custom_keys = []
+# Load inbuilt keys
+response = requests.get(f"{API_URL}/inbuilt_keys")
+inbuilt_keys = response.json() if response.status_code == 200 else {}
 
-add_key_button = st.button("Add Custom Key")
-if add_key_button:
-    st.session_state.custom_keys.append({"key": "", "description": ""})
-
+# Initialize inputs
+pdf_dir, image_dir, json_dir = "", "", ""
+model_size = "base"
+keys = []
 new_keys = {}
-for idx, custom_key in enumerate(st.session_state.custom_keys):
-    key_input = st.text_input(f"Enter Custom Key {idx+1}", custom_key['key'])
-    description_input = st.text_input(f"Enter Description for Key {idx+1}", custom_key['description'])
-    st.session_state.custom_keys[idx]['key'] = key_input
-    st.session_state.custom_keys[idx]['description'] = description_input
-    if key_input and description_input:
-        new_keys[key_input] = description_input
 
-#PDF upload 
-uploaded_pdf = st.file_uploader("Upload PDF to analyze (keep field empty if you are only running DataRaider)", type="pdf")
-if uploaded_pdf:
-    response = requests.post(f"{API_URL}/upload/", files={"pdf": uploaded_pdf})
-    if response.status_code == 200:
-        pdf_path = response.json().get("pdf_path")
-        st.success(f"PDF saved temporarily to: {pdf_path}")
-        pdf_dir = str(Path(pdf_path).parent)
-    else:
-        st.error("Error uploading PDF")
-else: 
-    pdf_dir="/placeholder/path/to/pdf"
-    
-# Form fields for other configuration settings
-image_dir = st.text_input("Local directory to save extracted images or where images to be analyzed are located", "full/path/to/images")
-json_dir = st.text_input("Local directory to save reaction JSON dictionaries", "full/path/to/json")
-graph_dir = st.text_input("Local directory to save graph file", "full/path/to/graphs")
-model_size = st.selectbox("Select VisualHeist Model Size", ["BASE", "LARGE"])
+# Show relevant inputs based on selection
+if module in ["VisualHeist", "VisualHeist + DataRaider", "Full MERMaid Pipeline"]:
+    pdf_dir = st.text_input("Path to PDF folder", "/absolute/path/to/pdfs")
+    image_dir = st.text_input("Directory to save extracted images", "/absolute/path/to/images")
+    model_size = st.selectbox("VisualHeist Model Size", ["base", "large"])
 
-kgwizard_address = st.text_input("KGWizard Address", "ws://localhost")
-kgwizard_port = st.number_input("KGWizard Port", value=8182)
-kgwizard_graph_name = st.text_input("Graph Name", "g")
-kgwizard_schema = st.text_input("Schema Name", "echem")
-kgwizard_dynamic_start = st.number_input("Dynamic Start", value=1)
-kgwizard_dynamic_steps = st.number_input("Dynamic Steps", value=5)
-kgwizard_dynamic_max_workers = st.number_input("Dynamic Max Workers", value=15)
+if module in ["DataRaider", "VisualHeist + DataRaider", "Full MERMaid Pipeline"]:
+    if not image_dir:
+        image_dir = st.text_input("Directory with input images", "/absolute/path/to/images")
+    json_dir = st.text_input("Output directory for reaction JSONs", "/absolute/path/to/json")
 
-# Select pipeline to run
-st.subheader("Choose Pipeline to Run")
-pipeline_option = st.radio(
-    "Select Pipeline",
-    ["Run Full MERMaid Pipeline", "Run VisualHeist", "Run DataRaider"]
-)
+    keys = st.multiselect(
+        "Select reaction parameter keys",
+        options=list(inbuilt_keys.keys()),
+        format_func=lambda x: f"{x} - {inbuilt_keys.get(x, '')}"
+    )
 
-# Submit the form
-if st.button("Save Configuration"):
-    # Create a config dictionary
-    config = {
-        "keys": keys,
-        "new_keys": new_keys,
-        "pdf_dir": pdf_dir,
-        "image_dir": image_dir,
-        "json_dir": json_dir,
-        "graph_dir": graph_dir,
-        "model_size": model_size,
-        "kgwizard": {
-            "address": kgwizard_address,
-            "port": kgwizard_port,
-            "graph_name": kgwizard_graph_name,
-            "schema": kgwizard_schema,
-            "dynamic_start": kgwizard_dynamic_start,
-            "dynamic_steps": kgwizard_dynamic_steps,
-            "dynamic_max_workers": kgwizard_dynamic_max_workers,
-        }
+    st.markdown("Add custom reaction keys (optional):")
+    if "custom_keys" not in st.session_state:
+        st.session_state.custom_keys = []
+
+    if st.button("Add Custom Key"):
+        st.session_state.custom_keys.append({"key": "", "description": ""})
+
+    for idx, custom_key in enumerate(st.session_state.custom_keys):
+        key_input = st.text_input(f"Custom Key {idx+1}", custom_key['key'])
+        desc_input = st.text_input(f"Description {idx+1}", custom_key['description'])
+        st.session_state.custom_keys[idx] = {"key": key_input, "description": desc_input}
+        if key_input and desc_input:
+            new_keys[key_input] = desc_input
+
+# Show KGWizard note
+if module == "KGWizard (coming soon)":
+    st.warning("KGWizard will be supported in a future release.")
+
+# Config dictionary (always constructed for saving)
+config = {
+    "keys": keys,
+    "new_keys": new_keys,
+    "pdf_dir": pdf_dir,
+    "image_dir": image_dir,
+    "json_dir": json_dir,
+    "graph_dir": "",  # can update later
+    "model_size": model_size,
+    "prompt_dir": "",  # backend will handle default
+    "kgwizard": {
+        "address": "ws://localhost",
+        "port": 8182,
+        "graph_name": "g",
+        "schema": "echem",
+        "dynamic_start": 1,
+        "dynamic_steps": 5,
+        "dynamic_max_workers": 10,
     }
-    # Send data to FastAPI backend
-    response = requests.post(f"{API_URL}/update_config/", json=config)
-    
-    if response.status_code == 200:
-        st.success("Configuration updated successfully!")
+}
 
-        # allow user to download the updated configuration file
-        download_url = f"{API_URL}/download_config" 
-        download_response = requests.get(download_url)
-        if download_response.status_code == 200:
-            st.download_button(
-                label="Download Configuration",
-                data=download_response.content,
-                file_name="user_config.json",
-                mime="application/json"
-            )
-        else:
-            st.error("Error downloading configuration.")
+# Save configuration button
+if st.button("Save Configuration"):
+    save_response = requests.post(f"{API_URL}/update_config/", json=config)
+    if save_response.status_code == 200:
+        st.success("Configuration saved successfully!")
+        st.session_state.config_saved = True
     else:
-        st.error("Error updating configuration.")
-    
-# Trigger pipeline based on user selection
-if st.button("Run Selected Pipeline"):
-    if pipeline_option == "Run Full MERMaid Pipeline":
-        response = requests.post(f"{API_URL}/run_all")
-    elif pipeline_option == "Run VisualHeist":
-        response = requests.post(f"{API_URL}/run_visualheist")
-    elif pipeline_option == "Run DataRaider":
-        response = requests.post(f"{API_URL}/run_dataraider")
+        st.error("Failed to save configuration.")
+        st.session_state.config_saved = False
 
-    # Display the output of the selected pipeline
-    if response.status_code == 200:
-        st.success(f"Pipeline executed successfully. Check your results!")
+# Run pipeline only if config is saved
+if module != "KGWizard (coming soon)":
+    if st.session_state.config_saved:
+        if st.button("Run Selected Module"):
+            try:
+                # Call backend based on module
+                if module == "VisualHeist":
+                    run_response = requests.post(f"{API_URL}/run_visualheist")
+                elif module == "DataRaider":
+                    run_response = requests.post(f"{API_URL}/run_dataraider")
+                elif module == "VisualHeist + DataRaider":
+                    vh = requests.post(f"{API_URL}/run_visualheist")
+                    dr = requests.post(f"{API_URL}/run_dataraider")
+                    run_response = dr if dr.status_code != 200 else vh
+                elif module == "Full MERMaid Pipeline":
+                    run_response = requests.post(f"{API_URL}/run_all")
+
+                if run_response.status_code == 200:
+                    st.success("Module executed successfully.")
+                else:
+                    st.error(f"Error running pipeline: {run_response.text}")
+            except Exception as e:
+                st.error(f"Exception occurred: {e}")
     else:
-        st.error(f"Error executing pipeline: {response.json().get('error', 'Unknown error')}")
+        st.info("Please save your configuration before running any module.")
