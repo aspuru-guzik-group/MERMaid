@@ -4,6 +4,7 @@ import os
 import argparse
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from visualheist.methods_visualheist import batch_pdf_to_figures_and_tables
+from pathlib import Path
 
 def load_config(config_file):
     """Load configurations from config_file
@@ -13,14 +14,16 @@ def load_config(config_file):
     :return: Returns a dictionary of fields from config_file
     :rtype: dict
     """
+    config_file = Path(config_file)
     with open(config_file, 'r') as f:
         config = json.load(f)
     
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    parent_dir = os.path.dirname(script_dir)
-    config['default_image_dir'] = os.path.join(parent_dir, config.get('default_image_dir', ''))
-    config['default_json_dir'] = os.path.join(parent_dir, config.get('default_json_dir', ''))
-    config['default_graph_dir'] = os.path.join(parent_dir, config.get('default_graph_dir', ''))
+    script_dir = config_file.parent
+    parent_dir = script_dir.parent
+    for key in ['default_image_dir', 'default_json_dir', 'default_graph_dir']:
+        val = config.get(key)
+        if val and not Path(val).is_absolute():
+            config[key] = str((parent_dir / val).resolve())
     return config
 
 def main():
@@ -39,22 +42,22 @@ def main():
     args = parser.parse_args()
 
     if args.config:
-        config = load_config(args.config)
+        config = load_config(Path(args.config))
 
     else:
-        package_dir = os.path.dirname(os.path.dirname(__file__))
-        config_path = os.path.join(package_dir, 'scripts/startup.json')
-        config = load_config(config_path) if os.path.exists(config_path) else {}
+        package_dir = Path(__file__).resolve().parent.parent
+        config_path = package_dir / "scripts" / "startup.json"
+        config = load_config(config_path) if config_path.exists() else {}
 
-    pdf_dir = args.pdf_dir or config.get('pdf_dir', "./pdfs")
+    pdf_dir = Path(args.pdf_dir) if args.pdf_dir else Path(config.get("pdf_dir", "./pdfs"))
     image_dir = config.get('image_dir', "").strip() 
-    if not image_dir: 
-        image_dir = config.get('default_image_dir')
-    # image_dir = args.image_dir or config.get('image_dir', config.get('default_image_dir'))
+    image_dir = Path(args.image_dir) if args.image_dir else Path(config.get("image_dir") or config.get("default_image_dir", "./images"))
     model_size = args.model_size or config.get('model_size', "base")
+    print(f"Model size: {model_size}")
     use_large_model = model_size == "large"
 
     print(f"Processing PDFs in: {pdf_dir}")
+    print(f"Saving images to: {image_dir}")
     print(f"Using {'LARGE' if use_large_model else 'BASE'} model.")
 
     batch_pdf_to_figures_and_tables(pdf_dir, image_dir, large_model=use_large_model)

@@ -7,6 +7,8 @@ from huggingface_hub import hf_hub_download
 from unittest.mock import patch
 from typing import Union
 from transformers.dynamic_module_utils import get_imports
+from pathlib import Path
+import platform
 
 """
 Extracts all tables and figures from PDF documents, with the associated captions/
@@ -36,8 +38,13 @@ def _pdf_to_image(pdf_path):
     :return: List of Image instances
     :rtype: list[PIL.Image]
     """
-    images = convert_from_path(pdf_path)
-    return images
+    system = platform.system()
+    if system == "Windows":
+        poppler_path = os.environ.get("POPPLER_PATH")
+        if poppler_path is None:
+            raise RuntimeError("Please set the POPPLER_PATH environment variable to your Poppler binary directory.")
+        return convert_from_path(str(pdf_path), poppler_path=poppler_path)
+    return convert_from_path(str(pdf_path))
 
 
 def _tf_id_detection(image, model, processor):
@@ -91,15 +98,16 @@ def _save_image_from_bbox(image, annotation, image_counter, output_dir, pdf_name
     :return: The new image_counter after saving all cropped images
     :rtype: int
     """
-    
+    output_dir = Path(output_dir)
     for counter, bbox in enumerate(annotation['bboxes']):
         x1, y1, x2, y2 = bbox
         cropped_image = image.crop((x1, y1, x2, y2))
-        cropped_image.save(os.path.join(output_dir, f"{pdf_name}_image_{image_counter + counter + 1}.png"))
+        image_path = output_dir / f"{pdf_name}_image_{image_counter + counter + 1}.png"
+        cropped_image.save(image_path)
     return len(annotation["bboxes"]) + image_counter
 
 
-def _create_model(model_id, base_or_large):
+def _create_model(model_id):
     
     """Intializes model used for segmenting tables and figures using either the base or large model
 
@@ -138,16 +146,17 @@ def _pdf_to_figures_and_tables(pdf_path, output_dir, large_model):
     :return: Returns nothing, all segmented figures and tables are saved seperatly
     :rtype: None
     """
-    
-    os.makedirs(output_dir, exist_ok=True)
-    pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
+    pdf_path = Path(pdf_path)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    pdf_name = pdf_path.stem
     images = _pdf_to_image(pdf_path)
-    print(f"PDF {pdf_name} is loaded.")  
+    print(f"\nPDF {pdf_name} is loaded.")  
     
     if large_model:
-        model, processor = _create_model(LARGE_MODEL_ID, "large")
+        model, processor = _create_model(LARGE_MODEL_ID)
     else:
-        model, processor = _create_model(BASE_MODEL_ID, "base") 
+        model, processor = _create_model(BASE_MODEL_ID) 
         print('model and processor is loaded')   
     
     image_counter = 0
@@ -173,17 +182,17 @@ def batch_pdf_to_figures_and_tables(input_dir, output_dir=None, large_model=Fals
     :rtype: None
     """
     
-    if not output_dir:
-          output_dir = os.path.join(input_dir, "extracted_images")
-    
-    for file in os.listdir(input_dir): 
-        if not file.endswith("pdf"):
-            print("ERROR: " + file + " is not a pdf")
+    input_dir = Path(input_dir)
+    output_dir = Path(output_dir) if output_dir else input_dir / "extracted_images"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    for file in input_dir.iterdir():
+        if file.suffix.lower() != ".pdf":
+            print(f"ERROR: {file.name} is not a PDF. Moving on to next file.")
             continue
-        pdf_path = os.path.join(input_dir,file)
         try:
-            _pdf_to_figures_and_tables(pdf_path, output_dir, large_model)
+            _pdf_to_figures_and_tables(file, output_dir, large_model)
         except Exception as e:
             print(e)
-            print(f"pdf {pdf_path} cannot be processed.") 
+            print(f"ERROR: Failed to process {file.name}:{e}. Moving on to next file.\n") 
             continue 
