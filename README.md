@@ -146,3 +146,18 @@ dataraider
 ```sh
 kgwizard
 ```
+---
+
+### 4 Running the MERMaid Web App (Recommended for New Users)
+
+MERMaid comes with a web interface for running the modules interactively via a browser. 
+You can configure your input folders, select extraction keys, and run modules with no coding required.
+
+To launch the app locally:
+```sh
+./launch_webapp.sh
+```
+
+Then, open http://localhost:850x in your browser.
+
+> You must have your **`OPENAI_API_KEY`** set in your .env file (or terminal) before launching the app. You can follow the instructions in [3.2 Setting Up API Key](#32-setting-up-api-key) 
