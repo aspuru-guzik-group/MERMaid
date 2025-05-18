@@ -17,6 +17,7 @@ COMMON_NAMES = {"nBu4NBF4": "Tetrabutylammonium tetrafluoroborate",
                 "nBu4NPF6": "Tetrabutylammonium hexafluorophosphate",
                 "n-Bu4NPF6": "Tetrabutylammonium hexafluorophosphate",
                 "nBu4NPF6": "Tetrabutylammonium hexafluorophosphate",
+                "Bu4NPF6": "Tetrabutylammonium hexafluorophosphate",
                 "nBu4NI": "Tetrabutylammonium iodide",
                 "n-Bu4NI": "Tetrabutylammonium iodide",
                 "Bu4NI": "Tetrabutylammonium iodide",
@@ -217,7 +218,7 @@ def _entity_resolution_entry(entry: dict, keys: list, common_names: dict):
     return entry
 
 
-def _entity_resolution_rxn_dict(rxn_dict: dict, keys: list, common_names: dict):
+def _entity_resolution_rxn_dict_old(rxn_dict: dict, keys: list, common_names: dict):
     """
     Resolves and updates chemical entities for a reaction dictionary, including consolidating mixed solvent systems.
 
@@ -243,6 +244,38 @@ def _entity_resolution_rxn_dict(rxn_dict: dict, keys: list, common_names: dict):
             rxn_entry['Solvents'] = [[names, values]]
 
         rxn_dict["Optimization Runs"][entry_id] = rxn_entry
+    return rxn_dict
+
+def _entity_resolution_rxn_dict(rxn_dict: dict, keys: list, common_names: dict):
+    """
+    Resolves and updates chemical entities for a reaction dictionary, including consolidating mixed solvent systems.
+
+    :param rxn_dict: The dictionary representing a reaction with optimization runs and chemical entities.
+    :type rxn_dict: dict
+    :param keys: The list of keys representing chemical entities.
+    :type keys: list[str]
+    :param common_names: A dictionary of common names for chemicals.
+    :type common_names: dict
+    
+    :return: The updated reaction dictionary with resolved chemical entities.
+    :rtype: dict
+    """
+    opt_key = next((k for k in rxn_dict if "optimization" in k.lower()), None)
+    if opt_key is None:
+        print("WARNING: Could not find optimization runs. Dictionary will not be cleaned.\n")
+        return rxn_dict
+    opt_runs = rxn_dict.get(opt_key, {})
+    for entry_id, rxn_entry in opt_runs.items():
+        rxn_entry = _entity_resolution_entry(rxn_entry, keys, common_names)
+
+        solvents = rxn_entry.get("Solvents", None)
+        if solvents and len(solvents) > 1:
+            names = ":".join(str(s[0]) for s in solvents)
+            values = ":".join(str(s[1]) for s in solvents)
+            values = None if all(v == "None" for v in values.split(":")) else values
+            rxn_entry['Solvents'] = [[names, values]]
+
+        rxn_dict[opt_key][entry_id] = rxn_entry
     return rxn_dict
 
 

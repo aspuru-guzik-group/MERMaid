@@ -83,7 +83,7 @@ def main():
     construct_initial_prompt(prompt_dir, keys, new_keys)
     print('Filtering relevant images.')
     filter_images(info, prompt_dir, "filter_image_prompt", image_dir)
-    print('Processing relevant images.')
+    print('Processing relevant images.\n')
     batch_process_images(info, image_dir, prompt_dir, "get_data_prompt", "update_dict_prompt", json_dir)
     print()
     print('Clearing temporary files and custom prompts')

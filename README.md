@@ -15,14 +15,25 @@ MERMaid is an end-to-end knowledge ingestion pipeline to automatically convert d
 
 You can run MERMaid directly or use VisualHeist and DataRaider as standalone tools for their specific functionality.  
 
-MERMaid is integrated with the OpenAI provider at present. We will extend MERMaid to support other providers and open-source VLMs in future updates.  
+> ⚠️ MERMaid is integrated with the OpenAI provider at present. Please ensure that you have **sufficient credits in your account** otherwise you will encounter [errors](https://github.com/aspuru-guzik-group/MERMaid/issues/3) (Note: running VisualHeist by itself does not require an API key). We will extend MERMaid to support other providers and open-source VLMs in future updates.  
 
 VisualHeist works best on systems with **high RAM**. For optimal performance, ensure that your system has sufficient memory, as running out of memory may cause the process to be terminated prematurely.  
 
 Further usage details on KGWizard can be found in the [KGWizard README file](https://github.com/aspuru-guzik-group/MERMaid/blob/main/src/kgwizard/README.org).  
 
 ---
-
+If you use MERMaid and its submodules in your research, please cite our [preprint](https://doi.org/10.26434/chemrxiv-2025-8z6h2). Note that this content is a preprint and has not been peer-reviewed.
+```
+@article{
+    MERMaid,
+    title = {MERMaid: Universal multimodal mining of chemical reactions from PDFs using vision-language models},
+    author = {Shi Xuan Leong, Sergio Pablo-García, Brandon Wong, Alán Aspuru-Guzik},
+    DOI = {10.26434/chemrxiv-2025-8z6h2},
+    journal = {ChemRxiv},
+    year = {2025},
+}  
+```
+---
 ## 1. Installation  
 
 ### 1.1 Create a new virtual environment  
@@ -134,3 +145,5 @@ dataraider
 #### 2.4.3 KGWizard – Data-to-Knowledge Graph Translation  
 ```sh
 kgwizard
+
+If you 

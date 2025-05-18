@@ -22,4 +22,4 @@ Your second task:
 For each entry, check its "Substitutions" key (if any), which follows the "placeholder = substitution" format. you MUST APPLY the substitution only to the corresponding field of THAT entry if the placeholder is found in that field. For example, if in entry 1, "Substitutions": "T = CH3" and "Additive": "SiT2". The updated entry should be "Additive": "Si(CH3)2". NOTE: Each 'substitutions' key is ENTRY-SPECIFIC. DO NOT APPLY GLOBALLY.
 
 Response:
-Your response should contain only the updated optimization runs dictionary as a JSON object.
+Your response should contain only the updated Optimization Runs Dictionary as a JSON object.

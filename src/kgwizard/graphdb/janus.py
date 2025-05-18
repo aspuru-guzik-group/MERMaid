@@ -250,4 +250,4 @@ def save_graph(
 ) -> None:
     if not output_path.suffix:
         output_path = output_path.with_suffix(".graphml")
-    graph.io(output_path).write().iterate()
+    graph.io(str(output_path)).write().iterate()
