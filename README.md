@@ -147,6 +147,7 @@ dataraider
 ```sh
 kgwizard
 ```
+---
 
 ### 4 Running the MERMaid Web App (Recommended for New Users)
 
