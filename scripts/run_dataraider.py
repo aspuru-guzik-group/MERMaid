@@ -8,7 +8,7 @@ from pathlib import Path
 from dataraider.processor_info import DataRaiderInfo
 from dataraider.reaction_dictionary_formating import construct_initial_prompt
 from dataraider.process_images import batch_process_images, clear_temp_files
-from dataraider.filter_image import filter_images
+from dataraider.filter_image import filter_images, check_segmentation
 from huggingface_hub import hf_hub_download
 from dotenv import load_dotenv
 
@@ -79,12 +79,18 @@ def main():
     
     # Construct the initial reaction data extraction prompt
     print('\n############################ Starting up DataRaider ############################ ')
-    print("Constructing your custom reaction data extraction prompt")
+    print("Constructing your custom reaction data extraction prompt\n")
     construct_initial_prompt(prompt_dir, keys, new_keys)
-    print('Filtering relevant images.')
+    
+    print('Filtering relevant images.\n')
     filter_images(info, prompt_dir, "filter_image_prompt", image_dir)
+    
+    print('Checking if images are segmented properly\n')
+    check_segmentation(info,prompt_dir, image_dir, check_prompt ="check_image_prompt")
+    
     print('\nProcessing relevant images.\n')
     batch_process_images(info, image_dir, prompt_dir, "get_data_prompt", "update_dict_prompt", json_dir)
+    
     print()
     print('\nClearing temporary files and custom prompts')
     clear_temp_files(prompt_dir, image_dir)
