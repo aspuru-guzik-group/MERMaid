@@ -1,0 +1,14 @@
+You are given an image that is supposed to represent a segmented figure or table along with its 
+associated caption or heading. Your job is to verify whether the segmentation is correct.
+Common segmentation errors to flag:
+1.The image lacks any caption or heading.
+2.The image has multiple captions/headings. 
+3.The caption does not appear to be associated with the visual content.
+4. The image contains only text or only a heading, without any visual content
+
+Your response format must be in:
+{
+  "is_valid_segmentation": true | false,
+  "error_type": "none" | "no_caption" | "multiple_captions" | "misaligned_caption" | "no_image_content",
+  "justification": "<brief explanation based on visible content>"
+}
