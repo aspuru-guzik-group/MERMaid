@@ -27,6 +27,7 @@ USER_CONFIG_PATH = Path(__file__).resolve().parent.parent / "scripts" / "user_co
 PROMPT_DIR = Path(__file__).resolve().parent.parent / "Prompts"
 VISUALHEIST_PATH = Path(__file__).resolve().parent.parent / "scripts" / "run_visualheist.py"
 DATARAIDER_PATH = Path(__file__).resolve().parent.parent / "scripts" / "run_dataraider.py"
+KGWIZARD_PATH = Path(__file__).resolve().parent.parent / "scripts" / "run_kgwizard.py"
 MERMAID_PATH = Path(__file__).resolve().parent.parent / "scripts" / "run_mermaid.py"
 UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
@@ -184,6 +185,15 @@ def run_dataraider():
     print("RESULTS:", result)
     return result.stdout, result.stderr
 
+def run_kgwizard():
+    """Runs the KGWizard module."""
+    result = subprocess.run(
+        ["python", str(KGWIZARD_PATH)] + get_config_args(),
+        capture_output=True, text=True
+    )
+    print("RESULTS:", result)
+    return result.stdout, result.stderr
+
 @app.get("/")
 def home():
     return {"message": "Welcome to the MERMaid API"}
@@ -209,6 +219,14 @@ def visualheist():
 # Endpoint to run DataRaider module
 @app.post("/run_dataraider")
 def dataraider():
+    stdout, stderr = run_dataraider()
+    response = {"output": stdout}
+    if stderr:
+        response["error"] = stderr
+    return response
+
+@app.post("/run_kgwizard")
+def kgwizard():
     stdout, stderr = run_dataraider()
     response = {"output": stdout}
     if stderr:
