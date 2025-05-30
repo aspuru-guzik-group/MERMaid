@@ -37,7 +37,7 @@ else:
 # Module selector
 module = st.radio(
     "Select a module to run:",
-    ["VisualHeist", "DataRaider", "VisualHeist + DataRaider", "Full MERMaid Pipeline", "KGWizard (coming soon)"],
+    ["VisualHeist", "DataRaider", "VisualHeist + DataRaider", "Full MERMaid Pipeline", "KGWizard"],
     index=0
 )
 
@@ -83,8 +83,9 @@ if module in ["DataRaider", "VisualHeist + DataRaider", "Full MERMaid Pipeline"]
             new_keys[key_input] = desc_input
 
 # Show KGWizard note
-if module == "KGWizard (coming soon)":
-    st.warning("KGWizard will be supported in a future release.")
+if module == "KGWizard":
+    # st.warning("KGWizard will be supported in a future release.")
+    json_dir = st.text_input("Directory to reaction jsons", "/absolute/path/to/json")
 
 # Config dictionary (always constructed for saving)
 config = {
@@ -118,27 +119,29 @@ if st.button("Save Configuration"):
         st.session_state.config_saved = False
 
 # Run pipeline only if config is saved
-if module != "KGWizard (coming soon)":
-    if st.session_state.config_saved:
-        if st.button("Run Selected Module"):
-            try:
-                # Call backend based on module
-                if module == "VisualHeist":
-                    run_response = requests.post(f"{API_URL}/run_visualheist")
-                elif module == "DataRaider":
-                    run_response = requests.post(f"{API_URL}/run_dataraider")
-                elif module == "VisualHeist + DataRaider":
-                    vh = requests.post(f"{API_URL}/run_visualheist")
-                    dr = requests.post(f"{API_URL}/run_dataraider")
-                    run_response = dr if dr.status_code != 200 else vh
-                elif module == "Full MERMaid Pipeline":
-                    run_response = requests.post(f"{API_URL}/run_all")
+# if module != "KGWizard (coming soon)":
+if st.session_state.config_saved:
+    if st.button("Run Selected Module"):
+        try:
+            # Call backend based on module
+            if module == "VisualHeist":
+                run_response = requests.post(f"{API_URL}/run_visualheist")
+            elif module == "DataRaider":
+                run_response = requests.post(f"{API_URL}/run_dataraider")
+            elif module == "VisualHeist + DataRaider":
+                vh = requests.post(f"{API_URL}/run_visualheist")
+                dr = requests.post(f"{API_URL}/run_dataraider")
+                run_response = dr if dr.status_code != 200 else vh
+            elif module == "Full MERMaid Pipeline":
+                run_response = requests.post(f"{API_URL}/run_all")
+            elif module == "KGWizard":
+                run_response = requests.post(f"{API_URL}/run_kgwizard")
 
-                if run_response.status_code == 200:
-                    st.success("Module executed successfully.")
-                else:
-                    st.error(f"Error running pipeline: {run_response.text}")
-            except Exception as e:
-                st.error(f"Exception occurred: {e}")
-    else:
-        st.info("Please save your configuration before running any module.")
+            if run_response.status_code == 200:
+                st.success("Module executed successfully.")
+            else:
+                st.error(f"Error running pipeline: {run_response.text}")
+        except Exception as e:
+            st.error(f"Exception occurred: {e}")
+else:
+    st.info("Please save your configuration before running any module.")
