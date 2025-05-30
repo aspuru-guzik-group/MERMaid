@@ -42,6 +42,8 @@ def main():
     
     
     json_dir = Path(config.get('json_dir') or config.get('default_json_dir'))
+    # TEMPORARY OUTPUT FILE PATH
+    # need to change later
     output_file = config.get("pdf_dir")
 
     subprocess.run(["kgwizard", "transform", json_dir, "--output_file", output_file])
