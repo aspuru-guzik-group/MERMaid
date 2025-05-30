@@ -5,6 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 from PIL import Image
+import pdb
 
 # Display logo
 logo_path = Path(__file__).resolve().parent.parent / "Assets" / "MERMAID_logo.png"
@@ -23,6 +24,7 @@ except Exception as e:
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 API_URL = "http://127.0.0.1:8000"
+# API_URL = "	http://localhost:8000"
 
 # Session flag for saved config
 if "config_saved" not in st.session_state:

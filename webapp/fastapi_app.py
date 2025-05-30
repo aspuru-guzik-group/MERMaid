@@ -225,9 +225,10 @@ def dataraider():
         response["error"] = stderr
     return response
 
+# Endpoint to run KGWizard module
 @app.post("/run_kgwizard")
 def kgwizard():
-    stdout, stderr = run_dataraider()
+    stdout, stderr = run_kgwizard()
     response = {"output": stdout}
     if stderr:
         response["error"] = stderr

@@ -27,7 +27,6 @@ def main():
     """
     This function orchestrates loading the configuration, constructing custom prompts of KGWizard
     """
-    
     parser = argparse.ArgumentParser(description="Convert information into a graph databse with KGWIzard.")
     parser.add_argument("--config", type=str, help="Path to the configuration file", default=None)
     
@@ -42,10 +41,10 @@ def main():
         config = load_config(config_path) if config_path.exists() else {}
     
     
-    json_dir = Path(args.json_dir) if args.json_dir else Path(config.get('json_dir') or config.get('default_json_dir'))
+    json_dir = Path(config.get('json_dir') or config.get('default_json_dir'))
     output_file = json_dir / "my_graph.graphml"
 
-    subprocess.run(["kgwizard", "transform", "--input_dir", json_dir, "--output_file", output_file])
+    subprocess.run(["kgwizard", "transform", json_dir, "--output_file", output_file])
     
 
 if __name__ == "__main__":
