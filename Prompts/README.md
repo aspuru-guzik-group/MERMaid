@@ -55,19 +55,21 @@ This guide outlines how to modify MERMaid for:
 
     > *Optional:* Update the associated key in `startup.json` for labeling consistency. For example, change:
 
-        ```json
+        ```
         "is_optimization_table": true
         ```
         to 
 
-        ```json
+        ```
         "is_substrate_scope": true
         ```
 
 2. **Edit the reaction parameter keys**
+    
     Use the same approach as in 1.1. 
 
 3. **Modify the base prompt**
+    
     File: `Prompts/base_prompt.txt`
 
     Update this prompt to:
