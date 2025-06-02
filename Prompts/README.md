@@ -50,15 +50,14 @@ This guide outlines how to modify MERMaid for:
    *Optional:* Update the associated key `is_optimization_table: true` in `startup.json` for labeling consistency. For example, you can change to `is_substrate_scope: true`. 
 
 2. **Edit the reaction parameter keys**
-    Use the same approach as in 1.1. 
+Use the same approach as in 1.1. 
 
 3. **Modify the base prompt**
-    File: `Prompts/base_prompt.txt`
-
-    Update this prompt to:
-    - Reflect the expected output structure for your task
-    - Redefine the dictionaries you want to extract
-    - Adjust the parsing rules accordingly
+File: `Prompts/base_prompt.txt`
+Update this prompt to:
+- Reflect the expected output structure for your task
+- Redefine the dictionaries you want to extract
+- Adjust the parsing rules accordingly
 
 ### 2.2 Modifications for `KGWizard`
 (To be added)
