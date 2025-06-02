@@ -43,22 +43,26 @@ This guide outlines how to modify MERMaid for:
 ### 2.1 Modifications for `DataRaider`
 1. **Update the filter prompt**  
    File: `Prompts/filter_image_prompt.txt`  
-   Change the filtering question from `Does the figure contain reaction conditions of reaction optimization runs?` to match your new task. For example: 
+   Change the filtering question to match your new task. For example, change: 
+   ```json
+   Does the figure contain reaction conditions of reaction optimization runs?
+   ```
+   to: 
    
    ```json
    Does the figure contain substrate scope of a reaction?
    ```
 
-   *Optional:* Update the associated key in `startup.json` for labeling consistency. For example, change:
+    > *Optional:* Update the associated key in `startup.json` for labeling consistency. For example, change:
 
-    ```json
-    "is_optimization_table": true
-    ```
-    to 
+        ```json
+        "is_optimization_table": true
+        ```
+        to 
 
-    ```json
-    "is_substrate_scope": true
-    ```
+        ```json
+        "is_substrate_scope": true
+        ```
 
 2. **Edit the reaction parameter keys**
     Use the same approach as in 1.1. 
