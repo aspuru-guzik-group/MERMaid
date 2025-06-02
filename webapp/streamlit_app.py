@@ -52,6 +52,11 @@ pdf_dir, image_dir, json_dir = "", "", ""
 model_size = "base"
 keys = []
 new_keys = {}
+new_sub = {}
+schema = ""
+kgwizard_command = ""
+output_file = ""
+output_dir = ""
 
 # Show relevant inputs based on selection
 if module in ["VisualHeist", "VisualHeist + DataRaider", "Full MERMaid Pipeline"]:
@@ -84,11 +89,39 @@ if module in ["DataRaider", "VisualHeist + DataRaider", "Full MERMaid Pipeline"]
         if key_input and desc_input:
             new_keys[key_input] = desc_input
 
-# Show KGWizard note
 if module == "KGWizard":
-    # st.warning("KGWizard will be supported in a future release.")
-    json_dir = st.text_input("Directory to reaction jsons", "/absolute/path/to/json")
+    kgwizard_command = st.radio("Select KGWizard command:", ["transform", "parse"], index=0)
+    
+    if kgwizard_command == "transform":
+        json_dir = st.text_input("Directory to reaction jsons", "/absolute/path/to/json")
+        schema = st.radio("Select a schema to use:",
+                      ["photo", "org", "echem"],
+                        index=0)
+        output_dir = st.text_input("Directory to store intermediate files (required for parse command)", "/absolute/path/to/intermediate/json/storage")
+        output_file = st.text_input("Path to where you want the .graphml file saved", "/absolute/path/to/graphml/file/my_graph.graphml")
+        
+        
+        st.markdown("Add substitutions in the prompt files (optional):")
+        if "substitutions" not in st.session_state:
+            st.session_state.substitutions = []
 
+        if st.button("Add Substitutions"):
+            st.session_state.substitutions.append({"token": "", "NodeType": ""})
+
+        for idx, sub_key in enumerate(st.session_state.substitutions):
+            token_input = st.text_input(f"token {idx+1}", sub_key['token'])
+            nodetype_input = st.text_input(f"NodeType {idx+1}", sub_key['NodeType'])
+            st.session_state.substitutions[idx] = {"token": token_input, "NodeType": nodetype_input}
+            if token_input and nodetype_input:
+                new_sub[token_input] = nodetype_input
+                
+    elif kgwizard_command == "parse":
+        schema = st.radio("Select a schema to use:",
+                      ["photo", "org", "echem"],
+                        index=0)
+        output_dir = st.text_input("Directory to location of intermediate files", "/absolute/path/to/intermediate/json/storage")
+        output_file = st.text_input("Path to where you want the .graphml file saved", "/absolute/path/to/graphml/file/my_graph.graphml")
+    
 # Config dictionary (always constructed for saving)
 config = {
     "keys": keys,
@@ -103,7 +136,11 @@ config = {
         "address": "ws://localhost",
         "port": 8182,
         "graph_name": "g",
-        "schema": "echem",
+        "output_file": output_file,
+        "output_dir": output_dir,
+        "schema": schema,
+        "substitutions": new_sub,
+        "command": kgwizard_command,
         "dynamic_start": 1,
         "dynamic_steps": 5,
         "dynamic_max_workers": 10,

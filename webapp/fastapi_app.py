@@ -70,6 +70,11 @@ class KGWizardConfig(BaseModel):
     dynamic_start: int
     dynamic_steps: int
     dynamic_max_workers: int
+    output_file: str
+    output_dir: str
+    schema: str
+    substitutions: dict
+    command: str
 
 
 class Config(BaseModel):

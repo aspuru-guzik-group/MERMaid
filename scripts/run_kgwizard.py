@@ -30,23 +30,39 @@ def main():
     parser = argparse.ArgumentParser(description="Convert information into a graph databse with KGWIzard.")
     parser.add_argument("--config", type=str, help="Path to the configuration file", default=None)
     
-    args = parser.parse_args()
+    cli_args = parser.parse_args()
     
-    if args.config:
-        config = load_config(Path(args.config))
+    if cli_args.config:
+        config = load_config(Path(cli_args.config))
 
     else:
         package_dir = Path(__file__).resolve().parent.parent
         config_path = package_dir / "scripts" / "startup.json"
         config = load_config(config_path) if config_path.exists() else {}
     
+    kgwizard_config = config.get("kgwizard")
+    command = kgwizard_config.get("command")
     
-    json_dir = Path(config.get('json_dir') or config.get('default_json_dir'))
-    # TEMPORARY OUTPUT FILE PATH
-    # need to change later
-    output_file = config.get("pdf_dir")
+    if command == "transform":
+        json_dir = config.get('json_dir')
+        output_file = kgwizard_config.get("output_file")
+        output_dir = kgwizard_config.get("output_dir")
+        schema = kgwizard_config.get("schema")
+        sub_dict = kgwizard_config.get("substitutions")
+        substitutions = [f"{k}:{v}" for k, v in sub_dict.items()]
+        
+        cli_args = [command, json_dir, "--output_file", output_file, "--output_dir", output_dir, "--schema", schema]
+        if len(substitutions) > 0:
+            cli_args += ["--substitutions"] + substitutions
+    
+    else: # command == "parse"
+        output_file = kgwizard_config.get("output_file")
+        output_dir = kgwizard_config.get("output_dir")
+        schema = kgwizard_config.get("schema")
 
-    subprocess.run(["kgwizard", "transform", json_dir, "--output_file", output_file])
+        cli_args = [command, output_dir, "--output_file", output_file, "--schema", schema]
+
+    subprocess.run(["kgwizard"] + cli_args)
     
 
 if __name__ == "__main__":
