@@ -123,6 +123,7 @@ if module == "KGWizard":
         output_file = st.text_input("Path to where you want the .graphml file saved", "/absolute/path/to/graphml/file/my_graph.graphml")
     
 # Config dictionary (always constructed for saving)
+# NOTE this config must match the format of the Config object in fastapi_app.py
 config = {
     "keys": keys,
     "new_keys": new_keys,

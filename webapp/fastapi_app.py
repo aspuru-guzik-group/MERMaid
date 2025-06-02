@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel, Field
 import json
 from typing import List, Dict
@@ -8,6 +8,7 @@ import os
 import tempfile 
 from pathlib import Path
 from dotenv import load_dotenv
+import logging
 import platform
 
 # Load environment variables from .env file
@@ -31,7 +32,17 @@ KGWIZARD_PATH = Path(__file__).resolve().parent.parent / "scripts" / "run_kgwiza
 MERMAID_PATH = Path(__file__).resolve().parent.parent / "scripts" / "run_mermaid.py"
 UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+LOGGING_PATH = Path(__file__).resolve().parent.parent / "mermaid.log"
 
+# Setup logger
+logging.basicConfig(
+    level=logging.INFO,                          # Minimum log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+    format="%(asctime)s [%(levelname)s] %(message)s",  # Log format
+    handlers=[
+        logging.FileHandler(LOGGING_PATH),          # Write to file
+        logging.StreamHandler()                  # Also print to console
+    ]
+)
 
 import platform
 
@@ -169,6 +180,9 @@ def get_config_args():
 def run_mermaid_pipeline():
     """Runs the full MERMaid pipeline via subprocess."""
     result = subprocess.run(["python", "scripts/run_mermaid.py", "RUN"], capture_output=True, text=True)
+    if result.returncode != 0 or result.stderr:
+        logging.error("Full Mermaid pipeline failed")
+        logging.error(result.stderr)
     return result.stdout, result.stderr
 
 # Run individual submodules
@@ -178,7 +192,9 @@ def run_visualheist():
         ["python", str(VISUALHEIST_PATH)] + get_config_args(),
         capture_output=True, text=True
     )
-    print("RESULTS:", result)
+    if result.returncode != 0 or result.stderr:
+        logging.error("VisualHeist failed")
+        logging.error(result.stderr)
     return result.stdout, result.stderr
 
 def run_dataraider():
@@ -187,7 +203,9 @@ def run_dataraider():
         ["python", str(DATARAIDER_PATH)] + get_config_args(),
         capture_output=True, text=True
     )
-    print("RESULTS:", result)
+    if result.returncode != 0 or result.stderr:
+        logging.error("DataRaider failed")
+        logging.error(result.stderr)
     return result.stdout, result.stderr
 
 def run_kgwizard():
@@ -196,7 +214,10 @@ def run_kgwizard():
         ["python", str(KGWIZARD_PATH)] + get_config_args(),
         capture_output=True, text=True
     )
-    print("RESULTS:", result)
+    print(result)
+    if result.returncode != 0 or result.stderr:
+        logging.error("KGWizard failed")
+        logging.error(result.stderr)
     return result.stdout, result.stderr
 
 @app.get("/")
@@ -210,6 +231,7 @@ def run_all_pipeline():
     response = {"output": stdout}
     if stderr:
         response["error"] = stderr
+        raise HTTPException(status_code=500, detail=stderr)
     return response
 
 # Endpoint to run VisualHeist module
@@ -219,6 +241,7 @@ def visualheist():
     response = {"output": stdout}
     if stderr:
         response["error"] = stderr
+        raise HTTPException(status_code=500, detail=stderr)
     return response
 
 # Endpoint to run DataRaider module
@@ -228,6 +251,7 @@ def dataraider():
     response = {"output": stdout}
     if stderr:
         response["error"] = stderr
+        raise HTTPException(status_code=500, detail=stderr)
     return response
 
 # Endpoint to run KGWizard module
@@ -237,4 +261,5 @@ def kgwizard():
     response = {"output": stdout}
     if stderr:
         response["error"] = stderr
+        raise HTTPException(status_code=500, detail=stderr)
     return response
