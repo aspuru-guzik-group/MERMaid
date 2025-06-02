@@ -44,12 +44,12 @@ This guide outlines how to modify MERMaid for:
 1. **Update the filter prompt**  
    File: `Prompts/filter_image_prompt.txt`  
    Change the filtering question to match your new task. For example, change: 
-   ```json
+   ```
    Does the figure contain reaction conditions of reaction optimization runs?
    ```
    to: 
    
-   ```json
+   ```
    Does the figure contain substrate scope of a reaction?
    ```
 
@@ -65,11 +65,9 @@ This guide outlines how to modify MERMaid for:
         ```
 
 2. **Edit the reaction parameter keys**
-    
     Use the same approach as in 1.1. 
 
 3. **Modify the base prompt**
-    
     File: `Prompts/base_prompt.txt`
 
     Update this prompt to:
