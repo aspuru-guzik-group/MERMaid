@@ -24,7 +24,8 @@ This guide outlines how to modify MERMaid for:
   "keys": ["Entry", "Anode", "Cathode", "Electrolytes", "Solvents", "Duration"]
 
 - **Option 2: Add custom reaction parameters**  
-  You can define new keys directly in `startup.json` using the format: "<custom_key>": "<brief description>"
+  You can define new keys directly in `startup.json` using the format: 
+  `"<custom_key>" : "<brief description>"
   
   **Example:**
   ```json
@@ -46,26 +47,29 @@ This guide outlines how to modify MERMaid for:
    
    ```json
    Does the figure contain substrate scope of a reaction?
+   ```
 
-   *Optional:* Update the associated key in `startup.json` for labeling consistency:
+   *Optional:* Update the associated key in `startup.json` for labeling consistency. For example, change:
 
     ```json
     "is_optimization_table": true
+    ```
     to 
 
     ```json
     "is_substrate_scope": true
+    ```
 
 2. **Edit the reaction parameter keys**
-Use the same approach as in 1.1. 
+    Use the same approach as in 1.1. 
 
 3. **Modify the base prompt**
-File: `Prompts/base_prompt.txt`
+    File: `Prompts/base_prompt.txt`
 
-Update this prompt to:
-- Reflect the expected output structure for your task
-- Redefine the dictionaries you want to extract
-- Adjust the parsing rules accordingly
+    Update this prompt to:
+    - Reflect the expected output structure for your task
+    - Redefine the dictionaries you want to extract
+    - Adjust the parsing rules accordingly
 
 ### 2.2 Modifications for `KGWizard`
 (To be added)
