@@ -49,14 +49,14 @@ A running JanusGraph server is also needed if you plan to upload data into a gra
   cd MERMaid
 #+end_src
 
-2. *Install package*:
+1. *Install package*:
 #+begin_src bash
   pip install -e .[kgwizard]
 #+end_src
 
 Use the ~-e~ flag command to make changes on the prompt files inside ~prompt/assets~.
 
-3. *Setup JanusGraph Server*
+1. *Setup JanusGraph Server*
 In order to setup the JanusGraph server you will need to install both Java 8 SE and JanusGraph
 
 To install Java 8 SE go to the [[https://www.oracle.com/ca-en/java/technologies/javase/javase8-archive-downloads.html][Oracle website]] and download the appropriate file. Follow the installation provided.
@@ -77,7 +77,9 @@ To run in the foreground or
 #+begin_src bash
   ./bin/janusgraph-server.sh start
 #+end_src
-To run in the background. To terminate the server you may either use CTRL+C if run in the foreground or 
+To run in the background.
+
+To terminate the server you may either use CTRL+C if run in the foreground or 
 
 #+begin_src bash
   ./bin/janusgraph-server.sh stop
