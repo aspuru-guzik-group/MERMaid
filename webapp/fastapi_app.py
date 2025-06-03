@@ -180,10 +180,13 @@ def get_config_args():
 def run_mermaid_pipeline():
     """Runs the full MERMaid pipeline via subprocess."""
     result = subprocess.run(["python", "scripts/run_mermaid.py", "RUN"], capture_output=True, text=True)
-    if result.returncode != 0 or result.stderr:
+    if result.returncode != 0:
         logging.error("Full Mermaid pipeline failed")
         logging.error(result.stderr)
-    return result.stdout, result.stderr
+    elif result.stderr:
+        logging.warning("Full Mermaid pipeline encountered a non-fatal error")
+        logging.warning(result.stderr)
+    return result.stdout, result.stderr, result.returncode
 
 # Run individual submodules
 def run_visualheist():
@@ -192,10 +195,14 @@ def run_visualheist():
         ["python", str(VISUALHEIST_PATH)] + get_config_args(),
         capture_output=True, text=True
     )
-    if result.returncode != 0 or result.stderr:
+    if result.returncode != 0:
         logging.error("VisualHeist failed")
         logging.error(result.stderr)
-    return result.stdout, result.stderr
+    elif result.stderr:
+        logging.warning("VisualHeist encountered a non-fatal error")
+        logging.warning(result.stderr)
+    
+    return result.stdout, result.stderr, result.returncode
 
 def run_dataraider():
     """Runs DataRaider module."""
@@ -203,10 +210,13 @@ def run_dataraider():
         ["python", str(DATARAIDER_PATH)] + get_config_args(),
         capture_output=True, text=True
     )
-    if result.returncode != 0 or result.stderr:
+    if result.returncode != 0:
         logging.error("DataRaider failed")
         logging.error(result.stderr)
-    return result.stdout, result.stderr
+    elif result.stderr:
+        logging.warning("DataRaider encountered a non-fatal error")
+        logging.warning(result.stderr)
+    return result.stdout, result.stderr, result.returncode
 
 def run_kgwizard():
     """Runs the KGWizard module."""
@@ -214,11 +224,13 @@ def run_kgwizard():
         ["python", str(KGWIZARD_PATH)] + get_config_args(),
         capture_output=True, text=True
     )
-    print(result)
-    if result.returncode != 0 or result.stderr:
+    if result.returncode != 0:
         logging.error("KGWizard failed")
         logging.error(result.stderr)
-    return result.stdout, result.stderr
+    elif result.stderr:
+        logging.warning("KGWizard encountered a non-fatal error")
+        logging.warning(result.stderr)
+    return result.stdout, result.stderr, result.returncode
 
 @app.get("/")
 def home():
@@ -227,9 +239,9 @@ def home():
 # Endpoint to run the full MERMaid pipeline
 @app.post("/run_all")
 def run_all_pipeline():
-    stdout, stderr = run_mermaid_pipeline()
+    stdout, stderr, returncode = run_mermaid_pipeline()
     response = {"output": stdout}
-    if stderr:
+    if returncode != 0:
         response["error"] = stderr
         raise HTTPException(status_code=500, detail=stderr)
     return response
@@ -237,9 +249,9 @@ def run_all_pipeline():
 # Endpoint to run VisualHeist module
 @app.post("/run_visualheist")
 def visualheist():
-    stdout, stderr = run_visualheist()
+    stdout, stderr, returncode = run_visualheist()
     response = {"output": stdout}
-    if stderr:
+    if returncode != 0:
         response["error"] = stderr
         raise HTTPException(status_code=500, detail=stderr)
     return response
@@ -247,9 +259,9 @@ def visualheist():
 # Endpoint to run DataRaider module
 @app.post("/run_dataraider")
 def dataraider():
-    stdout, stderr = run_dataraider()
+    stdout, stderr, returncode = run_dataraider()
     response = {"output": stdout}
-    if stderr:
+    if returncode != 0:
         response["error"] = stderr
         raise HTTPException(status_code=500, detail=stderr)
     return response
@@ -257,9 +269,9 @@ def dataraider():
 # Endpoint to run KGWizard module
 @app.post("/run_kgwizard")
 def kgwizard():
-    stdout, stderr = run_kgwizard()
+    stdout, stderr, returncode = run_kgwizard()
     response = {"output": stdout}
-    if stderr:
+    if returncode != 0:
         response["error"] = stderr
         raise HTTPException(status_code=500, detail=stderr)
     return response

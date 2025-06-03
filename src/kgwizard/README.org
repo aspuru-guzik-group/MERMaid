@@ -56,6 +56,36 @@ A running JanusGraph server is also needed if you plan to upload data into a gra
 
 Use the ~-e~ flag command to make changes on the prompt files inside ~prompt/assets~.
 
+3. *Setup JanusGraph Server*
+In order to setup the JanusGraph server you will need to install both Java 8 SE and JanusGraph
+
+To install Java 8 SE go to the [[https://www.oracle.com/ca-en/java/technologies/javase/javase8-archive-downloads.html][Oracle website]] and download the appropriate file. Follow the installation provided.
+
+To install JanusGraph go to the [[https://github.com/JanusGraph/janusgraph/releases][JanusGraph install page]] and download janusgraph-1.1.0.zip. Note that any version should work, however KGWizard was tested using version 1.1.0.
+
+Then unzip the zip file:
+#+begin_src bash
+  unzip janusgraph-1.1.0.zip
+  cd janusgraph-1.1.0
+#+end_src
+To start the server you may either run
+
+#+begin_src bash
+  ./bin/janusgraph-server.sh ./conf/gremlin-server/gremlin-server.yaml
+#+end_src
+To run in the foreground or
+#+begin_src bash
+  ./bin/janusgraph-server.sh start
+#+end_src
+To run in the background. To terminate the server you may either use CTRL+C if run in the foreground or 
+
+#+begin_src bash
+  ./bin/janusgraph-server.sh stop
+#+end_src
+if run in the background
+
+NOTE that running the server takes anywhere from 2GB-8GB of RAM. Please be sure that there is enough memory avaliable otherwise the server will crash
+
 * Usage                                            :usage:
 
 After installation, you can run:
