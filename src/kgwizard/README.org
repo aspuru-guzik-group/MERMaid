@@ -146,10 +146,10 @@ If unset, only the ~parse~ command will be available.
 
 This section explains how to
 
-1. **Start from the template schema** (`graphdb/schemas/echem.py`).
-2. **Add your own vertices / edges** in that same file (or in a copy).
-3. **Select the schema** via the CLI.
-4. **Tweak the LLM prompt instructions** if needed.
+1. *Start from the template schema* (~graphdb/schemas/echem.py~).
+2. *Add your own vertices / edges* in that same file (or in a copy).
+3. *Select the schema* via the CLI.
+4. *Tweak the LLM prompt instructions* if needed.
 
 ** Use *echem.py* as your template
 :PROPERTIES:
@@ -158,11 +158,11 @@ This section explains how to
 
 The file =graphdb/schemas/echem.py= already contains:
 
-- The three *base* classes `VertexBase`, `EdgeBase`, `Connection`.
-- A handful of generic chemistry vertices/edges (Reaction, Compound, …).
-- Helper utilities (`apply_type_from_list`, `build_node_from_dict`, …).
+- The three *base* classes ~VertexBase~, ~EdgeBase~, ~Connection~.
+- A handful of generic chemistry vertices/edges (Reaction, Compound, ...).
+- Helper utilities (~apply_type_from_list~, ~build_node_from_dict~, ...).
 
-Because a schema must be *self-contained* (no cross-imports), **copy that file** and start editing it; or append your new classes at the bottom of it.
+Because a schema must be *self-contained* (no cross-imports), *copy that file* and start editing it; or append your new classes at the bottom of it.
 Either way, keep everything in one file so the LLM can see the complete schema.
 
 ** Add your domain-specific classes
@@ -205,7 +205,7 @@ kgwizard transform ... --schema photo
 kgwizard parse ... --schema /absolute/path/photo.py
 #+end_src
 
-Install the package in editable mode (`pip install -e .[kgwizard]`) so new schema files are auto-discovered.
+Install the package in editable mode (~pip install -e .[kgwizard]~) so new schema files are auto-discovered.
 
 ** Adjusting the LLM instructions
 :PROPERTIES:
@@ -221,8 +221,8 @@ Prompt templates live in =kgwizard/prompt/assets/=:
 | =tail=         | Closing text plus magic tokens |
 
 Substitutions & RAG
-- Add `--substitutions "token:VertexLabel"` at the CLI. This **enables Retrieval-Augmented Generation (RAG)**: kgwizard queries the connected JanusGraph for *unique* vertex names of *VertexLabel* and replaces ~{token}~ with the **comma-separated list** it finds.
-- If a token is **not listed** in `--substitutions`, or the query returns **no vertices**, every line in =instructions= still containing that token is **deleted** before the prompt is sent. This keeps the prompt compact and avoids confusing the model.
+- Add ~--substitutions "token:VertexLabel"~ at the CLI. This *enables Retrieval-Augmented Generation (RAG)*: kgwizard queries the connected JanusGraph for *unique* vertex names of *VertexLabel* and replaces ~{token}~ with the *comma-separated list* it finds.
+- If a token is *not listed* in ~--substitutions~, or the query returns *no vertices*, every line in =instructions= still containing that token is *deleted* before the prompt is sent. This keeps the prompt compact and avoids confusing the model.
 
 Prompt assembly
 1. *Header* text.  
