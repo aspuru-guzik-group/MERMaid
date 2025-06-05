@@ -180,30 +180,22 @@ Key points
 
 - *EdgeBase generics link edges to the correct vertices*.
   Example from the current schema:
-
   #+begin_src python
   @dataclass
   class HasConditions(EdgeBase[Reaction, IrradiationConditions]):
       pass
   #+end_src
-
-  *source* must be a ~Reaction~, *target* must be an
-  ~IrradiationConditions~.  Python type checkers catch mistakes, and
-  the LLM sees these hints inside the `{code}` block of the prompt, so
-  it generates the right connections.
+  *source* must be a ~Reaction~, *target* must be an ~IrradiationConditions~.  Python type checkers catch mistakes, and the LLM sees these hints inside the ~{code}~ block of the prompt, so it generates the right connections.
 
 - *Extra fields on an edge become edge properties*.  
   Edge ~HasPhotocatalyst~ illustrates this:
-
   #+begin_src python
   @dataclass
   class HasPhotocatalyst(EdgeBase[Reaction, Compound]):
       value: Optional[float] = None
       unit:  Optional[str]  = None
   #+end_src
-
-  The JSON for this edge must supply *value* and *unit* as numeric or
-  text properties, not embed them in the vertex name.
+  The JSON for this edge must supply *value* and *unit* as numeric or text properties, not embed them in the vertex name.
 
 Example: adding a pressure vertex and edge
 
