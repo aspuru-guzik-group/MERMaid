@@ -17,8 +17,13 @@ kgwizard is a Python command-line tool designed to:
    - [[#transform-command][Transform Command]]
    - [[#parse-command][Parse Command]]
 5. [[#environment-variables][Environment Variables]]
-6. [[#contributing][Contributing]]
-7. [[#license][License]]
+6. [[#extending][Extending KGWizard]]
+   - [[#template][Template]]
+   - [[#new-classes][Add new classes]]
+   - [[#schema-use][Select schema]]
+   - [[#prompt-edit][Adjusting the LLM instructions]]
+7. [[#contributing][Contributing]]
+8. [[#license][License]]
 
 * Features                                        :features:
 
@@ -112,6 +117,89 @@ This parses each ~.json~ in ~./results~ and updates JanusGraph. Also saves a ~.g
 #+end_src
 
 If unset, only the ~parse~ command will be available.
+
+* Extending KGWizard                                              :extending:
+
+This section explains how to
+
+1. **Start from the template schema** (`graphdb/schemas/echem.py`).
+2. **Add your own vertices / edges** in that same file (or in a copy).
+3. **Select the schema** via the CLI.
+4. **Tweak the LLM prompt instructions** if needed.
+
+** 1. Use *echem.py* as your template                         :template:
+
+The file =graphdb/schemas/echem.py= already contains:
+
+- The three *base* classes `VertexBase`, `EdgeBase`, `Connection`.
+- A handful of generic chemistry vertices/edges (Reaction, Compound, …).
+- Helper utilities (`apply_type_from_list`, `build_node_from_dict`, …).
+
+Because a schema must be *self-contained* (no cross-imports), **copy that file** and start editing it; or append your new classes at the bottom of it.
+Either way, keep everything in one file so the LLM can see the complete schema.
+
+** 2. Add your domain-specific classes                       :new-classes:
+
+Append only the parts that are unique to your domain.  
+For example, to model photocatalysis you might add:
+
+#+begin_src python
+# ─── photocatalysis additions ─────────────────────────────
+from dataclasses import dataclass
+from typing import Optional
+
+# (Base classes already defined earlier in this same file)
+
+@dataclass
+class LightSource(VertexBase):
+    wavelength_nm: float
+    power_mw:      Optional[float] = None
+
+@dataclass
+class HasLight(EdgeBase[Reaction, LightSource]):
+    duration_min: float            # exposure time
+#+end_src
+
+That’s it-no need to show the base classes again; they are already in *echem.py*. Just adding the types will make KGWizard to automatically convert the values to the specified type.
+
+** 3. Select your schema at run time                         :schema-use:
+
+If you saved the modified file as, say, =graphdb/schemas/photo.py=:
+
+#+begin_src bash
+kgwizard transform ... --schema photo
+# or, from anywhere:
+kgwizard parse ... --schema /absolute/path/photo.py
+#+end_src
+
+Install the package in editable mode (`pip install -e .[kgwizard]`) so new schema files are auto-discovered.
+
+** 4. Adjusting the LLM instructions                         :prompt-edit:
+
+Prompt templates live in =kgwizard/prompt/assets/=:
+
+| File           | Role in the final prompt |
+|----------------+--------------------------|
+| =header=       | Text placed at the very top |
+| =instructions= | Bullet list consumed by the LLM |
+| =tail=         | Closing text plus magic tokens |
+
+Substitutions & RAG
+- Add `--substitutions "token:VertexLabel"` at the CLI. This **enables Retrieval-Augmented Generation (RAG)**: kgwizard queries the connected JanusGraph for *unique* vertex names of *VertexLabel* and replaces ~{token}~ with the **comma-separated list** it finds.
+- If a token is **not listed** in `--substitutions`, or the query returns **no vertices**, every line in =instructions= still containing that token is **deleted** before the prompt is sent. This keeps the prompt compact and avoids confusing the model.
+
+Prompt assembly
+1. *Header* text.  
+2. *Instructions* (after the token-replacement / pruning step).  
+3. *Tail* text.  
+
+These three pieces are concatenated—blank line between each—to form the final system prompt delivered to the LLM.
+
+Magic tokens in the tail
+- ~{json}~  ⟶ replaced by the full input JSON block.  
+- ~{code}~  ⟶ replaced by the *entire* active schema file.
+
+The helper in =kgwizard/prompt/builder.py= performs these replacements automatically, so you never need to paste the JSON or schema yourself.
 
 * Contributing                                     :contributing:
 
