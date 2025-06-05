@@ -25,7 +25,10 @@ kgwizard is a Python command-line tool designed to:
 7. [[#contributing][Contributing]]
 8. [[#license][License]]
 
-* Features                                        :features:
+* Features
+:PROPERTIES:
+:CUSTOM_ID: features
+:END:
 
 - *Dynamic Parallel Execution* using Python’s ~multiprocessing~ to speed up large-scale transformations.
 - *RAG Integration* to retrieve existing nodes in the JanusGraph database for substituting references.
@@ -33,7 +36,10 @@ kgwizard is a Python command-line tool designed to:
 - *Schema Loading* at runtime, either from built-in defaults or user-provided schema files.
 - *Fallback for Older Typing Features* ensures compatibility with Python 3.9+.
 
-* Requirements                                     :requirements:
+* Requirements
+:PROPERTIES:
+:CUSTOM_ID: requirements
+:END:
 
 - *Python 3.9 or higher*
 
@@ -46,7 +52,10 @@ kgwizard is a Python command-line tool designed to:
 
 A running JanusGraph server is also needed if you plan to upload data into a graph database.
 
-* Installation                                     :installation:
+* Installation
+:PROPERTIES:
+:CUSTOM_ID: installation
+:END:
 
 1. *Clone the repository*:
 #+begin_src bash
@@ -61,14 +70,20 @@ A running JanusGraph server is also needed if you plan to upload data into a gra
 
 Use the ~-e~ flag command to make changes on the prompt files inside ~prompt/assets~.
 
-* Usage                                            :usage:
+* Usage
+:PROPERTIES:
+:CUSTOM_ID: usage
+:END:
 
 After installation, you can run:
 #+begin_src bash
   kgwizard <command> [options]
 #+end_src
 
-** Transform Command                               :transform-command:
+** Transform Command
+:PROPERTIES:
+:CUSTOM_ID: transform-command
+:END:
 
 Purpose: Converts raw JSON from DataRaider files into an intermediate JSON structure, optionally performs RAG lookups, and can update the database.
 
@@ -92,7 +107,10 @@ Options:
 - ~--schema~ allows to select a file containing node and edge types as defined in the graph schemas (~graphdb/schemas~). It can be also used to select between the already available schemas ~photo~, ~org~ and ~echem~.
 - ~--output-dir~ and ~--output-file~ allow to define the output directory of the intermediate JSONs and the path of the generated graph database respectively.
 
-** Parse Command                                   :parse-command:
+** Parse Command
+:PROPERTIES:
+:CUSTOM_ID: parse-command
+:END:
 
 Purpose: Reads the intermediate JSON files (from ~transform~), constructs objects using the loaded schema, and uploads them into the database.
 
@@ -108,7 +126,10 @@ Example:
 
 This parses each ~.json~ in ~./results~ and updates JanusGraph. Also saves a ~.graphml~ file representing the final graph state.
 
-* Environment Variables                            :environment-variables:
+* Environment Variables
+:PROPERTIES:
+:CUSTOM_ID: environment-variables
+:END:
 
 - ~OPENAI_API_KEY~: This environment variable is needed to use the openai API when using the ~transform~ command.
 
@@ -118,7 +139,10 @@ This parses each ~.json~ in ~./results~ and updates JanusGraph. Also saves a ~.g
 
 If unset, only the ~parse~ command will be available.
 
-* Extending KGWizard                                              :extending:
+* Extending KGWizard
+:PROPERTIES:
+:CUSTOM_ID: extending
+:END:
 
 This section explains how to
 
@@ -127,7 +151,10 @@ This section explains how to
 3. **Select the schema** via the CLI.
 4. **Tweak the LLM prompt instructions** if needed.
 
-** 1. Use *echem.py* as your template                         :template:
+** Use *echem.py* as your template
+:PROPERTIES:
+:CUSTOM_ID: template
+:END:
 
 The file =graphdb/schemas/echem.py= already contains:
 
@@ -138,7 +165,10 @@ The file =graphdb/schemas/echem.py= already contains:
 Because a schema must be *self-contained* (no cross-imports), **copy that file** and start editing it; or append your new classes at the bottom of it.
 Either way, keep everything in one file so the LLM can see the complete schema.
 
-** 2. Add your domain-specific classes                       :new-classes:
+** Add your domain-specific classes
+:PROPERTIES:
+:CUSTOM_ID: new-classes
+:END:
 
 Append only the parts that are unique to your domain.  
 For example, to model photocatalysis you might add:
@@ -162,7 +192,10 @@ class HasLight(EdgeBase[Reaction, LightSource]):
 
 That’s it-no need to show the base classes again; they are already in *echem.py*. Just adding the types will make KGWizard to automatically convert the values to the specified type.
 
-** 3. Select your schema at run time                         :schema-use:
+** Select your schema at run time
+:PROPERTIES:
+:CUSTOM_ID: schema-use
+:END:
 
 If you saved the modified file as, say, =graphdb/schemas/photo.py=:
 
@@ -174,7 +207,10 @@ kgwizard parse ... --schema /absolute/path/photo.py
 
 Install the package in editable mode (`pip install -e .[kgwizard]`) so new schema files are auto-discovered.
 
-** 4. Adjusting the LLM instructions                         :prompt-edit:
+** Adjusting the LLM instructions
+:PROPERTIES:
+:CUSTOM_ID: prompt-edit
+:END:
 
 Prompt templates live in =kgwizard/prompt/assets/=:
 
@@ -201,7 +237,10 @@ Magic tokens in the tail
 
 The helper in =kgwizard/prompt/builder.py= performs these replacements automatically, so you never need to paste the JSON or schema yourself.
 
-* Contributing                                     :contributing:
+* Contributing
+:PROPERTIES:
+:CUSTOM_ID: contributing
+:END:
 
 1. *Fork or clone* the repository.
 2. *Create a new branch* for your feature or fix.
