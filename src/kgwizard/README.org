@@ -170,27 +170,72 @@ Either way, keep everything in one file so the LLM can see the complete schema.
 :CUSTOM_ID: new-classes
 :END:
 
-Append only the parts that are unique to your domain.  
-For example, to model photocatalysis you might add:
+
+Append only the *new* vertices and edges that are unique to your chemistry domain.  The generic bases are already in *echem.py*.
+
+Key points
+
+- *Class names become Gremlin labels*.  
+  If your vertex class is ~IrradiationConditions~, then the JSON must contain ~"label": "IrradiationConditions"~.
+
+- *EdgeBase generics link edges to the correct vertices*.
+  Example from the current schema:
+
+  #+begin_src python
+  @dataclass
+  class HasConditions(EdgeBase[Reaction, IrradiationConditions]):
+      pass
+  #+end_src
+
+  *source* must be a ~Reaction~, *target* must be an
+  ~IrradiationConditions~.  Python type checkers catch mistakes, and
+  the LLM sees these hints inside the `{code}` block of the prompt, so
+  it generates the right connections.
+
+- *Extra fields on an edge become edge properties*.  
+  Edge ~HasPhotocatalyst~ illustrates this:
+
+  #+begin_src python
+  @dataclass
+  class HasPhotocatalyst(EdgeBase[Reaction, Compound]):
+      value: Optional[float] = None
+      unit:  Optional[str]  = None
+  #+end_src
+
+  The JSON for this edge must supply *value* and *unit* as numeric or
+  text properties, not embed them in the vertex name.
+
+Example: adding a pressure vertex and edge
 
 #+begin_src python
-# ─── photocatalysis additions ─────────────────────────────
 from dataclasses import dataclass
 from typing import Optional
 
-# (Base classes already defined earlier in this same file)
-
+# new vertex
 @dataclass
-class LightSource(VertexBase):
-    wavelength_nm: float
-    power_mw:      Optional[float] = None
+class Pressure(VertexBase):
+    unit:  str
+    value: float
 
+# new edge linking a reaction to that pressure
 @dataclass
-class HasLight(EdgeBase[Reaction, LightSource]):
-    duration_min: float            # exposure time
+class HasPressure(EdgeBase[Reaction, Pressure]):
+    measured_with: Optional[str] = None   # e.g. "gauge", "transducer"
 #+end_src
 
-That’s it-no need to show the base classes again; they are already in *echem.py*. Just adding the types will make KGWizard to automatically convert the values to the specified type.
+What the typing achieves
+
+1. *Parsing*  
+   Labels in the incoming JSON are looked up in ~VERTEX_CLASSES~ and ~EDGE_CLASSES~.  If they do not match, parsing fails, which protects the database from bad entries.
+
+2. *Prompt generation*  
+   The complete schema file is inserted into the prompt through the ~{code}~ token.  The LLM therefore sees every type hint and knows automatically that, for instance, ~Pressure.value~ must be convertible to float. This tight coupling of schema and prompt improves generation quality.
+
+Checklist
+
+- Pick clear, unique class names.  
+- Fix the generics on every edge, for example ~EdgeBase[Study, Reaction]~.  
+- Keep all code in one file so the LLM sees the entire schema.
 
 ** Select your schema at run time
 :PROPERTIES:
