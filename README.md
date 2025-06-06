@@ -7,6 +7,7 @@
 2. [Installation](#2-installation)  
 3. [Usage](#3-usage) 
 4. [Running the web app](#4-running-the-mermaid-web-app-recommended-for-new-users)
+5. [Adapting MERMaid to other chemical domains/tasks](#5-adapting-mermaid)
 
 ## 1. Overview  
 MERMaid is an end-to-end knowledge ingestion pipeline to automatically convert disparate information conveyed through figures, schemes, and tables across various PDFs into a coherent and machine-actionable knowledge graph. It integrates three sequential modules:  
@@ -147,7 +148,7 @@ dataraider
 kgwizard
 ```
 
-### 4 Running the MERMaid Web App (Recommended for New Users)
+## 4. Running the MERMaid Web App (Recommended for New Users)
 
 MERMaid comes with a web interface for running the modules interactively via a browser. 
 You can configure your input folders, select extraction keys, and run modules with no coding required.
@@ -160,3 +161,9 @@ To launch the app locally:
 Then, open http://localhost:850x in your browser.
 
 > You must have your **`OPENAI_API_KEY`** set in your .env file (or terminal) before launching the app. You can follow the instructions in [3.2 Setting Up API Key](#32-setting-up-api-key) 
+
+---
+
+### 5. Adapting MERMaid 
+
+For instructions on how to extend DataRaider and KGWizard for your target chemical domains, please check out the [DataRaider README file](https://github.com/aspuru-guzik-group/MERMaid/blob/main/src/dataraider/README.md) and the [KGWizard README file](https://github.com/aspuru-guzik-group/MERMaid/blob/main/src/kgwizard/README.org)
