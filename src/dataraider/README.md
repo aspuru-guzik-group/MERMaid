@@ -1,17 +1,17 @@
-# Guide on Customizing MERMaid
+# Guide on Customizing DataRaider
 
-MERMaid can be adapted to different domains or tasks with minimal effort. 
-This guide outlines how to modify MERMaid for:
+DataRaider can be adapted to different domains or tasks with minimal effort. 
+This guide outlines how to modify DataRaider for:
 
-- **Domain-level adaptation**: Using MERMaid for a new chemical domain (e.g., non-electrochemical reactions) while performing the same task (reaction mining).
-- **Task-level adaptation**: Using MERMaid for a different task (e.g., substrate scope extraction instead of optimization tables).
+- **Domain-level adaptation**: Using DataRaider for a new chemical domain (e.g., non-electrochemical reactions) while performing the same task (reaction mining).
+- **Task-level adaptation**: Using DataRaider for a different task (e.g., substrate scope extraction instead of optimization tables).
+
+> For instructions on how to extend KGWizard for your target chemical domains, please check out the README in `src/kgwizard`
 
 ---
 
 ## 1. Domain-Level Adaptation  
-*Applying MERMaid to a different chemical domain for the same task of reaction mining.*
-
-### 1.1 Modifications for `DataRaider`
+*Applying DataRaider to a different chemical domain for the same task of reaction mining.*
 
 **File to edit**: `scripts/startup.json`
 
@@ -33,14 +33,10 @@ This guide outlines how to modify MERMaid for:
 
 > All selected and user-defined keys are automatically injected into the base prompt and reflected in downstream logic. No code-level changes are needed.
 
-### 1.2 Modifications for `KGWizard`
-(To be added)
-
 ## 2. Task-Level Adaptation 
 *Applying MERMaid to a different task such as substrate scope analysis*
 > Task-level adaptation will require some **prompt engineering** if the new task significantly deviates from the original one of reaction mining from optimization studies.
 
-### 2.1 Modifications for `DataRaider`
 1. **Update the filter prompt**  
 File: `Prompts/filter_image_prompt.txt`  
   - Change the filtering question to match your new task. For example, you can change to: 
@@ -59,5 +55,3 @@ File: `Prompts/base_prompt.txt`
   - Redefine the dictionaries you want to extract  
   - Adjust the parsing rules accordingly  
 
-### 2.2 Modifications for `KGWizard`
-(To be added)
