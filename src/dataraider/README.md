@@ -6,7 +6,7 @@ This guide outlines how to modify DataRaider for:
 - **Domain-level adaptation**: Using DataRaider for a new chemical domain (e.g., non-electrochemical reactions) while performing the same task (reaction mining).
 - **Task-level adaptation**: Using DataRaider for a different task (e.g., substrate scope extraction instead of optimization tables).
 
-> For instructions on how to extend KGWizard for your target chemical domains, please check out the README in `src/kgwizard`
+> For instructions on how to extend KGWizard for your target chemical domains, please check out the [KGWizard README file](https://github.com/aspuru-guzik-group/MERMaid/blob/main/src/kgwizard/README.org)
 
 ---
 
