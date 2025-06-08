@@ -219,6 +219,6 @@ Contributions welcome for:
 - Enhanced RAG logic
 - New LLM connectors
 
-## License
+<!-- ## License
 
-Distributed under the MIT License.
+Distributed under the MIT License. -->
