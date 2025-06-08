@@ -89,7 +89,7 @@ if module in ["DataRaider", "VisualHeist + DataRaider", "Full MERMaid Pipeline"]
         if key_input and desc_input:
             new_keys[key_input] = desc_input
 
-if module == "KGWizard":
+if module in ["KGWizard", "Full MERMaid Pipeline"]:
     kgwizard_command = st.radio("Select KGWizard command:", ["transform", "parse"], index=0)
     
     if kgwizard_command == "transform":
