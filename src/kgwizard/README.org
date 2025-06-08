@@ -79,23 +79,23 @@ Use the ~-e~ flag command to make changes on the prompt files inside ~prompt/ass
   unzip janusgraph-1.1.0.zip
   cd janusgraph-1.1.0
 #+end_src
-To start the server you may either run it in the foreground using:
+- To start the server you may either run it in the foreground using:
 
 #+begin_src bash
   ./bin/janusgraph-server.sh ./conf/gremlin-server/gremlin-server.yaml
 #+end_src
 
-Or run it in the background using: 
+- Or run it in the background using: 
 #+begin_src bash
   ./bin/janusgraph-server.sh start
 #+end_src
 
-To terminate the server, you may either use CTRL+C if the server is running in the foreground OR 
+- To terminate the server, use *CTRL+C* if the server is running in the foreground. If the server is running in the background, use:
 
 #+begin_src bash
   ./bin/janusgraph-server.sh stop
 #+end_src
-if the server is running in the background
+
 
 NOTE that running the server takes anywhere from 2GB-8GB of RAM. Please be sure that there is enough memory avaliable otherwise the server will crash
 
