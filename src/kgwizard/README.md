@@ -49,9 +49,9 @@ git clone https://github.com/aspuru-guzik-group/MERMaid.git
 cd MERMaid
 pip install -e .[kgwizard]
 ```
-Use the ~-e~ flag command to make changes on the prompt files inside ~prompt/assets~.
+Use the `-e` flag command to make changes on the prompt files inside `prompt/assets`.
 
-Install the package in editable mode (~pip install -e .[kgwizard]~) so new schema files are auto-discovered.
+Install the package in editable mode (`pip install -e .[kgwizard]`) so new schema files are auto-discovered.
 
 ### JanusGraph Setup
 
@@ -63,7 +63,8 @@ unzip janusgraph-1.1.0.zip
 cd janusgraph-1.1.0
 ```
 
-3. Start JanusGraph Server (Choose either option):
+4. Start JanusGraph Server (Choose either option):
+> **Note**: Server requires 2–8 GB RAM.
 
 Foreground:
 ```bash
@@ -75,13 +76,11 @@ Background:
 ./bin/janusgraph-server.sh start
 ```
 
-Terminate (background):
+5. Terminate JanusGraph Server (for background):
 ```bash
 ./bin/janusgraph-server.sh stop
 ```
 - if you are running in the foreground, terminate using Ctrl+C. 
-
-> **Note**: Server requires 2–8 GB RAM.
 
 ## Usage
 
@@ -100,8 +99,8 @@ kgwizard transform ./input_data   --output_dir ./results   --output_file ./resul
 Options include:
 - `--no_parallel` (run sequentially)
 - `--workers N` (use a fixed number of parallel workers)
-> If neither ~--no_parallel~ nor ~--workers~ is set, kgwizard applies *dynamic parallel execution*.
-- `--substitutions token:NodeType` (replaces the ~token~ in the prompt files (marked as ~{token}~)  by the unique nodes of ~NodeType~ found in the janus database. Note that lines in ~instructions~ that are contain a token and are not succesfully replaced are removed from the final prompt.)
+> If neither `--no_parallel` nor `--workers` is set, kgwizard applies *dynamic parallel execution*.
+- `--substitutions token:NodeType` (replaces the `token` in the prompt files (marked as `{token}`)  by the unique nodes of `NodeType` found in the janus database. Note that lines in `instructions` that are contain a token and are not succesfully replaced are removed from the final prompt.)
 - `--schema`, `--output-dir`, `--output-file` (define the output directory of the intermediate JSONs and the path of the generated graph database respectively)
 
 ### Parse Command
@@ -136,7 +135,7 @@ Append only the *new* vertices and edges that are unique to your chemistry domai
 
 Key points: 
 - *Class names become Gremlin labels*.  
-  If your vertex class is ~IrradiationConditions~, then the JSON must contain ~"label": "IrradiationConditions"~.
+  Example: If your vertex class is `IrradiationConditions`, then the JSON must contain `"label": "IrradiationConditions"`.
 
 - *EdgeBase generics link edges to the correct vertices*.
   Example from the current schema:
@@ -146,42 +145,43 @@ Key points:
   class HasConditions(EdgeBase[Reaction, IrradiationConditions]):
       pass
   ```
-  In this example, *source* must be a ~Reaction~, *target* must be an ~IrradiationConditions~.  Python type checkers catch mistakes, and the LLM sees these hints inside the ~{code}~ block of the prompt, so it generates the right connections.
+  In this example, *source* must be a `Reaction`, *target* must be an `IrradiationConditions`.  Python type checkers catch mistakes, and the LLM sees these hints inside the `{code}` block of the prompt, so it generates the right connections.
 
 - *Extra fields on an edge become edge properties*.  
-  Edge ~HasPhotocatalyst~ illustrates this:
+  For example, Edge `HasPhotocatalyst` illustrates this:
   ```python
   @dataclass
   class HasPhotocatalyst(EdgeBase[Reaction, Compound]):
       value: Optional[float] = None
       unit:  Optional[str]  = None
- ```
+  ```
+  
   The JSON for this edge must supply *value* and *unit* as numeric or text properties, not embed them in the vertex name.
 
-Example: adding a pressure vertex and edge
+    Example: adding a pressure vertex and edge
 
-```python
-@dataclass
-class Pressure(VertexBase):
-    unit: str
-    value: float
+    ```python
+    @dataclass
+    class Pressure(VertexBase):
+        unit: str
+        value: float
 
-@dataclass
-class HasPressure(EdgeBase[Reaction, Pressure]):
-    measured_with: Optional[str] = None
-```
+    @dataclass
+    class HasPressure(EdgeBase[Reaction, Pressure]):
+        measured_with: Optional[str] = None
+    ```
 
 > What the typing achieves
 
   1. *Parsing*  
-    Labels in the incoming JSON are looked up in ~VERTEX_CLASSES~ and ~EDGE_CLASSES~.  If they do not match, parsing fails, which protects the database from bad entries.
+    Labels in the incoming JSON are looked up in `VERTEX_CLASSES` and `EDGE_CLASSES`.  If they do not match, parsing fails, which protects the database from bad entries.
 
   2. *Prompt generation*  
-    The complete schema file is inserted into the prompt through the ~{code}~ token.  The LLM therefore sees every type hint and knows automatically that, for instance, ~Pressure.value~ must be convertible to float. This tight coupling of schema and prompt improves generation quality.
+    The complete schema file is inserted into the prompt through the `{code}` token.  The LLM therefore sees every type hint and knows automatically that, for instance, `Pressure.value` must be convertible to float. This tight coupling of schema and prompt improves generation quality.
 
 Checklist:
 - Pick clear, unique class names.  
-- Fix the generics on every edge, for example ~EdgeBase[Study, Reaction]~.  
+- Fix the generics on every edge, for example `EdgeBase[Study, Reaction]`.  
 - Keep all code in one file so the LLM sees the entire schema.
 
 ### Select your schema at run time
@@ -201,8 +201,8 @@ Prompt templates live in `kgwizard/prompt/assets/`:
 - `tail` — closing instructions
 
 Substitutions & RAG
-- Add ~--substitutions "token:VertexLabel"~ at the CLI. This *enables Retrieval-Augmented Generation (RAG)*: kgwizard queries the connected JanusGraph for *unique* vertex names of *VertexLabel* and replaces ~{token}~ with the *comma-separated list* it finds.
-- If a token is *not listed* in ~--substitutions~, or the query returns *no vertices*, every line in =instructions= still containing that token is *deleted* before the prompt is sent. This keeps the prompt compact and avoids confusing the model.
+- Add `--substitutions "token:VertexLabel"` at the CLI. This *enables Retrieval-Augmented Generation (RAG)*: kgwizard queries the connected JanusGraph for *unique* vertex names of *VertexLabel* and replaces `{token}` with the *comma-separated list* it finds.
+- If a token is *not listed* in `--substitutions`, or the query returns *no vertices*, every line in =instructions= still containing that token is *deleted* before the prompt is sent. This keeps the prompt compact and avoids confusing the model.
 
 
 > Tokens `{token}`, `{json}`, and `{code}` are auto-replaced by the builder logic in `kgwizard/prompt/builder.py`
