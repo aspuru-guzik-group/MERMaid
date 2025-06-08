@@ -15,3 +15,8 @@ regex
 pubchempy
 openai
 huggingface_hub
+streamlit
+python-dotenv
+uvicorn
+fastapi
+python-multipart

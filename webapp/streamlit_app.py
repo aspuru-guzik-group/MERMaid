@@ -5,6 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 from PIL import Image
+import pdb
 
 # Display logo
 logo_path = Path(__file__).resolve().parent.parent / "Assets" / "MERMAID_logo.png"
@@ -23,6 +24,7 @@ except Exception as e:
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 API_URL = "http://127.0.0.1:8000"
+# API_URL = "	http://localhost:8000"
 
 # Session flag for saved config
 if "config_saved" not in st.session_state:
@@ -37,7 +39,7 @@ else:
 # Module selector
 module = st.radio(
     "Select a module to run:",
-    ["VisualHeist", "DataRaider", "VisualHeist + DataRaider", "Full MERMaid Pipeline", "KGWizard (coming soon)"],
+    ["VisualHeist", "DataRaider", "VisualHeist + DataRaider", "Full MERMaid Pipeline", "KGWizard"],
     index=0
 )
 
@@ -50,6 +52,11 @@ pdf_dir, image_dir, json_dir = "", "", ""
 model_size = "base"
 keys = []
 new_keys = {}
+new_sub = {}
+schema = ""
+kgwizard_command = ""
+output_file = ""
+output_dir = ""
 
 # Show relevant inputs based on selection
 if module in ["VisualHeist", "VisualHeist + DataRaider", "Full MERMaid Pipeline"]:
@@ -82,11 +89,41 @@ if module in ["DataRaider", "VisualHeist + DataRaider", "Full MERMaid Pipeline"]
         if key_input and desc_input:
             new_keys[key_input] = desc_input
 
-# Show KGWizard note
-if module == "KGWizard (coming soon)":
-    st.warning("KGWizard will be supported in a future release.")
+if module in ["KGWizard", "Full MERMaid Pipeline"]:
+    kgwizard_command = st.radio("Select KGWizard command:", ["transform", "parse"], index=0)
+    
+    if kgwizard_command == "transform":
+        json_dir = st.text_input("Directory to reaction jsons", "/absolute/path/to/json")
+        schema = st.radio("Select a schema to use:",
+                      ["photo", "org", "echem"],
+                        index=0)
+        output_dir = st.text_input("Directory to store intermediate files (required for parse command)", "/absolute/path/to/intermediate/json/storage")
+        output_file = st.text_input("Path to where you want the .graphml file saved", "/absolute/path/to/graphml/file/my_graph.graphml")
+        
+        
+        st.markdown("Add substitutions in the prompt files (optional):")
+        if "substitutions" not in st.session_state:
+            st.session_state.substitutions = []
 
+        if st.button("Add Substitutions"):
+            st.session_state.substitutions.append({"token": "", "NodeType": ""})
+
+        for idx, sub_key in enumerate(st.session_state.substitutions):
+            token_input = st.text_input(f"token {idx+1}", sub_key['token'])
+            nodetype_input = st.text_input(f"NodeType {idx+1}", sub_key['NodeType'])
+            st.session_state.substitutions[idx] = {"token": token_input, "NodeType": nodetype_input}
+            if token_input and nodetype_input:
+                new_sub[token_input] = nodetype_input
+                
+    elif kgwizard_command == "parse":
+        schema = st.radio("Select a schema to use:",
+                      ["photo", "org", "echem"],
+                        index=0)
+        output_dir = st.text_input("Directory to location of intermediate files", "/absolute/path/to/intermediate/json/storage")
+        output_file = st.text_input("Path to where you want the .graphml file saved", "/absolute/path/to/graphml/file/my_graph.graphml")
+    
 # Config dictionary (always constructed for saving)
+# NOTE this config must match the format of the Config object in fastapi_app.py
 config = {
     "keys": keys,
     "new_keys": new_keys,
@@ -100,7 +137,11 @@ config = {
         "address": "ws://localhost",
         "port": 8182,
         "graph_name": "g",
-        "schema": "echem",
+        "output_file": output_file,
+        "output_dir": output_dir,
+        "schema": schema,
+        "substitutions": new_sub,
+        "command": kgwizard_command,
         "dynamic_start": 1,
         "dynamic_steps": 5,
         "dynamic_max_workers": 10,
@@ -118,27 +159,29 @@ if st.button("Save Configuration"):
         st.session_state.config_saved = False
 
 # Run pipeline only if config is saved
-if module != "KGWizard (coming soon)":
-    if st.session_state.config_saved:
-        if st.button("Run Selected Module"):
-            try:
-                # Call backend based on module
-                if module == "VisualHeist":
-                    run_response = requests.post(f"{API_URL}/run_visualheist")
-                elif module == "DataRaider":
-                    run_response = requests.post(f"{API_URL}/run_dataraider")
-                elif module == "VisualHeist + DataRaider":
-                    vh = requests.post(f"{API_URL}/run_visualheist")
-                    dr = requests.post(f"{API_URL}/run_dataraider")
-                    run_response = dr if dr.status_code != 200 else vh
-                elif module == "Full MERMaid Pipeline":
-                    run_response = requests.post(f"{API_URL}/run_all")
+# if module != "KGWizard (coming soon)":
+if st.session_state.config_saved:
+    if st.button("Run Selected Module"):
+        try:
+            # Call backend based on module
+            if module == "VisualHeist":
+                run_response = requests.post(f"{API_URL}/run_visualheist")
+            elif module == "DataRaider":
+                run_response = requests.post(f"{API_URL}/run_dataraider")
+            elif module == "VisualHeist + DataRaider":
+                vh = requests.post(f"{API_URL}/run_visualheist")
+                dr = requests.post(f"{API_URL}/run_dataraider")
+                run_response = dr if dr.status_code != 200 else vh
+            elif module == "Full MERMaid Pipeline":
+                run_response = requests.post(f"{API_URL}/run_all")
+            elif module == "KGWizard":
+                run_response = requests.post(f"{API_URL}/run_kgwizard")
 
-                if run_response.status_code == 200:
-                    st.success("Module executed successfully.")
-                else:
-                    st.error(f"Error running pipeline: {run_response.text}")
-            except Exception as e:
-                st.error(f"Exception occurred: {e}")
-    else:
-        st.info("Please save your configuration before running any module.")
+            if run_response.status_code == 200:
+                st.success("Module executed successfully.")
+            else:
+                st.error(f"Error running pipeline: {run_response.text}")
+        except Exception as e:
+            st.error(f"Exception occurred: {e}")
+else:
+    st.info("Please save your configuration before running any module.")

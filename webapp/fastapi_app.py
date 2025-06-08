@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel, Field
 import json
 from typing import List, Dict
@@ -8,6 +8,7 @@ import os
 import tempfile 
 from pathlib import Path
 from dotenv import load_dotenv
+import logging
 import platform
 
 # Load environment variables from .env file
@@ -27,10 +28,21 @@ USER_CONFIG_PATH = Path(__file__).resolve().parent.parent / "scripts" / "user_co
 PROMPT_DIR = Path(__file__).resolve().parent.parent / "Prompts"
 VISUALHEIST_PATH = Path(__file__).resolve().parent.parent / "scripts" / "run_visualheist.py"
 DATARAIDER_PATH = Path(__file__).resolve().parent.parent / "scripts" / "run_dataraider.py"
+KGWIZARD_PATH = Path(__file__).resolve().parent.parent / "scripts" / "run_kgwizard.py"
 MERMAID_PATH = Path(__file__).resolve().parent.parent / "scripts" / "run_mermaid.py"
 UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+LOGGING_PATH = Path(__file__).resolve().parent.parent / "mermaid.log"
 
+# Setup logger
+logging.basicConfig(
+    level=logging.INFO,                          # Minimum log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+    format="%(asctime)s [%(levelname)s] %(message)s",  # Log format
+    handlers=[
+        logging.FileHandler(LOGGING_PATH),          # Write to file
+        logging.StreamHandler()                  # Also print to console
+    ]
+)
 
 import platform
 
@@ -69,6 +81,11 @@ class KGWizardConfig(BaseModel):
     dynamic_start: int
     dynamic_steps: int
     dynamic_max_workers: int
+    output_file: str
+    output_dir: str
+    schema: str
+    substitutions: dict
+    command: str
 
 
 class Config(BaseModel):
@@ -163,7 +180,13 @@ def get_config_args():
 def run_mermaid_pipeline():
     """Runs the full MERMaid pipeline via subprocess."""
     result = subprocess.run(["python", "scripts/run_mermaid.py", "RUN"], capture_output=True, text=True)
-    return result.stdout, result.stderr
+    if result.returncode != 0:
+        logging.error("Full Mermaid pipeline failed")
+        logging.error(result.stderr)
+    elif result.stderr:
+        logging.warning("Full Mermaid pipeline encountered a non-fatal error")
+        logging.warning(result.stderr)
+    return result.stdout, result.stderr, result.returncode
 
 # Run individual submodules
 def run_visualheist():
@@ -172,8 +195,14 @@ def run_visualheist():
         ["python", str(VISUALHEIST_PATH)] + get_config_args(),
         capture_output=True, text=True
     )
-    print("RESULTS:", result)
-    return result.stdout, result.stderr
+    if result.returncode != 0:
+        logging.error("VisualHeist failed")
+        logging.error(result.stderr)
+    elif result.stderr:
+        logging.warning("VisualHeist encountered a non-fatal error")
+        logging.warning(result.stderr)
+    
+    return result.stdout, result.stderr, result.returncode
 
 def run_dataraider():
     """Runs DataRaider module."""
@@ -181,8 +210,27 @@ def run_dataraider():
         ["python", str(DATARAIDER_PATH)] + get_config_args(),
         capture_output=True, text=True
     )
-    print("RESULTS:", result)
-    return result.stdout, result.stderr
+    if result.returncode != 0:
+        logging.error("DataRaider failed")
+        logging.error(result.stderr)
+    elif result.stderr:
+        logging.warning("DataRaider encountered a non-fatal error")
+        logging.warning(result.stderr)
+    return result.stdout, result.stderr, result.returncode
+
+def run_kgwizard():
+    """Runs the KGWizard module."""
+    result = subprocess.run(
+        ["python", str(KGWIZARD_PATH)] + get_config_args(),
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        logging.error("KGWizard failed")
+        logging.error(result.stderr)
+    elif result.stderr:
+        logging.warning("KGWizard encountered a non-fatal error")
+        logging.warning(result.stderr)
+    return result.stdout, result.stderr, result.returncode
 
 @app.get("/")
 def home():
@@ -191,26 +239,39 @@ def home():
 # Endpoint to run the full MERMaid pipeline
 @app.post("/run_all")
 def run_all_pipeline():
-    stdout, stderr = run_mermaid_pipeline()
+    stdout, stderr, returncode = run_mermaid_pipeline()
     response = {"output": stdout}
-    if stderr:
+    if returncode != 0:
         response["error"] = stderr
+        raise HTTPException(status_code=500, detail=stderr)
     return response
 
 # Endpoint to run VisualHeist module
 @app.post("/run_visualheist")
 def visualheist():
-    stdout, stderr = run_visualheist()
+    stdout, stderr, returncode = run_visualheist()
     response = {"output": stdout}
-    if stderr:
+    if returncode != 0:
         response["error"] = stderr
+        raise HTTPException(status_code=500, detail=stderr)
     return response
 
 # Endpoint to run DataRaider module
 @app.post("/run_dataraider")
 def dataraider():
-    stdout, stderr = run_dataraider()
+    stdout, stderr, returncode = run_dataraider()
     response = {"output": stdout}
-    if stderr:
+    if returncode != 0:
         response["error"] = stderr
+        raise HTTPException(status_code=500, detail=stderr)
+    return response
+
+# Endpoint to run KGWizard module
+@app.post("/run_kgwizard")
+def kgwizard():
+    stdout, stderr, returncode = run_kgwizard()
+    response = {"output": stdout}
+    if returncode != 0:
+        response["error"] = stderr
+        raise HTTPException(status_code=500, detail=stderr)
     return response

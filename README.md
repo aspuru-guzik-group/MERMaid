@@ -81,6 +81,8 @@ pip install MERMaid[dataraider]
 pip install MERMaid[kgwizard]
 ```
 
+NOTE that usage of KGWizard requires the setup of a local JanusGraph server. Please refer to src/kgwizard/README.org for details of installation and setup.
+
 ---
 
 ## 3. Usage  
