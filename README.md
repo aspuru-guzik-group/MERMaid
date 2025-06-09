@@ -21,8 +21,6 @@ You can run MERMaid directly or use VisualHeist and DataRaider as standalone too
 
 VisualHeist works best on systems with **high RAM**. For optimal performance, ensure that your system has sufficient memory, as running out of memory may cause the process to be terminated prematurely.  
 
-Further usage details on KGWizard can be found in the [KGWizard README file](https://github.com/aspuru-guzik-group/MERMaid/blob/main/src/kgwizard/README.org).  
-
 ---
 If you use MERMaid and its submodules in your research, please cite our [preprint](https://doi.org/10.26434/chemrxiv-2025-8z6h2). Note that this content is a preprint and has not been peer-reviewed.
 ```
@@ -63,8 +61,18 @@ cd ..
 ```
 > ⚠️ You may see a compatibility warning about `MolScribe version 1.1.1 not being compatible with Torch versions >2.0`. This can be safely ignored.  
 
-### 2.3 Install MERMaid  
-Download the repository and install dependencies:  
+### 2.3 Install/Setup of JanusGraph server
+In order to run KGWizard, a running local JanusGraph server is required.
+
+Install Java 8 SE from [Oracle](https://www.oracle.com/ca-en/java/technologies/javase/javase8-archive-downloads.html).
+Install [JanusGraph](https://github.com/JanusGraph/janusgraph/releases), tested with version 1.1.0.
+Unzip the JanusGraph zip file in the same folder that has `RxnScribe`. 
+```bash
+unzip janusgraph-1.1.0.zip
+```
+
+### 2.4 Install MERMaid  
+Download the repository and install dependencies in the same folder that has both `RxnSribe` and `janusgraph-1.1.0`:  
 ```sh
 git clone https://github.com/aspuru-guzik-group/MERMaid/
 cd MERMaid
@@ -81,13 +89,14 @@ pip install MERMaid[dataraider]
 pip install MERMaid[kgwizard]
 ```
 
-NOTE that usage of KGWizard requires the setup of a local JanusGraph server. Please refer to src/kgwizard/README.org for details of installation and setup.
-
 ---
 
 ## 3. Usage  
 
 ### 3.1 Setting Up Your Configuration File  
+
+
+Settings can be set through a configuration file found in `scripts/startup.json` or throught a created configuration file (see 3.3.3). VisualHeist and DataRaider can be run via the configuration file or via the command line (see 3.4) whereas full MERMaid pipeline requires settings to be provided through a configuration file (see 3.3.2).
 
 **Define custom settings in `scripts/startup.json`:** 
 - `pdf_dir`: Full path to directory where PDFs are stored (required for running VisualHeist).
@@ -127,28 +136,154 @@ This will automatically set the OPENAI_API_KEY environment variable whenever you
 ---
 
 ### 3.3 Running the Full MERMaid Pipeline  
-Run the full pipeline with:  
-```sh
-mermaid
+
+
+#### 3.3.1 Start JanusGraph Server
+
+A running JanusGraph server is required for running the full MERMaid pipline and KGWizard (see 3.4.3)
+
+Start the JanusGraph Server (Choose either option):
+> **Note**: Server requires 2–8 GB RAM.
+
+#### Foreground:
+Open a seperate terminal and navigate into to the `janusgraph-1.1.0` folder.
+
+To start the server:
+```bash
+./bin/janusgraph-server.sh ./conf/gremlin-server/gremlin-server.yaml
 ```
+To terminate the server use Ctrl+C
+
+#### Background:
+To start the server:
+```bash
+cd janusgraph-1.1.0
+./bin/janusgraph-server.sh start
+```
+
+To terminate the server:
+```bash
+./bin/janusgraph-server.sh stop
+```
+> The port of the running JanusGraph server is automatically set to 8182 with address ws://localhost
+
+The full MERMaid pipeline comes with two commands
+
+#### 3.3.2 RUN Command
+
+Run the mermaid pipeline (visualheist, dataraider, kgwizard sequentially)
+
+```sh
+mermaid RUN   --config ./scripts/startup.json
+```
+| Option        | Description |
+| --------       | ------- |
+| `--config`     | Path to the configuration file|
+
 Intermediate files will be saved in the `Results/` directory.  
+
+#### 3.3.3 CFG Command
+Output a configuration file of the same form as `scripts/startup.json`
+
+```sh
+mermaid CFG   --out_location ./
+```
+| Option        | Description |
+| --------       | ------- |
+| `--out_location`     | Path to save new configuration file |
 
 ### 3.4 Running Individual Modules  
 
-#### 3.4.1 VisualHeist – Image Segmentation from PDFs  
+#### 3.4.1 VisualHeist – Image Segmentation from PDFs
+
+VisualHeist can be run using the settings provided in `scripts/startup.json` using:
+
 ```sh
 visualheist
 ```
+
+Or can be run using command line arguments with the following:
+```sh
+visualheist    --config ./scripts/startup.json   --pdf_dir /path/to/pdf   --image_dir /path/to/save/images   --model_size base
+```
+
+| Option        | Description |
+| --------       | ------- |
+| `--config`     | Path to the configuration file. If specified, ignores other arguments |
+| `--pdf_dir`    | Path to the input PDF directory     |
+| `--image_dir`  | Path to the output image directory    |
+| `--model_size` |Model size to use, either `base` or `large`
+
+
 #### 3.4.2 DataRaider – Image-to-Data Conversion  
+
+DataRaider can be run using the settings provided in `scripts/startup.json` using:
 ```sh
 dataraider
 ```
+
+Or can be run using command line arguments with the following:
+```sh
+dataraider   --config ./scripts/startup.json   --image_dir /path/to/save/images   --prompt_dir ./Prompts   --json_dir ./
+```
+
+| Option        | Description |
+| --------       | ------- |
+| `--config`     | Path to the configuration file. If specified, ignores other arguments |
+| `--image_dir`  | Directory containing images to process     |
+| `--prompt_dir` | Directory containing prompt files (should point to `Prompts` directory)    |
+| `--json_dir`   | Directory to save processed JSON data
+| `--keys`       | List of keys to extract
+| `--new_keys`   | List of new keys for data extraction
+
 *A sample output JSON is available in the `Assets` folder.*  
 
-#### 3.4.3 KGWizard – Data-to-Knowledge Graph Translation  
-```sh
-kgwizard
+#### 3.4.3 KGWizard – Data-to-Knowledge Graph Translation
+
+KGWizard comes with two commands.
+
+##### 3.4.3.1 Transform Command
+
+Converts raw JSON to intermediate format, optionally performs RAG lookup and updates database.
+
+```bash
+kgwizard transform    ./input_data   --output_dir ./results   --output_file ./results/my_graph.graphml   --substitutions "material:Material" "atmosphere:Atmosphere"   --address ws://localhost   --port 8182   --schema echem   --graph_name g
 ```
+
+| Option        | Description |
+| --------       | ------- |
+|`input_dir` (positional argument) | Folder where the JSON files from DataRaider are stored
+|`--output_dir` | Folder where the generate JSON intermediate files will be stored. The folder will be automatically created. Defaults to ./results.
+|`--no_parallel`  |If active, run the conversions sequentially instead of using the dynamic increase parallel algorithm. Overrides the --workers flag.
+|`--workers` |If defined, use this number of parallel workers instead of the dynamic increase algorithm.
+|`--substitutions` | Substitution to be made in the instructions file. The input format consists on a pair formed by the substitution keyword and the node label separated by a colon (keyword:node_name). If substitutions are not given, RAG module will not be executed.
+|`--dynamic_start` | Starting number of workers for the dynamic algorithms..
+|`--dynamic_steps` | Maximum number of steps of the dynamic paralelization algorithm.
+|`--dynamic_max_workers` | Maximum number of workers of the dynamic paralelization algorithm.
+|`--address `| JanusGraph server address. Defaults to ws://localhost.
+|`--port` | JanusGraph port. Defaults to 8182.
+|`--graph_name` | JanusGraph graph name. Defaults to g.
+|`--schema` | Node/Edge schema to be used during the json conversion. Can be either a path or any of the default schemas: photo,org,echem. Defaults to echem
+|`--output_file` |"If set, save the generated graph into the specified file after updating the database.
+
+
+##### 3.4.3.2 Parse Command
+
+Parses intermediate JSONs (from transform command) into schema-based graph and uploads to JanusGraph. It also saves a .graphml file representing the final graph state.
+
+```bash
+kgwizard parse    ./results   --address ws://localhost   --port 8182   --graph_name g   --schema /path/to/custom_schema.py   --output_file ./final_graph.graphml
+```
+
+| Option        | Description |
+| --------       | ------- |
+|`input_dir` (positional argument) | Folder where the JSON files from `transform` are stored
+| `--address`     | JanusGraph server address. Defaults to ws://localhost |
+| `--port`  | JanusGraph port. Defaults to 8182  |
+| `--graph_name` | JanusGraph graph name. Defaults to g |
+| `--schema`   | Node/Edge schema to be used during the json conversion. Can be either a path or any of the default schemas: photo,org,echem. Defaults to echem
+| `--output_file`       | If set, save the generated graph into the specified file after updating the database
+
 
 ## 4. Running the MERMaid Web App (Recommended for New Users)
 
@@ -164,6 +299,7 @@ Then, open http://localhost:850x in your browser.
 
 > You must have your **`OPENAI_API_KEY`** set in your .env file (or terminal) before launching the app. You can follow the instructions in [3.2 Setting Up API Key](#32-setting-up-api-key) 
 
+> A JanusGraph server is not required for the web interface to run, but is required if using either KGWIzard or the full MERMaid pipeline throught the interface (see [3.3.1 Start JanusGraph Server](#331-start-janusgraph-server))
 ---
 
 ### 5. Adapting MERMaid 
