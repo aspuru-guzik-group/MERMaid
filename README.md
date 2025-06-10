@@ -204,7 +204,7 @@ visualheist
 
 Or can be run using command line arguments with the following:
 ```sh
-visualheist    --config ./scripts/startup.json   --pdf_dir /path/to/pdf   --image_dir /path/to/save/images   --model_size base
+visualheist   --config ./scripts/startup.json   --pdf_dir /path/to/pdf   --image_dir /path/to/save/images   --model_size base
 ```
 
 | Option        | Description |
@@ -247,7 +247,7 @@ KGWizard comes with two commands.
 Converts raw JSON to intermediate format, optionally performs RAG lookup and updates database.
 
 ```bash
-kgwizard transform    ./input_data   --output_dir ./results   --output_file ./results/my_graph.graphml   --substitutions "material:Material" "atmosphere:Atmosphere"   --address ws://localhost   --port 8182   --schema echem   --graph_name g
+kgwizard transform   ./input_data   --output_dir ./results   --output_file ./results/my_graph.graphml   --substitutions "material:Material" "atmosphere:Atmosphere"   --address ws://localhost   --port 8182   --schema echem   --graph_name g
 ```
 
 | Option        | Description |
@@ -272,13 +272,13 @@ kgwizard transform    ./input_data   --output_dir ./results   --output_file ./re
 Parses intermediate JSONs (from transform command) into schema-based graph and uploads to JanusGraph. It also saves a .graphml file representing the final graph state.
 
 ```bash
-kgwizard parse    ./results   --address ws://localhost   --port 8182   --graph_name g   --schema /path/to/custom_schema.py   --output_file ./final_graph.graphml
+kgwizard parse   ./results   --address ws://localhost   --port 8182   --graph_name g   --schema /path/to/custom_schema.py   --output_file ./final_graph.graphml
 ```
 
-| Option        | Description |
+| Option | Description |
 | --------       | ------- |
 |`input_dir` (positional argument) | Folder where the JSON files from `transform` are stored
-| `--address`     | JanusGraph server address. Defaults to ws://localhost |
+| `--address`| JanusGraph server address. Defaults to ws://localhost |
 | `--port`  | JanusGraph port. Defaults to 8182  |
 | `--graph_name` | JanusGraph graph name. Defaults to g |
 | `--schema`   | Node/Edge schema to be used during the json conversion. Can be either a path or any of the default schemas: photo,org,echem. Defaults to echem
