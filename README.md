@@ -65,7 +65,9 @@ cd ..
 In order to run KGWizard, a running local JanusGraph server is required.
 
 Install Java 8 SE from [Oracle](https://www.oracle.com/ca-en/java/technologies/javase/javase8-archive-downloads.html).
+
 Install [JanusGraph](https://github.com/JanusGraph/janusgraph/releases), tested with version 1.1.0.
+
 Unzip the JanusGraph zip file in the same folder that has `RxnScribe`. 
 ```bash
 unzip janusgraph-1.1.0.zip
@@ -96,7 +98,7 @@ pip install MERMaid[kgwizard]
 ### 3.1 Setting Up Your Configuration File  
 
 
-Settings can be set through a configuration file found in `scripts/startup.json` or throught a created configuration file (see 3.3.3). VisualHeist and DataRaider can be run via the configuration file or via the command line (see 3.4) whereas full MERMaid pipeline requires settings to be provided through a configuration file (see 3.3.2).
+Settings can be set through a configuration file found in `scripts/startup.json` or throught a created configuration file (see [3.3.3 CFG Command](#333-cfg-command)). VisualHeist and DataRaider can be run via the configuration file or via the command line (see [3.4 Running Individual Modules](#34-running-individual-modules)) whereas full MERMaid pipeline requires settings to be provided through a configuration file (see [3.3.2 RUN Command](#332-run-command)).
 
 **Define custom settings in `scripts/startup.json`:** 
 - `pdf_dir`: Full path to directory where PDFs are stored (required for running VisualHeist).
@@ -140,7 +142,7 @@ This will automatically set the OPENAI_API_KEY environment variable whenever you
 
 #### 3.3.1 Start JanusGraph Server
 
-A running JanusGraph server is required for running the full MERMaid pipline and KGWizard (see 3.4.3)
+A running JanusGraph server is required for running the full MERMaid pipline and KGWizard (see [3.4.3 KGWizard – Data-to-Knowledge Graph Translation](#343-kgwizard--data-to-knowledge-graph-translation))
 
 Start the JanusGraph Server (Choose either option):
 > **Note**: Server requires 2–8 GB RAM.
@@ -166,8 +168,6 @@ To terminate the server:
 ./bin/janusgraph-server.sh stop
 ```
 > The port of the running JanusGraph server is automatically set to 8182 with address ws://localhost
-
-The full MERMaid pipeline comes with two commands
 
 #### 3.3.2 RUN Command
 
