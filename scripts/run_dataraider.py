@@ -55,7 +55,6 @@ def main():
     # parser.add_argument("--api_key", type=str, help="API key", default=None)
     
     args = parser.parse_args()
-
     if args.config:
         config = load_config(Path(args.config))
     else:
@@ -67,8 +66,19 @@ def main():
     prompt_dir = Path(args.prompt_dir) if args.prompt_dir else Path(config.get('prompt_dir', "Prompts"))
     json_dir = Path(args.json_dir) if args.json_dir else Path(config.get('json_dir') or config.get('default_json_dir'))
     
-    keys = config.get('keys', ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents", "Footnote"])
-    new_keys = config.get('new_keys', None)
+    if args.keys:
+        keys = args.keys
+        keys = [k.capitalize() for k in keys]
+    else:
+        keys = ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents", "Footnote"]
+    # keys = args.get('keys', ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents", "Footnote"])
+    
+    if args.new_keys:
+        new_keys = args.new_keys
+        new_keys = [k.capitalize() for k in new_keys]
+    else:
+        new_keys = []
+        
     # api_key = config.get('api_key', None)
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
