@@ -4,6 +4,7 @@ import regex as re
 from .processor_info import DataRaiderInfo
 from . import postprocess as pp
 from pathlib import Path
+from typing import Union
 
 """
 Scripts for reaction dictionary formatting
@@ -188,7 +189,7 @@ def postprocess_dict(
 def construct_initial_prompt(
                             prompt_directory: str, 
                             opt_run_keys: list, 
-                            new_run_keys: dict):
+                            new_run_keys: Union[dict, list]):
     """Creates a get_data_prompt with opt_run_keys key-value pairs embedded into it
     Uses <INSERT_HERE> as the location tag for inserting keys.
     Saves the new prompt to a file named get_data_prompt.txt inside the Prompts directory
@@ -205,6 +206,14 @@ def construct_initial_prompt(
     """
     prompt_directory = Path(prompt_directory)
     marker = "<INSERT_HERE>"
+
+    if isinstance(new_run_keys, list):
+        try:
+            new_run_keys = dict(k.strip().split(":", 1) for k in new_run_keys if ":" in k)
+        except ValueError as e:
+            raise ValueError(
+                f"Invalid format in new_keys list: each item must be 'Key: Description'. Got: {new_run_keys}"
+            )
 
     # Retrieve all inbuilt keys
     inbuilt_key_pair_file_path = prompt_directory /"inbuilt_keyvaluepairs.txt"
