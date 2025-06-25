@@ -70,7 +70,7 @@ def main():
         keys = args.keys
         keys = [k.capitalize() for k in keys]
     else:
-        keys = ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents", "Footnote"]
+        keys = config.get("keys")
     # keys = args.get('keys', ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents", "Footnote"])
     
     if args.new_keys:
