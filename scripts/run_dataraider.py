@@ -72,7 +72,6 @@ def main():
     else:
         keys = config.get("keys")
     # keys = args.get('keys', ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents", "Footnote"])
-    print(config["new_keys"])
     if args.new_keys:
         new_keys = args.new_keys
         # new_keys = [k.capitalize() for k in new_keys]
@@ -93,6 +92,7 @@ def main():
     # Construct the initial reaction data extraction prompt
     print('\n############################ Starting up DataRaider ############################ ')
     print("Constructing your custom reaction data extraction prompt\n")
+    
     construct_initial_prompt(prompt_dir, keys, new_keys)
     
     print('Filtering relevant images.\n')
