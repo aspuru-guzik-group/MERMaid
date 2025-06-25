@@ -72,10 +72,13 @@ def main():
     else:
         keys = config.get("keys")
     # keys = args.get('keys', ["Entry", "Catalyst", "Ligand", "Cathode", "Solvents", "Footnote"])
-    
+    print(config["new_keys"])
     if args.new_keys:
         new_keys = args.new_keys
-        new_keys = [k.capitalize() for k in new_keys]
+        # new_keys = [k.capitalize() for k in new_keys]
+    # make sure that we did not use the default startup.json new_keys, because otherwise it does not work
+    elif "NEW_KEY1" not in config["new_keys"]:
+        new_keys = config["new_keys"]
     else:
         new_keys = []
         
